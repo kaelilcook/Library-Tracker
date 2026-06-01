@@ -1,0 +1,589 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- =========================
+         META
+    ========================== -->
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+          rel="stylesheet">
+
+    <title>Personal Library Tracker</title>
+
+    <!-- =========================
+         STYLES
+    ========================== -->
+
+    <link rel="stylesheet"
+          href="StyleSheet1.css">
+
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside id="sidebar">
+
+        <h2>My Shelves</h2>
+
+        <nav id="shelfNav"></nav>
+
+        <section class="add-shelf-section">
+
+            <input type="text"
+                   id="newShelfInput"
+                   placeholder="New shelf name">
+
+            <button id="addShelfBtn">
+                Add Shelf
+            </button>
+
+        </section>
+
+    </aside>
+
+
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main id="mainContent">
+
+        <!-- HEADER -->
+
+        <header>
+            <div class="header">
+                <h1>My Personal Library</h1>
+                <p class="subtitle">Track, Log, and Curate Your Reading</p>
+            </div>
+        </header>
+
+        <!-- =========================
+             SEARCH
+        ========================== -->
+
+        <h1 class="section-title">Add Book</h1>
+
+        <section class="search-section">
+
+            <input type="text"
+                   id="searchInput"
+                   placeholder="Search by title, author, or ISBN">
+
+            <button id="searchBtn">
+                Search
+            </button>
+
+            <button id="openManualAddBtn">
+                + Add Book Manually
+            </button>
+
+        </section>
+
+        <section id="searchResults"></section>
+
+
+        <!-- =========================
+             STATS
+        ========================== -->
+
+        <section class="stats-section">
+
+            <h1 class="section-title">My Stats</h1>
+
+            <div id="statsPanel"></div>
+
+
+        </section>
+
+        <!-- BUTTON ON MAIN PAGE -->
+        <div class="reading-dashboard-actions">
+
+            <button id="openCurrentlyReadingBtn"
+                    class="reading-dashboard-btn">
+                📚 Currently Reading
+            </button>
+
+            <button id="openReadingDashboardBtn"
+                    class="reading-dashboard-btn secondary-dashboard-btn">
+                🔥 Reading Dashboard
+            </button>
+
+            <button id="openReadingLogBtn"
+                    class="reading-dashboard-btn secondary-dashboard-btn">
+                📖 Log Today’s Reading
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             LIBRARY
+        ========================== -->
+
+        <section class="library-section">
+
+            <h1 class="section-title">My Collection</h1>
+            <h2 id="activeShelfLabel">All Books</h2>
+
+            <!-- =========================
+                 FILTERS
+            ========================== -->
+
+            <section class="filters">
+
+                <input id="filterTitle"
+                       placeholder="Search title, author, series, genre...">
+
+                <select id="filterSort">
+
+                    <option value="newest">
+                        Newest First
+                    </option>
+
+                    <option value="oldest">
+                        Oldest First
+                    </option>
+
+                    <option value="titleAZ">
+                        Title A–Z
+                    </option>
+
+                    <option value="titleZA">
+                        Title Z–A
+                    </option>
+
+                </select>
+
+            </section>
+
+            <div id="library"></div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         BOOK DETAILS MODAL
+    ========================== -->
+
+    <div id="bookModal" class="modal hidden">
+
+        <div class="modal-content">
+
+            <!-- CLOSE BUTTON -->
+
+            <span id="closeModal"
+                  class="close">
+
+                &times;
+
+            </span>
+
+
+            <!-- =========================
+                 BOOK HEADER
+            ========================== -->
+
+            <section class="modal-header">
+
+                <div class="cover-wrapper">
+
+                    <img id="detailCover"
+                         class="detail-cover"
+                         src=""
+                         alt="Book Cover">
+
+                </div>
+
+                <div class="detail-main">
+
+                    <h2 id="detailTitle"></h2>
+
+                    <p id="detailAuthor"></p>
+
+                    <p id="detailSeries"></p>
+
+                    <p id="detailGenre"></p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 BOOK STATS
+            ========================== -->
+
+            <section class="stats">
+
+                <div>
+                    <strong>Status:</strong>
+                    <span id="detailStatus"></span>
+                </div>
+
+                <div>
+                    <strong>Rating:</strong>
+                    <span id="detailRating"></span>
+                </div>
+
+                <div>
+                    <strong>ISBN:</strong>
+                    <span id="detailISBN"></span>
+                </div>
+
+                <div>
+                    <strong>Shelves:</strong>
+                    <span id="detailShelves"></span>
+                </div>
+
+                <div id="detailReadingHistory"></div>
+
+            </section>
+
+
+            <!-- =========================
+                 NOTES
+            ========================== -->
+
+            <section class="notes">
+
+                <h3>Notes</h3>
+
+                <p id="detailNotes"></p>
+
+            </section>
+
+
+            <!-- =========================
+                 MODAL ACTIONS
+            ========================== -->
+
+            <section class="modal-actions">
+
+                <button id="editBtn">
+                    Edit
+                </button>
+
+                <button id="deleteBtn">
+                    Delete
+                </button>
+
+            </section>
+
+
+            <!-- =========================
+                 EDIT SECTION
+            ========================== -->
+
+            <section id="editSection"
+                     class="edit-section">
+
+                <!-- COVER -->
+
+                <input id="editCoverInput"
+                       placeholder="New cover URL">
+
+                <button id="saveCoverBtn">
+                    Update Cover
+                </button>
+
+
+                <!-- BOOK FIELDS -->
+
+                <label>
+                    Title
+                    <input id="editTitle">
+                </label>
+
+                <label>
+                    Author
+                    <input id="editAuthor">
+                </label>
+
+                <label>
+                    Series
+                    <input id="editSeries">
+                </label>
+
+                <label>
+                    Genre
+                    <input id="editGenre">
+                </label>
+
+                <label>
+                    ISBN
+                    <input id="editISBN">
+                </label>
+
+
+                <!-- RATING -->
+
+                <label>
+
+                    Rating
+
+                    <select id="editRating">
+
+                        <option value="">
+                            Unrated
+                        </option>
+
+                        <option value="1">
+                            1 ★
+                        </option>
+
+                        <option value="2">
+                            2 ★★
+                        </option>
+
+                        <option value="3">
+                            3 ★★★
+                        </option>
+
+                        <option value="4">
+                            4 ★★★★
+                        </option>
+
+                        <option value="5">
+                            5 ★★★★★
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <!-- STATUS -->
+
+                <label>
+
+                    Status
+
+                    <select id="editStatus">
+
+                        <option>
+                            Unread
+                        </option>
+
+                        <option>
+                            Reading
+                        </option>
+
+                        <option>
+                            Finished
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <!-- READING HISTORY -->
+
+                <section class="reading-history-section">
+
+                    <h3>Reading History</h3>
+
+                    <div id="readingHistoryContainer"></div>
+
+                    <button id="addReadingSessionBtn">
+                        Add Reading Session
+                    </button>
+
+                </section>
+
+
+                <!-- SHELVES -->
+
+                <section>
+
+                    <h3>Shelves</h3>
+
+                    <div id="shelfCheckboxes"></div>
+
+                </section>
+
+
+                <!-- TAGS -->
+
+                <label>
+
+                    <input id="editTags"
+                           placeholder="fantasy, favorites, signed">
+
+                </label>
+
+
+                <!-- NOTES -->
+
+                <label>
+
+                    Notes
+
+                    <textarea id="editNotes"></textarea>
+
+                </label>
+
+
+                <!-- ACTION BUTTONS -->
+
+                <div class="edit-buttons">
+
+                    <button id="saveEditBtn">
+                        Save
+                    </button>
+
+                    <button id="cancelEditBtn">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+    <!-- HABIT MODAL -->
+
+    <div id="habitModal" class="modal hidden">
+        <div class="modal-content large-modal">
+            <span id="closeHabitModal" class="close">&times;</span>
+            <h2 class="section-title">Reading Log</h2>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+
+
+    <!-- =========================
+         MANUAL ADD MODAL
+    ========================== -->
+
+    <div id="manualAddModal" class="modal hidden">
+
+        <div class="modal-content">
+
+            <h2>Add Book</h2>
+
+
+            <!-- BASIC INFO -->
+
+            <input id="manualTitle"
+                   placeholder="Title">
+
+            <input id="manualAuthor"
+                   placeholder="Author">
+
+            <input id="manualISBN"
+                   placeholder="ISBN">
+
+            <input id="manualGenre"
+                   placeholder="Genre">
+
+            <input id="manualSeries"
+                   placeholder="Series">
+
+            <input id="manualCover"
+                   placeholder="Cover Image URL">
+
+
+            <!-- TAGS -->
+
+            <label for="manualTags">
+
+            </label>
+
+            <input type="text"
+                   id="manualTags"
+                   placeholder="fantasy, signed, favorites">
+
+
+            <!-- NOTES -->
+
+            <textarea id="manualNotes"
+                      placeholder="Notes"></textarea>
+
+
+            <!-- SHELVES -->
+
+            <div id="manualShelfCheckboxes"></div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="modal-buttons">
+
+                <button id="saveManualBookBtn">
+                    Save Book
+                </button>
+
+                <button id="closeManualAddBtn">
+                    Cancel
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================
+         STATS MODAL
+    ========================== -->
+    <div id="statsModal" class="modal hidden">
+        <div class="modal-content stats-modal-content">
+
+            <span class="close" onclick="closeModal('statsModal')">&times;</span>
+
+            <div class="modal-body"></div>
+
+        </div>
+    </div>
+
+    <!-- =========================
+         SHELF EDIT MODAL
+    ========================== -->
+
+    <div id="shelfEditModal" class="modal hidden">
+        <div class="modal-content">
+
+            <h3>Edit Shelf</h3>
+
+            <input type="text" id="editShelfName" />
+
+            <div id="colorPicker" class="color-picker"></div>
+
+            <div class="modal-actions">
+                <button id="saveShelfEditBtn">Save</button>
+                <button id="cancelShelfEditBtn">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =========================
+         SCRIPTS
+    ========================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script2.js"></script>
+
+</body>
+
+</html>
