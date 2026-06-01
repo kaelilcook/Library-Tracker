@@ -57,6 +57,10 @@ let lastSearchQuery = "";
 const GOOGLE_BOOKS_API_KEY =
     "AIzaSyDcy9vbZAD2FpVuha27Lh-etDIw7IFD_GY";
 
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js");
+}
+
 
 // ========================
 // DOM ELEMENTS
@@ -2900,7 +2904,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("bookModal").style.display = "none";
     });
 
+    // ========================
+    // MOBILE NAV
+    // ========================
 
+    document.getElementById("menuToggle").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.toggle("open");
+    });
 
     // ========================
     // HABIT TRACKER
