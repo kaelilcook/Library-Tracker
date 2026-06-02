@@ -177,7 +177,7 @@ button, input, select {
         }
 }
 
-.mobile-menu-btn {
+#menu-toggle {
     display: block !important;
     position: fixed !important;
     top: 10px;
