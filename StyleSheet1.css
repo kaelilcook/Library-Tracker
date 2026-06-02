@@ -177,7 +177,7 @@ button, input, select {
         }
 }
 
-#menu-toggle {
+.menu-toggle {
     display: block !important;
     position: fixed !important;
     top: 10px;
