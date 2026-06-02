@@ -177,6 +177,19 @@ button, input, select {
         }
 }
 
+.mobile-menu-btn {
+    display: block !important;
+    position: fixed !important;
+    top: 10px;
+    left: 10px;
+    z-index: 99999;
+    background: #8b4c5c;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+}
+
 /* =========================
    2. LAYOUT
 ========================= */
