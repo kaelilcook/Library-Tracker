@@ -169,10 +169,12 @@ function percent(part, total) {
 }
 
 function closeModal(modalId) {
+
     const modal = document.getElementById(modalId);
+
     if (!modal) return;
-    modal.classList.remove("hidden");
-    modal.classList.add("hidden");
+
+    modal.style.display = "none";
 }
 
 // ========================
@@ -1922,7 +1924,6 @@ function openModalView(title, html) {
     `;
 
     modal.classList.remove("hidden");
-    modal.classList.add("hidden");
 }
 
 function openCurrentlyReadingModal() {
@@ -2862,6 +2863,13 @@ document.addEventListener("DOMContentLoaded", () => {
         renderReadingHistory(book);
     });
 
+    document.getElementById("closeHabitModal")
+        ?.addEventListener("click", () => {
+
+            document.getElementById("habitModal")
+                .style.display = "none";
+        });
+
     // ========================
     // EDIT / SAVE / DELETE
     // ========================
@@ -2902,14 +2910,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     closeModalBtn?.addEventListener("click", () => {
         document.getElementById("bookModal").style.display = "none";
-    });
-
-    // ========================
-    // MOBILE NAV
-    // ========================
-
-    document.getElementById("menuToggle").addEventListener("click", () => {
-        document.getElementById("sidebar").classList.toggle("open");
     });
 
     // ========================
