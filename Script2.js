@@ -2746,6 +2746,33 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("filterSort");
 
     // ========================
+    // MOBILE
+    // ========================
+
+    document.getElementById("mobileMenuBtn")
+        ?.addEventListener("click", () => {
+
+            document.getElementById("sidebar")
+                .classList.toggle("open");
+        });
+
+    document.addEventListener("click", (e) => {
+
+        const sidebar = document.getElementById("sidebar");
+        const button = document.getElementById("mobileMenuBtn");
+
+        if (!sidebar || !button) return;
+
+        const clickedInsideSidebar = sidebar.contains(e.target);
+        const clickedButton = button.contains(e.target);
+
+        if (!clickedInsideSidebar && !clickedButton) {
+            sidebar.classList.remove("open");
+        }
+    });
+
+
+    // ========================
     // MANUAL ADD MODAL
     // ========================
     manualAddBtn?.addEventListener("click", () => {

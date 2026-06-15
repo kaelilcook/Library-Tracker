@@ -196,6 +196,285 @@ p {
 }
 
 /* =========================
+   MOBILE
+========================= */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+@media (max-width: 412px) {
+
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 260px;
+        background: white;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        display: block; /* IMPORTANT */
+    }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+    #mainContent {
+        margin-left: 0 !important;
+    }
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+    }
+
+    button, input, select {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .shelf-button {
+        padding: 12px;
+    }
+
+    .modal-content {
+        width: calc(100% - 24px);
+        max-width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 12px;
+        box-sizing: border-box;
+    }
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 20000;
+        background: rgba(0,0,0,.5);
+    }
+
+    .book-card {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        overflow: hidden;
+    }
+
+        .book-card img {
+            width: 60px;
+            flex-shrink: 0;
+            height: auto;
+        }
+
+        .book-card,
+        .book-card * {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+    #mainContent {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0 !important;
+        padding: 12px;
+        overflow-x: hidden;
+    }
+
+    .menu-toggle {
+        display: block !important;
+        position: fixed !important;
+        top: 10px;
+        right: 10px;
+        z-index: 99999;
+        background: #8b4c5c;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: none;
+    }
+
+    .book-grid {
+        display: grid;
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+        width: 100%;
+    }
+
+        .book-grid,
+        .search-results-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+    .search-section,
+    .search-controls,
+    .currently-reading-toolbar {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+        gap: 10px;
+    }
+
+    input,
+    select,
+    button,
+    .search-section,
+    .currently-reading-toolbar {
+        min-width: 0;
+    }
+
+    #manualShelfCheckboxes label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #manualShelfCheckboxes input[type="checkbox"] {
+        margin: 0;
+    }
+
+    #shelfCheckboxes label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #shelfCheckboxes input[type="checkbox"] {
+        margin: 0;
+    }
+
+    #statsModal .modal-content {
+        width: 95%;
+        max-width: 95%;
+        box-sizing: border-box;
+    }
+
+    #statsModal .modal-body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+
+    .stat-row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+        .stat-row > * {
+            min-width: 0;
+        }
+
+        .stat-row,
+        .stat-row * {
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+    .stats-grid,
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .habit-stats-grid {
+        display: flex !important;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+        gap: 12px;
+    }
+
+    .habit-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+    }
+
+            .habit-card * {
+                max-width: 100%;
+                min-width: 0;
+                overflow-wrap: break-word;
+                word-break: break-word;
+                box-sizing: border-box;
+            }
+
+    canvas,
+    .chart-container,
+    .progress-container {
+        max-width: 100%;
+    }
+}
+
+.mobile-topbar {
+    display: none;
+}
+
+.mobile-nav {
+    display: none;
+}
+
+@media (max-width: 412px) {
+
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 56px;
+        padding: 0 12px;
+        background: #8b4c5c;
+        color: white;
+        box-sizing: border-box;
+    }
+
+    #mainContent {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0 !important;
+        box-sizing: border-box;
+    }
+
+    body {
+        display: block;
+    }
+
+    .mobile-nav {
+        display: block;
+        width: 100%;
+    }
+
+    #mainContent {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+}
+
+/* =========================
    3. SEARCH / FILTERS
 ========================= */
 
