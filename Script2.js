@@ -55,7 +55,7 @@ let lastSearchQuery = "";
 // ========================
 
 const GOOGLE_BOOKS_API_KEY =
-    "AIzaSyDcy9vbZAD2FpVuha27Lh-etDIw7IFD_GY";
+    "AIzaSyAZEc5zIcalmXGERxbRI0eGELag5DtmuGY";
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
