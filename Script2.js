@@ -54,8 +54,7 @@ let lastSearchQuery = "";
 // CONFIG
 // ========================
 
-const GOOGLE_BOOKS_API_KEY =
-    "AIzaSyAZEc5zIcalmXGERxbRI0eGELag5DtmuGY";
+
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
