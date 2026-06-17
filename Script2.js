@@ -149,6 +149,52 @@ function loadLibrary() {
     }));
 }
 
+function exportLibrary() {
+    const data = localStorage.getItem("myLibrary");
+
+    if (!data) {
+        alert("No library data found.");
+        return;
+    }
+
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "myLibrary-export.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+function importLibraryFile(file) {
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            const json = JSON.parse(e.target.result);
+
+            // basic validation
+            if (!Array.isArray(json)) {
+                alert("Invalid file format. Expected an array.");
+                return;
+            }
+
+            localStorage.setItem("myLibrary", JSON.stringify(json));
+
+            alert("Library imported successfully!");
+
+            location.reload(); // refresh UI
+        } catch (err) {
+            alert("Invalid JSON file.");
+            console.error(err);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
 // ========================
 // MODALS
 // ========================
@@ -2937,6 +2983,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     closeModalBtn?.addEventListener("click", () => {
         document.getElementById("bookModal").style.display = "none";
+    });
+
+    document.getElementById("exportLibraryBtn")
+    ?.addEventListener("click", exportLibrary);
+
+document.getElementById("importLibraryBtn")
+    ?.addEventListener("click", () => {
+        document.getElementById("importFileInput").click();
+    });
+
+document.getElementById("importFileInput")
+    ?.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) importLibraryFile(file);
     });
 
     // ========================

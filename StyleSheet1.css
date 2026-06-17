@@ -111,6 +111,20 @@ p {
     --space-7: 48px;
 }
 
+.data-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+    .data-tools button {
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
 /* =========================
    2. LAYOUT
 ========================= */
