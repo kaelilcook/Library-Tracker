@@ -58,7 +58,7 @@ const GOOGLE_BOOKS_API_KEY =
     "AIzaSyDcy9vbZAD2FpVuha27Lh-etDIw7IFD_GY";
 
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/service-worker.js");
+    navigator.serviceWorker.register("service-worker.js");
 }
 
 
