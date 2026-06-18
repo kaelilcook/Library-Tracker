@@ -41,6 +41,11 @@ const shelfColors = [
     "#777777"  // gray
 ];
 
+const supabase = supabase.createClient(
+    "https://bkjvdyvosoqyiorpkhvy.supabase.co/rest/v1/books",
+    "sb_publishable_eETwZqxup4vZT08dKX8iMA_kug-Fz_H"
+);
+
 let activeShelf = "All";
 
 let currentEditId = null;
