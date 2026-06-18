@@ -1061,7 +1061,7 @@ function renderLibrary() {
         ${(book.tags || []).join(" • ")}
     </p>
 
-    <button onclick="openBookModal(${book.id})">
+    <button onclick="openBookModal('${book.id}')">
         Details
     </button>
 `;
