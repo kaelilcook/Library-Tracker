@@ -2120,12 +2120,6 @@ window.openShelfEditModal = function (shelf) {
 // SHELF MANAGEMENT
 // ------------------------
 
-create table shelves (
-  id uuid primary key default gen_random_uuid(),
-  name text,
-  color text
-);
-
 function addShelf() {
 
     const input = document.getElementById("newShelfInput");
