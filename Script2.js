@@ -182,9 +182,31 @@ async function importLibraryFile(file) {
                 return;
             }
 
+            // 🧼 CLEAN STEP (THIS IS WHAT YOU WERE MISSING)
+            const cleaned = json.map(book => ({
+                title: book.title,
+                author: book.author,
+                isbn: book.isbn,
+                genre: book.genre,
+                series: book.series,
+                notes: book.notes,
+                cover: book.cover,
+
+                rating:
+                    book.rating === "" || book.rating == null
+                        ? null
+                        : Number(book.rating),
+
+                shelves: book.shelves || [],
+                reading_history: book.readingHistory || [],
+                tags: book.tags || [],
+                status: book.status,
+                date_added: book.dateAdded
+            }));
+
             const { error } = await supabaseClient
                 .from("books")
-                .insert(json);
+                .insert(cleaned);
 
             if (error) {
                 console.error(error);
