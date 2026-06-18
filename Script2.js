@@ -5,9 +5,7 @@
 
 let myLibrary = [];
 
-let readingLog =
-    JSON.parse(localStorage.getItem("readingLog"))
-    || [];
+let readingLog = [];
 
 let shelves = [
     {
@@ -118,45 +116,45 @@ function findBook(id) {
 // ========================
 
 function saveLibrary() {
-    localStorage.setItem("myLibrary", JSON.stringify(myLibrary));
-    localStorage.setItem("readingLog", JSON.stringify(readingLog));
+    // Supabase is now source of truth
+    console.log("Save handled by Supabase");
+}
+async function loadLibrary() {
+
+  const { data, error } = await supabase
+    .from("books")
+    .select("*");
+
+  if (error) {
+    console.error("Load error:", error);
+    return [];
+  }
+
+  return data;
 }
 
-function loadLibrary() {
+async function exportLibrary() {
 
-    myLibrary = JSON.parse(localStorage.getItem("myLibrary")) || [];
-    readingLog = JSON.parse(localStorage.getItem("readingLog")) || [];
+    const { data, error } = await supabase
+        .from("books")
+        .select("*");
 
-    shelves = JSON.parse(localStorage.getItem("shelves")) || shelves;
+    if (error) {
+        console.error(error);
+        alert("Failed to export library.");
+        return;
+    }
 
-    // normalize structure safely
-    myLibrary = myLibrary.map(book => ({
-        title: "",
-        author: "",
-        series: "",
-        genre: "",
-        isbn: "",
-        notes: "",
-        tags: [],
-        shelves: [],
-        rating: "",
-        status: "Unread",
-        cover: "",
-        readingHistory: [],
-        dateAdded: Date.now(),
-        ...book
-    }));
-}
-
-function exportLibrary() {
-    const data = localStorage.getItem("myLibrary");
-
-    if (!data) {
+    if (!data || data.length === 0) {
         alert("No library data found.");
         return;
     }
 
-    const blob = new Blob([data], { type: "application/json" });
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+    );
+
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
@@ -167,24 +165,31 @@ function exportLibrary() {
     URL.revokeObjectURL(url);
 }
 
-function importLibraryFile(file) {
+async function importLibraryFile(file) {
     const reader = new FileReader();
 
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
         try {
             const json = JSON.parse(e.target.result);
 
-            // basic validation
             if (!Array.isArray(json)) {
                 alert("Invalid file format. Expected an array.");
                 return;
             }
 
-            localStorage.setItem("myLibrary", JSON.stringify(json));
+            const { error } = await supabase
+                .from("books")
+                .insert(json);
+
+            if (error) {
+                console.error(error);
+                alert("Import failed.");
+                return;
+            }
 
             alert("Library imported successfully!");
+            location.reload();
 
-            location.reload(); // refresh UI
         } catch (err) {
             alert("Invalid JSON file.");
             console.error(err);
@@ -2115,6 +2120,12 @@ window.openShelfEditModal = function (shelf) {
 // SHELF MANAGEMENT
 // ------------------------
 
+create table shelves (
+  id uuid primary key default gen_random_uuid(),
+  name text,
+  color text
+);
+
 function addShelf() {
 
     const input = document.getElementById("newShelfInput");
@@ -2135,8 +2146,12 @@ function addShelf() {
 
     input.value = "";
 
-    localStorage.setItem("shelves", JSON.stringify(shelves));
-    renderShelfNav();
+    await supabase
+    .from("shelves")
+    .insert({
+        name: shelfName,
+        color: shelfColor
+    });
 }
 
 let editingShelf = null;
@@ -2865,7 +2880,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         saveLibrary();
-        localStorage.setItem("shelves", JSON.stringify(shelves));
+        await supabase
+    .from("shelves")
+    .update({
+        name: newName,
+        color: newColor
+    })
+    .eq("name", editingShelf.name);
 
         document.getElementById("shelfEditModal")
             .classList.add("hidden");
