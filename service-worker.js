@@ -40,7 +40,7 @@ self.addEventListener("install", (event) => {
         "/Library-Tracker/",
         "/Library-Tracker/index.html",
         "/Library-Tracker/Script2.js",
-        "/Library-Tracker/style.css"
+        "/Library-Tracker/StyleSheet1.css"
       ]);
     })
   );
