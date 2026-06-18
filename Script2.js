@@ -113,7 +113,7 @@ function debounce(func, delay) {
 }
 
 function findBook(id) {
-    return myLibrary.find(b => Number(b.id) === Number(id));
+    return myLibrary.find(b => String(b.id) === String(id));
 }
 
 // ========================
@@ -1439,6 +1439,7 @@ function openStatsModal(title, html) {
 function openBookModalView(title, html) {
     openModal("bookModal", title, html);
 }
+
 function progressBarRow(label, value, max) {
 
     return `
@@ -1466,8 +1467,7 @@ function progressBarRow(label, value, max) {
 
 function openBookModal(id) {
 
-    const book = findBook(id);
-    if (!book) return;
+    const book = myLibrary.find(b => String(b.id) === String(id));
 
     currentEditId = id;
 
@@ -1507,6 +1507,7 @@ function openBookModal(id) {
     document.getElementById("editSection").style.display = "none";
     document.getElementById("bookModal").style.display = "flex";
 }
+
 function openGenreModal() {
 
     const stats = getLibraryStats();
@@ -2565,6 +2566,8 @@ function addReadingSession(id, startDate, endDate) {
 // ------------------------
 
 function openEditMode() {
+    console.log("EDIT MODE OPENED, ID:", currentEditId);
+
     const book = findBook(currentEditId);
     if (!book) return;
 
@@ -2588,6 +2591,7 @@ function openEditMode() {
 
     editSection.style.display = "flex";
 }
+
 function cancelEdit() {
 
     currentEditId = null;
@@ -2967,6 +2971,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // ========================
     // EDIT / SAVE / DELETE
     // ========================
+    document.getElementById("editBtn").addEventListener("click", openEditMode);
+
     saveEditBtn?.addEventListener("click", saveEditedBook);
 
     document.getElementById("saveCoverBtn")
