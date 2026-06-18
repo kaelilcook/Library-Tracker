@@ -2,7 +2,8 @@
  
     "name": "My Library Tracker",
     "short_name": "Library",
-    "start_url": "/",
+    "start_url": "/Library-Tracker/",
+    "scope": "/Library-Tracker/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#8b4c5c",
