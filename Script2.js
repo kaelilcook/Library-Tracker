@@ -41,8 +41,8 @@ const shelfColors = [
     "#777777"  // gray
 ];
 
-const supabase = supabase.createClient(
-    "https://bkjvdyvosoqyiorpkhvy.supabase.co/rest/v1/books",
+const supabaseClient = window.supabase.createClient(
+    "https://bkjvdyvosoqyiorpkhvy.supabase.co",
     "sb_publishable_eETwZqxup4vZT08dKX8iMA_kug-Fz_H"
 );
 
@@ -126,7 +126,7 @@ function saveLibrary() {
 }
 async function loadLibrary() {
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("books")
     .select("*");
 
@@ -140,7 +140,7 @@ async function loadLibrary() {
 
 async function exportLibrary() {
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from("books")
         .select("*");
 
@@ -182,7 +182,7 @@ async function importLibraryFile(file) {
                 return;
             }
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from("books")
                 .insert(json);
 
@@ -2145,7 +2145,7 @@ async function addShelf() {
 
     input.value = "";
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from("shelves")
         .insert({
             name: shelfName,
@@ -2883,7 +2883,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         saveLibrary();
-        await supabase
+        await supabaseClient
     .from("shelves")
     .update({
         name: newName,
