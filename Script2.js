@@ -375,40 +375,6 @@ async function getBestCover(isbn, title, author) {
         }
     }
 
-    // ========================
-    // GOOGLE BOOKS FALLBACK
-    // ========================
-
-    try {
-
-        const query =
-            `${title} ${author || ""}`;
-
-        const response = await fetch(
-            `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`
-        );
-
-        const data = await response.json();
-
-        const image =
-            data.items?.[0]?.volumeInfo?.imageLinks;
-
-        if (image) {
-
-            return (
-                image.extraLarge ||
-                image.large ||
-                image.medium ||
-                image.thumbnail ||
-                image.smallThumbnail ||
-                ""
-            );
-        }
-
-    } catch (err) {
-
-        console.log("Google Books cover failed:", err);
-    }
 
     // ========================
     // NO COVER FOUND
@@ -2277,18 +2243,20 @@ async function searchBooks() {
     }
 
     // API key
-    googleUrl += `&key=${GOOGLE_BOOKS_API_KEY}`;
+     try {
 
-    try {
-
-        const response = await fetch(googleUrl);
-
-        // rate limit handling
-        if (response.status === 429) {
-            searchResults.innerHTML =
-                "<p>Too many searches. Please wait a moment.</p>";
-            return;
-        }
+        const response = await fetch(
+    "https://bkjvdyvosoqyiorpkhvy.supabase.co/functions/v1/google-books-search",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            query: googleUrl
+        })
+    }
+);
 
         const data = await response.json();
 

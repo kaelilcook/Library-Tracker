@@ -5,16 +5,16 @@ self.addEventListener("install", () => {
 
 self.addEventListener("fetch", (event) => {
 
-    const url = new URL(event.request.url);
+  const url = new URL(event.request.url);
 
-    // only cache your own site
-    if (url.origin !== location.origin) {
-        return;
-    }
+  // ❌ ignore external images completely
+  if (url.origin !== self.location.origin) {
+    return;
+  }
 
-    event.respondWith(
-        caches.match(event.request).then((cached) => {
-            return cached || fetch(event.request);
-        })
-    );
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
+  );
 });
