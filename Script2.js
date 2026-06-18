@@ -124,18 +124,21 @@ function saveLibrary() {
     // Supabase is now source of truth
     console.log("Save handled by Supabase");
 }
+
 async function loadLibrary() {
 
-  const { data, error } = await supabaseClient
-    .from("books")
-    .select("*");
+    const { data, error } = await supabaseClient
+        .from("books")
+        .select("*");
 
-  if (error) {
-    console.error("Load error:", error);
-    return [];
-  }
+    if (error) {
+        console.error(error);
+        return;
+    }
 
-  return data;
+    myLibrary = data;
+
+    renderLibrary();
 }
 
 async function exportLibrary() {
