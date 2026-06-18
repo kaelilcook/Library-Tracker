@@ -127,6 +127,8 @@ function saveLibrary() {
 
 async function loadLibrary() {
 
+    console.log("Loading from Supabase...");
+
     const { data, error } = await supabaseClient
         .from("books")
         .select("*");
@@ -136,9 +138,12 @@ async function loadLibrary() {
         return;
     }
 
+    console.log("Books loaded:", data);
+
     myLibrary = data;
 
     renderLibrary();
+    renderStats?.();
 }
 
 async function exportLibrary() {
