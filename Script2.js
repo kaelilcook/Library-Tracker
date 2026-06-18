@@ -2842,7 +2842,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ========================
     addShelfBtn?.addEventListener("click", addShelf);
 
-    document.getElementById("saveShelfEditBtn").onclick = () => {
+    document.getElementById("saveShelfEditBtn").onclick = async () => {
 
         const newName = document
             .getElementById("editShelfName")
