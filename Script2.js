@@ -656,7 +656,7 @@ function renderBookGrid(books, showActions = false, actionType = "") {
                     <small>${book.author || ""}</small>
 
                     ${showActions ? `
-                        <button onclick="${actionType}(${book.id})">
+                        <button onclick="${actionType}('${book.id}'')">
                             Mark as Finished
                         </button>
                     ` : ""}
@@ -748,8 +748,8 @@ function renderHabitModal() {
 
                     <input
     type="checkbox"
-    value="${book.id}"
-    ${todayLog?.books?.includes(book.id)
+    value="'${book.id}'"
+    ${todayLog?.books?.includes('book.id')
                     ? "checked"
                     : ""
                 }
@@ -1836,7 +1836,7 @@ function setupLogSearch(date) {
 
         results.innerHTML = matches.map(book => `
             <div class="search-book-card"
-                 onclick="toggleLogBook(${book.id}, '${date}')">
+                 onclick="toggleLogBook('${book.id}', '${date}')">
                 <p>${book.title}</p>
                 <small>${book.author}</small>
             </div>
@@ -1933,8 +1933,8 @@ function renderLogEditor(date) {
                 ${readingBooks.length ? readingBooks.map(book => `
                     <label class="reading-log-item">
                         <input type="checkbox"
-                               value="${book.id}"
-                               ${entry.books.includes(book.id) ? "checked" : ""}>
+                               value="'${book.id}'"
+                               ${entry.books.includes('book.id') ? "checked" : ""}>
                         ${book.title}
                     </label>
                 `).join("") : `<p>No currently reading books</p>`}
@@ -2063,7 +2063,7 @@ function setupCurrentlyReadingSearch() {
             matches.map(book => `
 
                 <div class="search-book-card"
-                     data-id="${book.id}">
+                     data-id="'${book.id}'">
 
                     <img src="${book.cover || ""}">
 
