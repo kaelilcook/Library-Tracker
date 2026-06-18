@@ -2120,7 +2120,7 @@ window.openShelfEditModal = function (shelf) {
 // SHELF MANAGEMENT
 // ------------------------
 
-function addShelf() {
+async function addShelf() {
 
     const input = document.getElementById("newShelfInput");
     const colorInput = document.getElementById("newShelfColor");
@@ -2130,7 +2130,7 @@ function addShelf() {
 
     if (!shelfName) return;
 
-    // prevent duplicates (OBJECT SAFE CHECK)
+    // prevent duplicates (local check still fine)
     if (shelves.some(s => s.name === shelfName)) return;
 
     shelves.push({
@@ -2140,12 +2140,16 @@ function addShelf() {
 
     input.value = "";
 
-    await supabase
-    .from("shelves")
-    .insert({
-        name: shelfName,
-        color: shelfColor
-    });
+    const { error } = await supabase
+        .from("shelves")
+        .insert({
+            name: shelfName,
+            color: shelfColor
+        });
+
+    if (error) {
+        console.error("Shelf insert failed:", error);
+    }
 }
 
 let editingShelf = null;
