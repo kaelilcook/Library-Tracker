@@ -60,7 +60,11 @@ let lastSearchQuery = "";
 
 
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(reg => console.log("SW registered", reg))
+            .catch(err => console.error("SW registration failed", err));
+    });
 }
 
 
@@ -113,7 +117,9 @@ function debounce(func, delay) {
 }
 
 function findBook(id) {
-    return myLibrary.find(b => String(b.id) === String(id));
+    return myLibrary.find(
+        b => b?.id && String(b.id) === String(id)
+    );
 }
 
 // ========================
@@ -130,8 +136,9 @@ async function loadLibrary() {
     console.log("Loading from Supabase...");
 
     const { data, error } = await supabaseClient
-        .from("books")
-        .select("*");
+    .from("books")
+    .select("*")
+    .order("date_added", { ascending: false });
 
     if (error) {
         console.error(error);
@@ -140,7 +147,7 @@ async function loadLibrary() {
 
     console.log("Books loaded:", data);
 
-    myLibrary = data;
+    myLibrary = data || [];
 
     renderLibrary();
     renderStats?.();
@@ -201,15 +208,21 @@ async function importLibraryFile(file) {
                 cover: book.cover,
 
                 rating:
-                    book.rating === "" || book.rating == null
-                        ? null
-                        : Number(book.rating),
+    book.rating === "" || book.rating == null
+        ? null
+        : Number(book.rating) || null,
 
                 shelves: book.shelves || [],
-                reading_history: book.readingHistory || [],
+                reading_history:
+    book.reading_history ||
+    book.readingHistory ||
+    [],
                 tags: book.tags || [],
                 status: book.status,
-                date_added: book.dateAdded
+                date_added:
+    book.date_added ??
+    book.dateAdded ??
+    null,
             }));
 
             const { error } = await supabaseClient
@@ -223,7 +236,7 @@ async function importLibraryFile(file) {
             }
 
             alert("Library imported successfully!");
-            location.reload();
+await loadLibrary();
 
         } catch (err) {
             alert("Invalid JSON file.");
@@ -305,15 +318,18 @@ function normalizeBook(volume) {
         isbn: volume.industryIdentifiers?.[0]?.identifier || "",
         cover: volume.imageLinks?.thumbnail || "",
 
+        series: "",
+        shelves: [],
+
         tags: [],
         subjects: [],
         source: "google",
 
-        rating: 0,
+        rating: null,
         status: "Unread",
         notes: "",
-        readingHistory: [],
-        dateAdded: Date.now()
+        reading_history: [],
+        date_added: Date.now()
     };
 }
 
@@ -467,7 +483,7 @@ function getLibraryStats() {
         }
 
         // MONTHLY ADDS
-        const d = new Date(book.dateAdded);
+        const d = new Date(book.date_added);
         if (!isNaN(d)) {
             stats.monthlyAdds[d.getMonth()]++;
         }
@@ -2330,13 +2346,22 @@ async function searchBooks() {
             "<p>Error searching books.</p>";
     }
 }
-function removeBook(id) {
+async function removeBook(id) {
+
+    const { error } = await supabaseClient
+        .from("books")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        console.error("Delete error:", error);
+        return;
+    }
+
     myLibrary = myLibrary.filter(b => b.id !== id);
 
-    saveLibrary();
     renderLibrary();
     renderStats();
-
 }
 
 function confirmRemoveBook(id) {
@@ -2345,8 +2370,6 @@ function confirmRemoveBook(id) {
 }
 
 async function addToLibrary(bookData, shelf = "") {
-
-    console.log("🚨 SAVING BOOK TO SUPABASE:", newBook);
 
     const cover = await getBestCover(
         bookData.isbn,
@@ -2370,22 +2393,21 @@ async function addToLibrary(bookData, shelf = "") {
         date_added: Date.now()
     };
 
-    const { data, error } = await supabaseClient
-    .from("books")
-    .insert([newBook])
-    .select();
+    console.log("🚨 SAVING BOOK TO SUPABASE:", book);
 
-console.log("SUPABASE RESPONSE:", { data, error });
+    const { data, error } = await supabaseClient
+        .from("books")
+        .insert([book])
+        .select();
+
+    console.log("SUPABASE RESPONSE:", { data, error });
 
     if (error) {
         console.error("Insert error:", error);
         return;
     }
 
-    myLibrary.unshift(data[0]);
-
-    renderLibrary();
-    renderStats();
+    await loadLibrary();
 }
 
 function findPossibleDuplicates(newBook) {
@@ -2470,25 +2492,9 @@ async function saveManualBook() {
 
     console.log("🚨 SAVING BOOK TO SUPABASE:", newBook);
 
-    const cleanBook = {
-  title: "TEST BOOK",
-  author: "TEST",
-  isbn: "123",
-  genre: "test",
-  series: "",
-  cover: "",
-  notes: "",
-  shelves: [],
-  tags: [],
-  reading_history: [],
-  status: "Unread",
-  rating: null,
-  date_added: Date.now()
-};
-
 const { data, error } = await supabaseClient
   .from("books")
-  .insert([cleanBook])
+  .insert([newBook])
   .select();
 
 if (error) {
@@ -2507,48 +2513,51 @@ renderStats();
 closeManualAddModal();
 }
 
-function saveEditedBook() {
+async function saveEditedBook() {
+
     const book = findBook(currentEditId);
     if (!book) return;
 
-    book.title = editTitle.value;
-    book.author = editAuthor.value;
-    book.series = editSeries.value;
-    book.genre = editGenre.value;
-    book.rating = editRating.value;
-    book.isbn = editISBN.value;
-    book.status = editStatus.value;
-    book.notes = editNotes.value;
+    const updatedBook = {
+        title: editTitle.value,
+        author: editAuthor.value,
+        series: editSeries.value,
+        genre: editGenre.value,
+        rating: editRating.value ? Number(editRating.value) : null,
+        isbn: editISBN.value,
+        status: editStatus.value,
+        notes: editNotes.value,
 
-    // rebuild reading history
-    book.readingHistory = [];
+        reading_history: Array.from(
+            document.querySelectorAll(".reading-session")
+        ).map(session => ({
+            startDate: session.querySelector(".reading-start").value,
+            endDate: session.querySelector(".reading-finish").value
+        })),
 
-    document.querySelectorAll(".reading-session").forEach(session => {
-        const startDate = session.querySelector(".reading-start").value;
-        const endDate = session.querySelector(".reading-finish").value;
+        shelves: [
+            ...document.querySelectorAll("#shelfCheckboxes input:checked")
+        ].map(i => i.value),
 
-        book.readingHistory.push({ startDate, endDate });
-    });
+        tags: document
+            .getElementById("editTags")
+            .value
+            .split(",")
+            .map(t => t.trim())
+            .filter(Boolean)
+    };
 
-    // shelves
-    const selectedShelves = [
-        ...document.querySelectorAll("#shelfCheckboxes input:checked")
-    ].map(i => i.value);
+    const { error } = await supabaseClient
+        .from("books")
+        .update(updatedBook)
+        .eq("id", book.id);
 
-    book.shelves = selectedShelves;
+    if (error) {
+        console.error("Update error:", error);
+        return;
+    }
 
-    // tags
-    book.tags = document
-        .getElementById("editTags")
-        .value
-        .split(",")
-        .map(t => t.trim())
-        .filter(Boolean);
-
-    saveLibrary();
-    renderLibrary();
-    renderStats();
-
+    await loadLibrary();
 
     document.getElementById("bookModal").style.display = "none";
     currentEditId = null;
