@@ -43,7 +43,7 @@ self.addEventListener("install", (event) => {
         "./",
         "./index.html",
         "./Script2.js",
-        "./style.css",
+        "./StyleSheet1.css",
         "./manifest.json"
       ];
 
