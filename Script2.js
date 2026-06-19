@@ -2519,6 +2519,7 @@ async function saveEditedBook() {
     if (!book) return;
 
     const updatedBook = {
+        cover: editCoverInput.value.trim() || book.cover,
         title: editTitle.value,
         author: editAuthor.value,
         series: editSeries.value,
@@ -2550,7 +2551,7 @@ async function saveEditedBook() {
     const { error } = await supabaseClient
         .from("books")
         .update(updatedBook)
-        .eq("id", book.id);
+        .eq("id", currentEditId);
 
     if (error) {
         console.error("Update error:", error);
