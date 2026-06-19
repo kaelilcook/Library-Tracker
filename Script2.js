@@ -2345,6 +2345,7 @@ function confirmRemoveBook(id) {
 }
 
 async function addToLibrary(bookData, shelf = "") {
+
     const cover = await getBestCover(
         bookData.isbn,
         bookData.title,
@@ -2352,26 +2353,37 @@ async function addToLibrary(bookData, shelf = "") {
     );
 
     const book = {
-        id: Date.now(),
         title: bookData.title,
         author: bookData.author,
         genre: bookData.genre,
         series: bookData.series,
         cover,
         isbn: bookData.isbn,
+
         shelves: shelf ? [shelf] : [],
         tags: [],
-        readingHistory: [],
-        dateAdded: Date.now()
+        reading_history: [],
+        status: "Unread",
+        rating: null,
+        date_added: Date.now()
     };
 
-    myLibrary.unshift(book);
+    const { data, error } = await supabaseClient
+        .from("books")
+        .insert([book])
+        .select();
 
-    saveLibrary();
+    if (error) {
+        console.error("Insert error:", error);
+        return;
+    }
+
+    myLibrary.unshift(data[0]);
+
     renderLibrary();
     renderStats();
-
 }
+
 function findPossibleDuplicates(newBook) {
 
     const newTitle =
@@ -2424,13 +2436,13 @@ function findPossibleDuplicates(newBook) {
     });
 }
 
-function saveManualBook() {
+async function saveManualBook() {
+
     const selectedShelves = [
         ...document.querySelectorAll("#manualShelfCheckboxes input:checked")
     ].map(i => i.value);
 
     const newBook = {
-        id: Date.now(),
         title: manualTitle.value.trim(),
         author: manualAuthor.value.trim(),
         isbn: manualISBN.value.trim(),
@@ -2438,35 +2450,33 @@ function saveManualBook() {
         series: manualSeries.value.trim(),
         cover: manualCover.value.trim(),
         notes: manualNotes.value.trim(),
-        shelves: [...selectedShelves],
+
+        shelves: selectedShelves,
         tags: document.getElementById("manualTags")
             .value
             .split(",")
             .map(t => t.trim())
             .filter(Boolean),
-        readingHistory: [],
-        dateAdded: Date.now()
+
+        reading_history: [],
+        status: "Unread",
+        rating: null,
+        date_added: Date.now()
     };
 
-    const duplicates =
-        findPossibleDuplicates(newBook);
+    const { data, error } = await supabaseClient
+        .from("books")
+        .insert([newBook])
+        .select();
 
-    if (duplicates.length > 0) {
-
-        const proceed = confirm(
-            `Possible duplicate found:\n\n` +
-            duplicates.map(b =>
-                `${b.title} — ${b.author}`
-            ).join("\n") +
-            `\n\nAdd anyway?`
-        );
-
-        if (!proceed) return;
+    if (error) {
+        console.error("Insert error:", error);
+        alert("Failed to save book.");
+        return;
     }
 
-    myLibrary.unshift(newBook);
+    myLibrary.unshift(data[0]);
 
-    saveLibrary();
     renderLibrary();
     renderStats();
     closeManualAddModal();
