@@ -2346,6 +2346,8 @@ function confirmRemoveBook(id) {
 
 async function addToLibrary(bookData, shelf = "") {
 
+    console.log("🚨 SAVING BOOK TO SUPABASE:", newBook);
+
     const cover = await getBestCover(
         bookData.isbn,
         bookData.title,
@@ -2369,9 +2371,11 @@ async function addToLibrary(bookData, shelf = "") {
     };
 
     const { data, error } = await supabaseClient
-        .from("books")
-        .insert([book])
-        .select();
+    .from("books")
+    .insert([newBook])
+    .select();
+
+console.log("SUPABASE RESPONSE:", { data, error });
 
     if (error) {
         console.error("Insert error:", error);
@@ -2464,22 +2468,43 @@ async function saveManualBook() {
         date_added: Date.now()
     };
 
-    const { data, error } = await supabaseClient
-        .from("books")
-        .insert([newBook])
-        .select();
+    console.log("🚨 SAVING BOOK TO SUPABASE:", newBook);
 
-    if (error) {
-        console.error("Insert error:", error);
-        alert("Failed to save book.");
-        return;
-    }
+    const cleanBook = {
+  title: "TEST BOOK",
+  author: "TEST",
+  isbn: "123",
+  genre: "test",
+  series: "",
+  cover: "",
+  notes: "",
+  shelves: [],
+  tags: [],
+  reading_history: [],
+  status: "Unread",
+  rating: null,
+  date_added: Date.now()
+};
 
-    myLibrary.unshift(data[0]);
+const { data, error } = await supabaseClient
+  .from("books")
+  .insert([cleanBook])
+  .select();
 
-    renderLibrary();
-    renderStats();
-    closeManualAddModal();
+if (error) {
+  console.error(error);
+  return;
+}
+
+const insertedBook = data[0];
+
+// IMPORTANT: update local state
+myLibrary.unshift(insertedBook);
+
+// THEN render
+renderLibrary();
+renderStats();
+closeManualAddModal();
 }
 
 function saveEditedBook() {
@@ -2689,30 +2714,29 @@ function getFilteredBooks() {
         (searchInput?.value || "")
             .toLowerCase()
             .trim();
+if (query) {
 
-    if (query) {
+    books = books.filter(book => {
 
-        books = books.filter(book => {
+        const searchText = [
+            book.title,
+            book.author,
+            book.series,
+            book.genre,
+            book.isbn,
+            book.notes,
+            ...(book.shelves || []),
+            ...(book.tags || []),
+            ...(book.reading_history || []).map(r =>
+                `${r.startDate || ""} ${r.endDate || ""}`
+            )
+        ]
+            .join(" ")
+            .toLowerCase();
 
-            const searchText = [
-                book.title,
-                book.author,
-                book.series,
-                book.genre,
-                book.isbn,
-                book.notes,
-                ...(book.shelves || []),
-                ...(book.tags || []),
-                ...(book.readingHistory || []).map(r =>
-                    `${r.startDate || ""} ${r.endDate || ""}`
-                )
-            ]
-                .join(" ")
-                .toLowerCase();
-
-            return searchText.includes(query);
-        });
-    }
+        return searchText.includes(query);
+    });
+}
 
 
     // ------------------------
@@ -2724,18 +2748,18 @@ function getFilteredBooks() {
     switch (sort) {
 
         case "newest":
-            books.sort(
-                (a, b) =>
-                    (b.dateAdded || 0) - (a.dateAdded || 0)
-            );
-            break;
+    books.sort(
+        (a, b) =>
+            (b.date_added || 0) - (a.date_added || 0)
+    );
+    break;
 
-        case "oldest":
-            books.sort(
-                (a, b) =>
-                    (a.dateAdded || 0) - (b.dateAdded || 0)
-            );
-            break;
+case "oldest":
+    books.sort(
+        (a, b) =>
+            (a.date_added || 0) - (b.date_added || 0)
+    );
+    break;
 
         case "titleAZ":
             books.sort((a, b) =>

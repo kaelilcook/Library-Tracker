@@ -3,7 +3,7 @@ self.addEventListener("install", () => {
     console.log("Service Worker installed");
 });
 
-const CACHE_NAME = "library-cache";
+
 const BASE = "/Library-Tracker/";
 
 self.addEventListener("fetch", (event) => {
@@ -33,15 +33,29 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+const CACHE_NAME = "library-cache-v1";
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        "/Library-Tracker/",
-        "/Library-Tracker/index.html",
-        "/Library-Tracker/Script2.js",
-        "/Library-Tracker/StyleSheet1.css"
-      ]);
+    caches.open(CACHE_NAME).then(async (cache) => {
+
+      const files = [
+        "./",
+        "./index.html",
+        "./Script2.js",
+        "./style.css",
+        "./manifest.json"
+      ];
+
+      for (const file of files) {
+        try {
+          await cache.add(file);
+          console.log("CACHED:", file);
+        } catch (err) {
+          console.error("❌ FAILED:", file, err);
+        }
+      }
+
     })
   );
 });
