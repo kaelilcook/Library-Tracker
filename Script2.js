@@ -153,6 +153,24 @@ async function loadLibrary() {
     renderStats?.();
 }
 
+async function loadReadingLog() {
+
+    const { data, error } = await supabaseClient
+        .from("reading_log")
+        .select("*");
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    readingLog = data.map(row => ({
+        date: row.date,
+        books: row.books || []
+    }));
+}
+
+
 async function exportLibrary() {
 
     const { data, error } = await supabaseClient
@@ -237,6 +255,7 @@ async function importLibraryFile(file) {
 
             alert("Library imported successfully!");
 await loadLibrary();
+await loadReadingLog();
 
         } catch (err) {
             alert("Invalid JSON file.");
@@ -608,12 +627,28 @@ function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
 }
 
-function logReadingDay(date, selectedBookIds = []) {
+async function logReadingDay(date, selectedBookIds = []) {
+
+    const { error } = await supabaseClient
+        .from("reading_log")
+        .upsert(
+            {
+                date: date,
+                books: selectedBookIds
+            },
+            {
+                onConflict: "date"
+            }
+        );
+
+    if (error) {
+        console.error("Reading log save error:", error);
+        return;
+    }
 
     let entry = readingLog.find(d => d.date === date);
 
     if (!entry) {
-
         entry = {
             date,
             books: []
@@ -623,9 +658,8 @@ function logReadingDay(date, selectedBookIds = []) {
     }
 
     entry.books = [...selectedBookIds];
-
-    saveLibrary();
 }
+
 
 // 3 Render Functions
 function renderStats() {
@@ -2408,6 +2442,7 @@ async function addToLibrary(bookData, shelf = "") {
     }
 
     await loadLibrary();
+await loadReadingLog();
 }
 
 function findPossibleDuplicates(newBook) {
@@ -2559,6 +2594,7 @@ async function saveEditedBook() {
     }
 
     await loadLibrary();
+await loadReadingLog();
 
     document.getElementById("bookModal").style.display = "none";
     currentEditId = null;
