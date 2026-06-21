@@ -629,6 +629,8 @@ function getTodayKey() {
 
 async function logReadingDay(date, selectedBookIds = []) {
 
+    console.log("logReadingDay called", date, selectedBookIds);
+
     const { error } = await supabaseClient
         .from("reading_log")
         .upsert(
@@ -640,6 +642,8 @@ async function logReadingDay(date, selectedBookIds = []) {
                 onConflict: "date"
             }
         );
+
+        console.log("Reading log result:", { error });
 
     if (error) {
         console.error("Reading log save error:", error);
