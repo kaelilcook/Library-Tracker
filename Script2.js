@@ -1138,6 +1138,7 @@ function renderManualShelfCheckboxes() {
     });
 }
 function displayGoogleResults(books) {
+    
     searchResults.innerHTML = "";
     books.forEach(bookData => {
         const cover = bookData.cover || "";
@@ -1189,7 +1190,7 @@ function displayGoogleResults(books) {
             addToLibrary(bookData, selectedShelf);
 
             searchResults.innerHTML = "";
-
+            
             searchInput.value = "";
         });
 
@@ -2299,7 +2300,7 @@ async function searchBooks() {
     }
 
     // prevent duplicate requests
-    if (query === lastSearchQuery) return;
+    //if (query === lastSearchQuery) return;
 
     lastSearchQuery = query;
 
@@ -2314,8 +2315,8 @@ async function searchBooks() {
 
     } else {
 
-        googleUrl = `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(query)}`;
-    }
+        googleUrl =
+  `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
 
     // API key
      try {
@@ -2328,12 +2329,13 @@ async function searchBooks() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            query: googleUrl
-        })
+    query: query
+})
     }
 );
 
         const data = await response.json();
+
 
         if (!data.items || data.items.length === 0) {
             searchResults.innerHTML =
@@ -2348,6 +2350,8 @@ async function searchBooks() {
         // enrich + render results
         //enrichAll(googleBooks);
 
+  
+
         displayGoogleResults(googleBooks);
 
     } catch (err) {
@@ -2355,7 +2359,7 @@ async function searchBooks() {
         searchResults.innerHTML =
             "<p>Error searching books.</p>";
     }
-}
+}}
 async function removeBook(id) {
 
     const { error } = await supabaseClient
