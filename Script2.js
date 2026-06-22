@@ -102,6 +102,10 @@ const elements = {
 
 };
 
+const today = new Date();
+window.calendarMonth ??= today.getMonth();
+window.calendarYear ??= today.getFullYear();
+
 
 
 
@@ -1798,45 +1802,141 @@ async function logReadingDay(date, selectedBookIds = []) {
 
 function renderReadingCalendar() {
 
-    const container = document.getElementById("readingCalendar");
+    const container =
+        document.getElementById("readingCalendar");
+
     if (!container) return;
 
-    const today = new Date();
-    const year = today.getFullYear();
+    
+const month = window.calendarMonth;
+const year = window.calendarYear;
 
-    const start = new Date(year, 0, 1);
-    const end = new Date(year, 11, 31);
+    const firstDay =
+        new Date(year, month, 1);
 
-    const logMap = new Map(
-        readingLog.map(l => [l.date, l.books.length])
-    );
+    const lastDay =
+        new Date(year, month + 1, 0);
 
-    let html = `<div class="calendar-grid">`;
+    const monthName =
+        firstDay.toLocaleString("default", {
+            month: "long"
+        });
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    let html = `
+    <div class="calendar-month">
 
-        const dateStr = d.toISOString().slice(0, 10);
-        const count = logMap.get(dateStr) || 0;
+        <div class="calendar-header">
+
+            <button
+                class="calendar-nav-btn"
+                onclick="changeMonth(-1)">
+                ◀
+            </button>
+
+            <span>
+                ${monthName} ${year}
+            </span>
+
+            <button
+                class="calendar-nav-btn"
+                onclick="changeMonth(1)">
+                ▶
+            </button>
+
+        </div>
+
+        <div class="calendar-grid">
+`;
+
+        for (
+        let i = 0;
+        i < firstDay.getDay();
+        i++
+    ) {
+        html += `<div></div>`;
+    }
+
+        for (
+        let day = 1;
+        day <= lastDay.getDate();
+        day++
+    ) {
+
+        const dateObj =
+            new Date(year, month, day);
+
+        const dateStr =
+            dateObj.toISOString().slice(0, 10);
+
+        const log =
+            readingLog.find(
+                l => l.date === dateStr
+            );
+
+        const books =
+            log?.books || [];
+
+        const covers = books
+            .map(id => findBook(id))
+            .filter(Boolean)
+            .slice(0, 3);
 
         html += `
-            <div class="calendar-day level-${getHeatLevel(count)}"
-                 onclick="openLogByDate('${dateStr}')"
-                 title="${dateStr}: ${count} books">
+            <div
+                class="calendar-date ${books.length ? "has-reading" : ""}"
+                onclick="openLogByDate('${dateStr}')"
+            >
+
+                <div class="calendar-number">
+                    ${day}
+                </div>
+
+                <div class="calendar-books">
+
+    ${covers.length
+        ? covers.map(book => `
+            <img
+                src="${book.cover || ""}"
+                class="calendar-cover"
+                alt="${book.title}"
+            >
+        `).join("")
+        : books.length
+            ? `<span class="calendar-dot"></span>`
+            : ""
+    }
+
+</div>
+
             </div>
         `;
     }
 
-    html += `</div>`;
+        html += `
+            </div>
+        </div>
+    `;
 
     container.innerHTML = html;
 }
-function getHeatLevel(count) {
-    if (count === 0) return 0;
-    if (count === 1) return 1;
-    if (count <= 3) return 2;
-    if (count <= 5) return 3;
-    return 4;
+
+function changeMonth(direction) {
+
+    window.calendarMonth += direction;
+
+    if (window.calendarMonth < 0) {
+        window.calendarMonth = 11;
+        window.calendarYear--;
+    }
+
+    if (window.calendarMonth > 11) {
+        window.calendarMonth = 0;
+        window.calendarYear++;
+    }
+
+    renderReadingCalendar();
 }
+
 function openLogByDate(date) {
     document.getElementById("logDate").value = date;
     renderLogEditor(date);

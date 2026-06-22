@@ -1270,45 +1270,74 @@ body.modal-open {
         background: var(--surface);
     }
 
+.calendar-month {
+    margin-top: 1rem;
+}
+
+.calendar-header {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(20, 1fr);
-    gap: 4px;
-    margin-top: 20px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
 }
 
-.calendar-day {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 4px;
-    background: var(--surface-2);
+.calendar-day-name {
+    text-align: center;
+    font-weight: bold;
+    padding: 4px;
+}
+
+.calendar-date {
+    min-height: 70px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 4px;
     cursor: pointer;
-    transition: 0.2s ease;
 }
 
-    .calendar-day:hover {
-        transform: scale(1.2);
+    .calendar-date.has-reading {
+        background: #f5f8f5;
     }
 
-/* heat levels */
-.level-0 {
-    background: var(--surface-2);
+.calendar-number {
+    font-weight: bold;
 }
 
-.level-1 {
-    background: #cbb6bb;
+.calendar-books {
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
 }
 
-.level-2 {
-    background: #b48b95;
+.calendar-cover {
+    width: 18px;
+    height: 26px;
+    object-fit: cover;
+    border-radius: 2px;
 }
 
-.level-3 {
-    background: #9c5c6b;
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
-.level-4 {
-    background: #7d3b4a;
+.calendar-nav-btn {
+    color: black;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 4px 10px;
 }
 
 /* =========================
