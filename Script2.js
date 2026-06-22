@@ -67,6 +67,11 @@ if ("serviceWorker" in navigator) {
     });
 }
 
+function upgradeUrl(url) {
+    if (!url) return "";
+    return url.replace("http://", "https://");
+}
+
 
 // ========================
 // DOM ELEMENTS
@@ -336,7 +341,7 @@ function normalizeBook(volume) {
         author: volume.authors?.[0] || "",
         genre: volume.categories?.[0] || "",
         isbn: volume.industryIdentifiers?.[0]?.identifier || "",
-        cover: volume.imageLinks?.thumbnail || "",
+        cover: upgradeUrl(volume.imageLinks?.thumbnail || ""),
 
         series: "",
         shelves: [],
@@ -2288,58 +2293,48 @@ function renderColorPicker(selectedColor) {
 // ------------------------
 // LIBRARY CRUD
 // ------------------------
-
 async function searchBooks() {
 
-    const query = searchInput.value.trim();
+    const input = searchInput.value.trim();
 
     // prevent tiny searches
-    if (query.length < 2) {
+    if (input.length < 2) {
         searchResults.innerHTML = "";
         return;
     }
 
     // prevent duplicate requests
-    //if (query === lastSearchQuery) return;
+    if (input === lastSearchQuery) return;
 
-    lastSearchQuery = query;
+    lastSearchQuery = input;
 
     searchResults.innerHTML = "<p>Searching...</p>";
 
-    let googleUrl = "";
+    // build query properly
+    let query;
 
-    // ISBN search
-    if (/^\d{10}$/.test(query) || /^\d{13}$/.test(query)) {
-
-        googleUrl = `https://www.googleapis.com/books/v1/volumes?q=isbn:${query}`;
-
+    if (/^\d{10}$/.test(input) || /^\d{13}$/.test(input)) {
+        query = `isbn:${input}`;
     } else {
-
-        googleUrl =
-  `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
-
-    // API key
-     try {
-
-        const response = await fetch(
-    "https://bkjvdyvosoqyiorpkhvy.supabase.co/functions/v1/google-books-search",
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-    query: query
-})
+        query = `intitle:${input}`;
     }
-);
+
+    try {
+        const response = await fetch(
+            "https://bkjvdyvosoqyiorpkhvy.supabase.co/functions/v1/google-books-search",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ query })
+            }
+        );
 
         const data = await response.json();
 
-
         if (!data.items || data.items.length === 0) {
-            searchResults.innerHTML =
-                "<p>No books found.</p>";
+            searchResults.innerHTML = "<p>No books found.</p>";
             return;
         }
 
@@ -2347,20 +2342,13 @@ async function searchBooks() {
             normalizeBook(item.volumeInfo)
         );
 
-        // enrich + render results
-        //enrichAll(googleBooks);
-
-  
-
         displayGoogleResults(googleBooks);
 
     } catch (err) {
-        console.log("Search error:", err);
-        searchResults.innerHTML =
-            "<p>Error searching books.</p>";
+        console.error("Search error:", err);
+        searchResults.innerHTML = "<p>Error searching books.</p>";
     }
-}}
-async function removeBook(id) {
+}async function removeBook(id) {
 
     const { error } = await supabaseClient
         .from("books")
