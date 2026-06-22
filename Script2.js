@@ -151,6 +151,7 @@ async function loadLibrary() {
 
     renderLibrary();
     renderStats?.();
+    loadReadingLog();
 }
 
 async function loadReadingLog() {
@@ -627,44 +628,6 @@ function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
 }
 
-async function logReadingDay(date, selectedBookIds = []) {
-
-    console.log("logReadingDay called", date, selectedBookIds);
-
-    const { error } = await supabaseClient
-        .from("reading_log")
-        .upsert(
-            {
-                date: date,
-                books: selectedBookIds
-            },
-            {
-                onConflict: "date"
-            }
-        );
-
-        console.log("Reading log result:", { error });
-
-    if (error) {
-        console.error("Reading log save error:", error);
-        return;
-    }
-
-    let entry = readingLog.find(d => d.date === date);
-
-    if (!entry) {
-        entry = {
-            date,
-            books: []
-        };
-
-        readingLog.push(entry);
-    }
-
-    entry.books = [...selectedBookIds];
-}
-
-
 // 3 Render Functions
 function renderStats() {
 
@@ -802,8 +765,8 @@ function renderHabitModal() {
 
                     <input
     type="checkbox"
-    value="'${book.id}'"
-    ${todayLog?.books?.includes('book.id')
+    value="${book.id}"
+    ${todayLog?.books?.includes(String(book.id))
                     ? "checked"
                     : ""
                 }
@@ -937,7 +900,7 @@ function renderHabitModal() {
                 ...document.querySelectorAll(
                     ".reading-cover-card input:checked"
                 )
-            ].map(cb => Number(cb.value));
+            ].map(cb => String(cb.value))
 
             logReadingDay(
                 window.currentReadingLogDate || today,
@@ -1765,7 +1728,7 @@ function setupLogDashboard(initialDate) {
 
     if (saveBtn) {
 
-        saveBtn.addEventListener("click", () => {
+        saveBtn.addEventListener("click", async () => {
 
             const date = dateInput.value;
 
@@ -1773,24 +1736,9 @@ function setupLogDashboard(initialDate) {
                 document.querySelectorAll(
                     "#logEditor input[type='checkbox']:checked"
                 )
-            ).map(cb => Number(cb.value));
+            ).map(cb => String(cb.value));
 
-            let entry =
-                readingLog.find(l => l.date === date);
-
-            if (!entry) {
-
-                entry = {
-                    date,
-                    books: []
-                };
-
-                readingLog.push(entry);
-            }
-
-            entry.books = selected;
-
-            saveLibrary();
+            await logReadingDay(date, selected);
 
             renderReadingCalendar();
 
@@ -1798,6 +1746,50 @@ function setupLogDashboard(initialDate) {
         });
     }
 }
+
+async function logReadingDay(date, selectedBookIds = []) {
+    console.log("LOADING READING LOG...");
+    console.log("LOG READING DAY FIRED");
+    console.log("logReadingDay called", date, selectedBookIds);
+
+    const { data, error } = await supabaseClient
+        .from("reading_log")
+        .upsert(
+            {
+                date,
+                books: selectedBookIds
+            },
+            {
+                onConflict: "date",
+                ignoreDuplicates: false
+            }
+        )
+        .select();
+
+    console.log("SUPABASE RESULT:", { data, error });
+
+    if (error) {
+        console.error("Reading log save error:", error);
+        return;
+    }
+
+    let entry = readingLog.find(d => d.date === date);
+
+    if (!entry) {
+        entry = {
+            date,
+            books: []
+        };
+        readingLog.push(entry);
+    }
+
+    entry.books = [...selectedBookIds];
+
+    console.log("Reading log saved.");
+    console.log("READING LOG DATA:", data);
+}
+
+
 function renderReadingCalendar() {
 
     const container = document.getElementById("readingCalendar");
@@ -1916,27 +1908,7 @@ function toggleLogBook(bookId, date) {
 
     renderLogEditor(date); // instant refresh
 }
-function saveReadingLog() {
 
-    const date = document.getElementById("logDate").value;
-
-    const selected = Array.from(
-        document.querySelectorAll("#logEditor input[type='checkbox']:checked")
-    ).map(cb => Number(cb.value));
-
-    let entry = readingLog.find(l => l.date === date);
-
-    if (!entry) {
-        entry = { date, books: [] };
-        readingLog.push(entry);
-    }
-
-    entry.books = selected;
-
-    saveLibrary();
-
-    alert("Reading log saved!");
-}
 function setupReadingLogSave() {
 
     const btn = document.getElementById("saveReadingLogBtn");
@@ -1949,7 +1921,7 @@ function setupReadingLogSave() {
 
         const selected = Array.from(
             document.querySelectorAll("#readingLogList input:checked")
-        ).map(cb => Number(cb.value));
+        ).map(cb => String(cb.value))
 
         let entry = readingLog.find(l => l.date === date);
 
@@ -1988,8 +1960,8 @@ function renderLogEditor(date) {
                 ${readingBooks.length ? readingBooks.map(book => `
                     <label class="reading-log-item">
                         <input type="checkbox"
-                               value="'${book.id}'"
-                               ${entry.books.includes('book.id') ? "checked" : ""}>
+                               value="${book.id}"
+                              ${entry.books.includes(String(book.id)) ? "checked" : ""}>
                         ${book.title}
                     </label>
                 `).join("") : `<p>No currently reading books</p>`}
