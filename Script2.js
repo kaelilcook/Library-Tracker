@@ -2063,14 +2063,30 @@ function renderLogEditor(date) {
             <div>
                 <h4>Currently Reading</h4>
 
-                ${readingBooks.length ? readingBooks.map(book => `
-                    <label class="reading-log-item">
-                        <input type="checkbox"
-                               value="${book.id}"
-                              ${entry.books.includes(String(book.id)) ? "checked" : ""}>
-                        ${book.title}
-                    </label>
-                `).join("") : `<p>No currently reading books</p>`}
+      <div class="log-book-grid">
+
+${readingBooks.length
+    ? readingBooks.map(book => `
+        <label class="log-book-card">
+
+            <input
+                type="checkbox"
+                value="${book.id}"
+                ${entry.books.includes(book.id) ? "checked" : ""}
+            >
+
+            <img
+                src="${book.cover || ''}"
+                class="log-book-cover"
+                alt="${book.title}"
+            >
+
+            <span class="selected-badge">✓</span>
+
+        </label>
+    `).join("")
+    : `<p>No currently reading books</p>`
+}
             </div>
 
             <!-- SEARCH ADD -->
