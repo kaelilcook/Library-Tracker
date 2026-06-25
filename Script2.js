@@ -2592,7 +2592,7 @@ async function searchBooks() {
         searchResults.innerHTML = "";
         return;
     }
-
+     
     // prevent duplicate requests
     if (input === lastSearchQuery) return;
 

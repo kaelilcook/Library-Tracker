@@ -602,6 +602,7 @@ button {
     flex-direction: column;
     gap: var(--space-3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 160px;
 }
 
     .book-card:hover {
