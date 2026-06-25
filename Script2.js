@@ -154,13 +154,13 @@ async function loadLibrary() {
         return;
     }
 
-    console.log("Books loaded:", data);
-
     myLibrary = data || [];
 
     renderLibrary();
     renderStats?.();
     loadReadingLog();
+    renderAnnualReport();
+    
 }
 
 async function loadReadingLog() {
@@ -243,14 +243,16 @@ async function importLibraryFile(file) {
                 shelves: book.shelves || [],
                 reading_history:
     book.reading_history ||
-    book.readingHistory ||
+    book.reading_History ||
     [],
                 tags: book.tags || [],
                 status: book.status,
                 date_added:
     book.date_added ??
-    book.dateAdded ??
-    null,
+    book.date_Added ??
+                    null,
+                page_count: book.page_count || null,
+                completed_date: book.completed_date || null,
             }));
 
             const { error } = await supabaseClient
@@ -307,6 +309,170 @@ function closeModal(modalId) {
 // ========================
 // BOOK DATA
 // ========================
+async function fetchPageCount(isbn, title, author) {
+
+    let query = "";
+
+    if (isbn) {
+        query = `isbn:${isbn}`;
+    } else {
+        query = `${title} ${author}`;
+    }
+
+    const url =
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const book = data.items?.[0];
+
+        return book?.volumeInfo?.pageCount || null;
+
+    } catch (err) {
+        console.error("Page fetch failed", err);
+        return null;
+    }
+}
+function renderAnnualReport() {
+
+    const year =
+        Number(
+            document.getElementById("reportYear").value
+        );
+
+    const report =
+        generateAnnualReport(year);
+
+    const container =
+        document.getElementById(
+            "annualReportContent"
+        );
+
+    if (!container) return;
+
+    container.innerHTML =
+        renderAnnualReportHTML(report);
+}
+
+function renderAnnualReportHTML(report) {
+
+    const covers = report.books.map(book => `
+
+        <img
+            src="${book.cover || ""}"
+            class="report-cover"
+            title="${book.title}"
+        >
+
+    `).join("");
+
+    return `
+
+        <div class="report-grid">
+
+            <div class="report-card">
+                <h2>${report.booksRead}</h2>
+                <p>Books Read</p>
+            </div>
+
+            <div class="report-card">
+                <h2>${report.pagesRead}</h2>
+                <p>Pages Read</p>
+            </div>
+
+            <div class="report-card">
+                <h2>${report.daysRead}</h2>
+                <p>Days Read</p>
+            </div>
+
+            <div class="report-card">
+                <h2>${report.currentStreak}</h2>
+                <p>Current Streak</p>
+            </div>
+
+        </div>
+
+        <h3>Reading Highlights</h3>
+
+        <p>
+            <strong>Favorite Genre:</strong>
+            ${report.topGenre}
+        </p>
+
+        <p>
+            <strong>Most Read Author:</strong>
+            ${report.topAuthor}
+        </p>
+
+        <p>
+            <strong>Average Rating:</strong>
+            ${report.averageRating}
+        </p>
+
+        <h3>Books Finished</h3>
+
+        <div class="report-cover-grid">
+            ${covers}
+        </div>
+    `;
+}
+
+function openAnnualReport() {
+
+    const year =
+        new Date().getFullYear();
+
+    const report =
+        generateAnnualReport(year);
+
+    openStatsModal(
+        `📚 ${year} Reading Report`,
+        renderAnnualReportHTML(report)
+    );
+}
+
+function generateAnnualReport(year) {
+
+    const completedBooks =
+        myLibrary.filter(book => {
+
+            if (!book.completed_date)
+                return false;
+
+            return (
+                new Date(book.completed_date)
+                    .getFullYear() === year
+            );
+        });
+
+    return {
+
+        year,
+
+        booksRead: completedBooks.length,
+
+        pagesRead: completedBooks.reduce(
+            (sum, book) =>
+                sum + (book.page_count || 0),
+            0
+        ),
+
+        topGenre: getTopGenre(completedBooks),
+
+        topAuthor: getTopAuthor(completedBooks),
+
+        averageRating: getAverageRating(completedBooks),
+
+        daysRead: getDaysReadThisYear(),
+
+        currentStreak: calculateStreak(true),
+
+        books: completedBooks
+    };
+}
+
 function fuzzyMatch(text, query) {
 
     text = text.toLowerCase();
@@ -346,6 +512,8 @@ function normalizeBook(volume) {
         genre: volume.categories?.[0] || "",
         isbn: volume.industryIdentifiers?.[0]?.identifier || "",
         cover: upgradeUrl(volume.imageLinks?.thumbnail || ""),
+
+        page_count: volume.pageCount || null,
 
         series: "",
         shelves: [],
@@ -929,7 +1097,7 @@ function renderReadingHistory(book) {
 
     container.innerHTML = "";
 
-    const history = book.readingHistory || [];
+    const history = book.reading_History || [];
 
     history.forEach((session, index) => {
 
@@ -988,7 +1156,7 @@ function renderReadingHistory(book) {
                 const index =
                     Number(e.target.dataset.index);
 
-                book.readingHistory.splice(index, 1);
+                book.reading_History.splice(index, 1);
 
                 renderReadingHistory(book);
             });
@@ -1013,7 +1181,7 @@ function renderReadingHistory(book) {
                 const finishDate =
                     session.querySelector(".reading-finish").value;
 
-                book.readingHistory[index] = {
+                book.reading_History[index] = {
                     startDate,
                     endDate: finishDate
                 };
@@ -1022,8 +1190,8 @@ function renderReadingHistory(book) {
 
                 // refresh visible reading history
                 document.getElementById("detailReadingHistory").innerHTML =
-                    book.readingHistory.length
-                        ? book.readingHistory.map((r, i) => `
+                    book.reading_History.length
+                        ? book.reading_History.map((r, i) => `
             <p>
                 Reading ${i + 1}:
                 ${r.startDate || "?"}
@@ -1225,7 +1393,7 @@ function getBooksThisMonth() {
 
     return myLibrary.filter(book => {
 
-        const added = new Date(book.dateAdded);
+        const added = new Date(book.date_Added);
 
         return (
             added.getMonth() === now.getMonth() &&
@@ -1234,29 +1402,33 @@ function getBooksThisMonth() {
     }).length;
 }
 
-function getAverageRating() {
+function getAverageRating(books = myLibrary) {
 
-    const rated = myLibrary.filter(b => b.rating);
+    const rated =
+        books.filter(b => b.rating);
 
     if (!rated.length) return "N/A";
 
     const avg =
-        rated.reduce((sum, b) => sum + Number(b.rating), 0)
-        / rated.length;
+        rated.reduce(
+            (sum, b) =>
+                sum + Number(b.rating),
+            0
+        ) / rated.length;
 
     return avg.toFixed(1);
 }
 
-function getTopGenre() {
+function getTopGenre(books = myLibrary) {
 
-    const counts = countBy(myLibrary, "genre");
+    const counts = countBy(books, "genre");
 
     return getMaxKey(counts, "None");
 }
 
-function getTopAuthor() {
+function getTopAuthor(books = myLibrary) {
 
-    const counts = countBy(myLibrary, "author");
+    const counts = countBy(books, "author");
 
     return getMaxKey(counts, "None");
 }
@@ -1379,6 +1551,7 @@ function createShelfItem(label, shelfValue, isEditable, shelfObj) {
         updateShelfLabel(filtered.length);
         renderLibrary(filtered);
         renderStats();
+        renderAnnualReport();
     };
 
     if (isEditable) {
@@ -1518,7 +1691,7 @@ function openBookModal(id) {
     setText("detailISBN", book.isbn || "");
     setText("detailShelves", (book.shelves || []).join(", ") || "None");
 
-    const history = book.readingHistory || [];
+    const history = book.reading_History || [];
 
     setText(
         "detailReadingHistory",
@@ -2409,6 +2582,7 @@ function renderColorPicker(selectedColor) {
 // ------------------------
 // LIBRARY CRUD
 // ------------------------
+
 async function searchBooks() {
 
     const input = searchInput.value.trim();
@@ -2480,6 +2654,7 @@ async function searchBooks() {
 
     renderLibrary();
     renderStats();
+    renderAnnualReport();
 }
 
 function confirmRemoveBook(id) {
@@ -2502,6 +2677,8 @@ async function addToLibrary(bookData, shelf = "") {
         series: bookData.series,
         cover,
         isbn: bookData.isbn,
+
+        page_count: bookData.page_count || null,
 
         shelves: shelf ? [shelf] : [],
         tags: [],
@@ -2629,13 +2806,28 @@ myLibrary.unshift(insertedBook);
 // THEN render
 renderLibrary();
 renderStats();
-closeManualAddModal();
+    closeManualAddModal();
+    renderAnnualReport();
 }
 
 async function saveEditedBook() {
 
     const book = findBook(currentEditId);
     if (!book) return;
+    const oldStatus = book.status;
+    const newStatus = editStatus.value;
+
+    let completedDate = book.completed_date || null;
+
+    // If user just marked as Finished
+    if (oldStatus !== "Finished" && newStatus === "Finished") {
+        completedDate = new Date().toISOString().split("T")[0];
+    }
+
+    // Optional: if user UN-finishes a book
+    if (oldStatus === "Finished" && newStatus !== "Finished") {
+        completedDate = null;
+    }
 
     const updatedBook = {
         cover: editCoverInput.value.trim() || book.cover,
@@ -2644,8 +2836,16 @@ async function saveEditedBook() {
         series: editSeries.value,
         genre: editGenre.value,
         rating: editRating.value ? Number(editRating.value) : null,
+        page_count:
+            Number(
+                document.getElementById("editPageCount").value
+            ) || null,
         isbn: editISBN.value,
-        status: editStatus.value,
+
+        status: newStatus,
+        completed_date:
+            document.getElementById("editCompletedDate").value || null,
+
         notes: editNotes.value,
 
         reading_history: Array.from(
@@ -2695,8 +2895,8 @@ function markFinished(id) {
     book.status = "Finished";
 
     // optional: auto-fill finish date
-    if (book.readingHistory?.length) {
-        const last = book.readingHistory.at(-1);
+    if (book.reading_History?.length) {
+        const last = book.reading_History.at(-1);
 
         if (!last.finishDate) {
             last.finishDate =
@@ -2707,7 +2907,7 @@ function markFinished(id) {
     saveLibrary();
     renderLibrary();
     renderStats();
-
+    renderAnnualReport();
 
     openCurrentlyReadingModal();
 }
@@ -2716,13 +2916,13 @@ function addReadingSession(id, startDate, endDate) {
     const book = findBook(id);
     if (!book) return;
 
-    book.readingHistory ??= [];
-    book.readingHistory.push({ startDate, endDate });
+    book.reading_History ??= [];
+    book.reading_History.push({ startDate, endDate });
 
     saveLibrary();
     renderLibrary();
     renderStats();
-
+    renderAnnualReport();
 
 }
 
@@ -2743,11 +2943,16 @@ function openEditMode() {
     editSeries.value = book.series || "";
     editGenre.value = book.genre || "";
     editISBN.value = book.isbn || "";
+    document.getElementById("editPageCount").value =
+        book.page_count || "";
     editRating.value = book.rating || "";
     editStatus.value = book.status || "Unread";
+    document.getElementById("editCompletedDate").value =
+        book.completed_date || "";
     editNotes.value = book.notes || "";
 
-    book.readingHistory ??= [];
+    book.reading_history ??= [];
+
     renderReadingHistory(book);
     renderShelfCheckboxes(book);
 
@@ -2794,7 +2999,7 @@ function updateCover() {
     document.getElementById("editCoverInput").value = "";
 
     saveLibrary();
-
+    renderAnnualReport();
     renderLibrary();
     renderStats();
 
@@ -2921,6 +3126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderShelfNav();
     renderLibrary();
     renderStats();
+    renderAnnualReport();
 
 
     // ========================
@@ -3095,6 +3301,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderShelfNav();
         renderLibrary();
         renderStats();
+        renderAnnualReport();
     };
 
     document.getElementById("cancelShelfEditBtn").onclick = () => {
@@ -3113,11 +3320,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const book = findBook(currentEditId);
         if (!book) return;
 
-        if (!book.readingHistory) {
-            book.readingHistory = [];
+        if (!book.reading_History) {
+            book.reading_History = [];
         }
 
-        book.readingHistory.push({
+        book.reading_History.push({
             startDate: "",
             endDate: ""
         });
@@ -3216,11 +3423,13 @@ document.getElementById("importFileInput")
     filterTitle?.addEventListener("input", () => {
         renderLibrary();
         renderStats();
+        renderAnnualReport();
     });
 
     filterSort?.addEventListener("change", () => {
         renderLibrary();
         renderStats();
+        renderAnnualReport();
     });
 });
 

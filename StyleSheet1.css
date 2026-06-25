@@ -209,6 +209,15 @@ p {
     box-shadow: var(--shadow-sm);
 }
 
+.report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    text-align: center;
+}
+
 /* =========================
    MOBILE
 ========================= */
@@ -322,7 +331,7 @@ p {
         border: none;
     }
 
-    .book-grid {
+    .book-grid, .report-card-grid {
         display: grid;
         grid-template-columns: 1fr !important;
         gap: 12px;
@@ -333,6 +342,8 @@ p {
         .search-results-grid {
             grid-template-columns: 1fr !important;
         }
+
+
 
     .search-section,
     .search-controls,
@@ -543,6 +554,43 @@ button {
     align-items: start;
 }
 
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.report-card {
+    background: var(--card-bg, #fff);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    /* match library cards */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.15s ease;
+}
+
+    .report-card:hover {
+        transform: translateY(-2px);
+    }
+
+.report-cover-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 50px);
+    gap: 10px;
+    margin-top: 12px;
+    justify-content: start;
+}
+
+.report-cover {
+    width: 50px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
 
 /* =========================
    5. BOOK CARD

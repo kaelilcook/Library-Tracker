@@ -68,13 +68,13 @@
          MAIN CONTENT
     ========================== -->
     <section class="mobile-nav">
-    <div class="mobile-topbar">
+        <div class="mobile-topbar">
 
-    <button id="mobileMenuBtn">☰</button>
+            <button id="mobileMenuBtn">☰</button>
 
-</div>
+        </div>
     </section>
-    
+
 
     <main id="mainContent">
 
@@ -88,8 +88,8 @@
         </header>
 
         <!-- =========================
-             SEARCH
-        ========================== -->
+         SEARCH
+    ========================== -->
 
         <h1 class="section-title">Add Book</h1>
 
@@ -113,8 +113,8 @@
 
 
         <!-- =========================
-             STATS
-        ========================== -->
+         STATS
+    ========================== -->
 
         <section class="stats-section">
 
@@ -143,12 +143,23 @@
                 📖 Log Today’s Reading
             </button>
 
+
         </div>
 
+        <div id="annualReportView" class="hidden">
+            <div class="report-header">
+                <h2>📚 Annual Reading Report</h2>
 
+                <select id="reportYear">
+                    <option value="2026">2026</option>
+                </select>
+            </div>
+
+            <div id="annualReportContent"></div>
+        </div>
         <!-- =========================
-             LIBRARY
-        ========================== -->
+         LIBRARY
+    ========================== -->
 
         <section class="library-section">
 
@@ -156,8 +167,8 @@
             <h2 id="activeShelfLabel">All Books</h2>
 
             <!-- =========================
-                 FILTERS
-            ========================== -->
+             FILTERS
+        ========================== -->
 
             <section class="filters">
 
@@ -346,6 +357,13 @@
                     <input id="editISBN">
                 </label>
 
+                <label>
+                    Page Count
+                    <input id="editPageCount"
+                           type="number"
+                           min="1">
+                </label>
+
 
                 <!-- RATING -->
 
@@ -406,6 +424,12 @@
 
                     </select>
 
+                </label>
+
+                <label>
+                    Completed Date
+                    <input id="editCompletedDate"
+                           type="date">
                 </label>
 
 
@@ -509,6 +533,12 @@
             <input id="manualISBN"
                    placeholder="ISBN">
 
+            <input id="manualPageCount"
+                   type="number"
+                   min="1"
+                   placeholder="Page Count">
+
+
             <input id="manualGenre"
                    placeholder="Genre">
 
@@ -568,7 +598,9 @@
             <span class="close" onclick="closeModal('statsModal')">&times;</span>
 
             <div class="modal-body"></div>
+        </div>
     </div>
+
 
     <!-- =========================
          SHELF EDIT MODAL
