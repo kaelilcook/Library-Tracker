@@ -358,7 +358,13 @@ function renderAnnualReport() {
 
 function renderAnnualReportHTML(report) {
 
-    const covers = report.books.map(book => `
+    const covers = report.books.map((book, index) => `
+
+    <div class="report-book">
+
+        <div class="report-book-number">
+            #${index + 1}
+        </div>
 
         <img
             src="${book.cover || ""}"
@@ -366,7 +372,11 @@ function renderAnnualReportHTML(report) {
             title="${book.title}"
         >
 
-    `).join("");
+        
+
+    </div>
+
+`).join("");
 
     return `
 
@@ -394,7 +404,7 @@ function renderAnnualReportHTML(report) {
 
         </div>
 
-        <h3>Reading Highlights</h3>
+        <h2>Reading Highlights</h2>
 
         <p>
             <strong>Favorite Genre:</strong>
@@ -410,8 +420,6 @@ function renderAnnualReportHTML(report) {
             <strong>Average Rating:</strong>
             ${report.averageRating}
         </p>
-
-        <h3>Books Finished</h3>
 
         <div class="report-cover-grid">
             ${covers}
@@ -436,16 +444,19 @@ function openAnnualReport() {
 function generateAnnualReport(year) {
 
     const completedBooks =
-        myLibrary.filter(book => {
+        myLibrary
+            .filter(book => {
+                if (!book.completed_date) return false;
 
-            if (!book.completed_date)
-                return false;
-
-            return (
-                new Date(book.completed_date)
-                    .getFullYear() === year
+                return (
+                    new Date(book.completed_date)
+                        .getFullYear() === year
+                );
+            })
+            .sort((a, b) =>
+                new Date(a.completed_date) -
+                new Date(b.completed_date)
             );
-        });
 
     return {
 

@@ -209,15 +209,6 @@ p {
     box-shadow: var(--shadow-sm);
 }
 
-.report-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: var(--shadow-sm);
-    padding: 20px;
-    text-align: center;
-}
-
 /* =========================
    MOBILE
 ========================= */
@@ -555,11 +546,16 @@ button {
     align-items: start;
 }
 
+/* =========================
+   ANNUAL REPORT
+========================= */
+
 .report-grid {
     display: grid;
     grid-template-columns: repeat(2, 160px);
     gap: 16px;
     justify-content: center;
+    padding-bottom: 20px;
 }
 
 .report-card {
@@ -578,17 +574,15 @@ button {
     }
 
 .report-cover-grid {
-    gap: 10px;
-    justify-items: center;
-    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
 }
 
 .report-cover {
-    width: 50px;
-    height: 75px;
-    object-fit: cover;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    width: 80px;
+    height: 120px;
 }
 
 .report-header {
@@ -596,6 +590,21 @@ button {
     flex-direction: column;
     align-items: center;
     padding: 6px 0;
+}
+
+.report-book {
+    text-align: center;
+    width: 90px;
+}
+
+.report-book-title {
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.report-book-date {
+    font-size: 0.7rem;
+    opacity: 0.7;
 }
 
 /* =========================
