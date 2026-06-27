@@ -77,6 +77,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadShelves();
     await loadLibrary();
     await loadShelves();
+    await loadReadingGoal(
+        new Date().getFullYear()
+    );
 });
 
 
@@ -295,6 +298,9 @@ async function importLibraryFile(file) {
 await loadLibrary();
             await loadReadingLog();
             await loadShelves();
+            await loadReadingGoal(
+                new Date().getFullYear()
+            );
 
         } catch (err) {
             alert("Invalid JSON file.");
@@ -336,6 +342,30 @@ function closeModal(modalId) {
 // ========================
 // BOOK DATA
 // ========================
+let currentReadingGoal = null;
+
+async function loadReadingGoal(year) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("reading_goals")
+            .select("*")
+            .eq("year", year)
+            .maybeSingle();
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    currentReadingGoal = data;
+
+    console.log(
+        "Loaded goal:",
+        currentReadingGoal
+    );
+}
+
 async function fetchPageCount(isbn, title, author) {
 
     let query = "";
@@ -377,6 +407,9 @@ function renderAnnualReport() {
             "annualReportContent"
         );
 
+    const goal =
+        currentReadingGoal?.books_goal || 0;
+
     if (!container) return;
 
     container.innerHTML =
@@ -384,6 +417,18 @@ function renderAnnualReport() {
 }
 
 function renderAnnualReportHTML(report) {
+    const booksRead =
+        getBooksReadForYear(report.year);
+
+    const goal =
+        currentReadingGoal?.books_goal || 0;
+
+    const percent =
+        goal
+            ? Math.round(
+                booksRead / goal * 100
+            )
+            : 0;
 
     const covers = report.books.map((book, index) => `
 
@@ -448,6 +493,44 @@ function renderAnnualReportHTML(report) {
             ${report.averageRating}
         </p>
 
+        <div class="goal-card">
+
+    <h3>Reading Goal</h3>
+
+    <div class="goal-progress">
+
+        <div
+            class="goal-progress-fill"
+            style="width:${Math.min(percent, 100)}%">
+        </div>
+
+    </div>
+
+    <p>
+        <div class="goal-edit-row">
+
+    <input
+        type="number"
+        id="booksGoalInput"
+        value="${goal}"
+        min="1"
+    >
+
+    <button
+        onclick="saveReadingGoal(${report.year})"
+    >
+        Save Goal
+    </button>
+
+</div>
+
+<p>
+    ${booksRead} of ${goal} books
+</p>
+    </p>
+
+</div>
+
         <div class="report-cover-grid">
             ${covers}
         </div>
@@ -509,6 +592,32 @@ function generateAnnualReport(year) {
 
         books: completedBooks
     };
+}
+
+async function saveReadingGoal(year) {
+
+    const goal =
+        Number(
+            document.getElementById(
+                "booksGoalInput"
+            ).value
+        );
+
+    const { error } =
+        await supabaseClient
+            .from("reading_goals")
+            .update({
+                books_goal: goal
+            })
+            .eq("year", year);
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    await loadReadingGoal(year);
+    renderAnnualReport();
 }
 
 function fuzzyMatch(text, query) {
@@ -821,6 +930,14 @@ function getDaysReadThisYear() {
 
     return readingLog.filter(log =>
         new Date(log.date).getFullYear() === year
+    ).length;
+}
+
+function getBooksReadForYear(year) {
+
+    return myLibrary.filter(book =>
+        book.completed_date &&
+        new Date(book.completed_date).getFullYear() === year
     ).length;
 }
 
@@ -2750,6 +2867,9 @@ async function addToLibrary(bookData, shelf = "") {
     await loadLibrary();
     await loadReadingLog();
     await loadShelves();
+    await loadReadingGoal(
+        new Date().getFullYear()
+    );
 }
 
 function findPossibleDuplicates(newBook) {
@@ -2926,6 +3046,9 @@ async function saveEditedBook() {
     await loadLibrary();
     await loadReadingLog();
     await loadShelves();
+    await loadReadingGoal(
+        new Date().getFullYear()
+    );
 
     document.getElementById("bookModal").style.display = "none";
     currentEditId = null;
@@ -3163,12 +3286,18 @@ case "oldest":
 // 8 EVENTS
 // ========================
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
     // ========================
     // INITIAL LOAD
     // ========================
-    loadLibrary();
+    await loadLibrary();
+
+    await loadReadingLog();
+
+    await loadReadingGoal(
+        new Date().getFullYear()
+    );
 
     renderShelfNav();
     renderLibrary();
