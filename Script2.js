@@ -72,6 +72,13 @@ function upgradeUrl(url) {
     return url.replace("http://", "https://");
 }
 
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await loadShelves();
+    await loadLibrary();
+    await loadShelves();
+});
+
 
 // ========================
 // DOM ELEMENTS
@@ -161,6 +168,25 @@ async function loadLibrary() {
     loadReadingLog();
     renderAnnualReport();
     
+}
+
+async function loadShelves() {
+
+    const { data, error } =
+        await supabaseClient
+            .from("shelves")
+            .select("*")
+            .order("name");
+
+    if (error) {
+        console.error("Shelf load error:", error);
+        return;
+    }
+
+    shelves = data || [];
+
+    renderShelfNav();
+    renderManualShelfCheckboxes();
 }
 
 async function loadReadingLog() {
@@ -267,7 +293,8 @@ async function importLibraryFile(file) {
 
             alert("Library imported successfully!");
 await loadLibrary();
-await loadReadingLog();
+            await loadReadingLog();
+            await loadShelves();
 
         } catch (err) {
             alert("Invalid JSON file.");
@@ -1108,7 +1135,7 @@ function renderReadingHistory(book) {
 
     container.innerHTML = "";
 
-    const history = book.reading_History || [];
+    const history = book.reading_history || [];
 
     history.forEach((session, index) => {
 
@@ -1167,7 +1194,7 @@ function renderReadingHistory(book) {
                 const index =
                     Number(e.target.dataset.index);
 
-                book.reading_History.splice(index, 1);
+                book.reading_history.splice(index, 1);
 
                 renderReadingHistory(book);
             });
@@ -1192,7 +1219,7 @@ function renderReadingHistory(book) {
                 const finishDate =
                     session.querySelector(".reading-finish").value;
 
-                book.reading_History[index] = {
+                book.reading_history[index] = {
                     startDate,
                     endDate: finishDate
                 };
@@ -1201,8 +1228,8 @@ function renderReadingHistory(book) {
 
                 // refresh visible reading history
                 document.getElementById("detailReadingHistory").innerHTML =
-                    book.reading_History.length
-                        ? book.reading_History.map((r, i) => `
+                    book.reading_history.length
+                        ? book.reading_history.map((r, i) => `
             <p>
                 Reading ${i + 1}:
                 ${r.startDate || "?"}
@@ -1702,7 +1729,7 @@ function openBookModal(id) {
     setText("detailISBN", book.isbn || "");
     setText("detailShelves", (book.shelves || []).join(", ") || "None");
 
-    const history = book.reading_History || [];
+    const history = book.reading_history || [];
 
     setText(
         "detailReadingHistory",
@@ -2518,6 +2545,11 @@ async function addShelf() {
     if (error) {
         console.error("Shelf insert failed:", error);
     }
+
+    await loadShelves();
+
+    renderShelfNav();
+    renderManualShelfCheckboxes();
 }
 
 let editingShelf = null;
@@ -2649,7 +2681,9 @@ async function searchBooks() {
         console.error("Search error:", err);
         searchResults.innerHTML = "<p>Error searching books.</p>";
     }
-}async function removeBook(id) {
+}
+
+async function removeBook(id) {
 
     const { error } = await supabaseClient
         .from("books")
@@ -2714,7 +2748,8 @@ async function addToLibrary(bookData, shelf = "") {
     }
 
     await loadLibrary();
-await loadReadingLog();
+    await loadReadingLog();
+    await loadShelves();
 }
 
 function findPossibleDuplicates(newBook) {
@@ -2889,7 +2924,8 @@ async function saveEditedBook() {
     }
 
     await loadLibrary();
-await loadReadingLog();
+    await loadReadingLog();
+    await loadShelves();
 
     document.getElementById("bookModal").style.display = "none";
     currentEditId = null;
@@ -2906,8 +2942,8 @@ function markFinished(id) {
     book.status = "Finished";
 
     // optional: auto-fill finish date
-    if (book.reading_History?.length) {
-        const last = book.reading_History.at(-1);
+    if (book.reading_history?.length) {
+        const last = book.reading_history.at(-1);
 
         if (!last.finishDate) {
             last.finishDate =
@@ -2927,8 +2963,8 @@ function addReadingSession(id, startDate, endDate) {
     const book = findBook(id);
     if (!book) return;
 
-    book.reading_History ??= [];
-    book.reading_History.push({ startDate, endDate });
+    book.reading_history ??= [];
+    book.reading_history.push({ startDate, endDate });
 
     saveLibrary();
     renderLibrary();
@@ -3288,14 +3324,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // update books
-        myLibrary.forEach(book => {
+        for (const book of myLibrary) {
 
-            if (!book.shelves) return;
+            if (!book.shelves?.includes(editingShelf.name))
+                continue;
 
-            book.shelves = book.shelves.map(s =>
-                s === editingShelf.name ? newName : s
-            );
-        });
+            const updatedShelves =
+                book.shelves.map(s =>
+                    s === editingShelf.name
+                        ? newName
+                        : s
+                );
+
+            book.shelves = updatedShelves;
+
+            await supabaseClient
+                .from("books")
+                .update({
+                    shelves: updatedShelves
+                })
+                .eq("id", book.id);
+        }
 
         saveLibrary();
         await supabaseClient
@@ -3315,6 +3364,8 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAnnualReport();
     };
 
+  
+
     document.getElementById("cancelShelfEditBtn").onclick = () => {
 
         document.getElementById("shelfEditModal")
@@ -3331,15 +3382,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const book = findBook(currentEditId);
         if (!book) return;
 
-        if (!book.reading_History) {
-            book.reading_History = [];
+        if (!book.reading_history) {
+            book.reading_history = [];
         }
 
-        book.reading_History.push({
+        book.reading_history.push({
             startDate: "",
             endDate: ""
         });
-
+        console.log("ADD SESSION CLICKED");
         renderReadingHistory(book);
     });
 
