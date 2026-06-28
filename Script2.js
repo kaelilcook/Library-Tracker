@@ -356,6 +356,29 @@ function closeModal(modalId) {
 // ========================
 // BOOK DATA
 // ========================
+function getGenreColor(genre) {
+
+    const colors = {
+
+        "Fantasy": "#7E57C2",
+        "Historical Fiction": "#66BB6A",
+        "Mystery": "#42A5F5",
+        "Thriller": "#EF5350",
+        "Romance": "#EC407A",
+        "Science Fiction": "#26C6DA",
+        "Classic": "#FFA726",
+        "Classics": "#FFA726",
+        "Nonfiction": "#8D6E63",
+        "Biography": "#8D6E63",
+        "Children": "#FFEE58",
+        "Young Adult": "#AB47BC"
+
+    };
+
+    return colors[genre] || "#BDBDBD";
+
+}
+
 function groupBooksByMonth(books) {
 
     const months = Array.from({ length: 12 }, () => []);
@@ -424,6 +447,30 @@ async function fetchPageCount(isbn, title, author) {
         console.error("Page fetch failed", err);
         return null;
     }
+}
+
+function getReadingDays(book) {
+
+    if (!book.reading_history?.length)
+        return null;
+
+    const first =
+        book.reading_history[0].startDate;
+
+    const last =
+        book.reading_history.at(-1).endDate;
+
+    if (!first || !last)
+        return null;
+
+    return Math.ceil(
+
+        (new Date(last) - new Date(first))
+
+        / 86400000
+
+    );
+
 }
 function renderAnnualReport() {
 
@@ -504,16 +551,68 @@ function renderAnnualReportHTML(report) {
             }
 
         <img
-            src="${book.cover || ""}"
-            class="report-cover"
-            title="${book.title}"
-        >
+    src="${book.cover || ""}"
+    class="report-cover"
+    title="${book.title}"
+    style="
+        border:4px solid ${getGenreColor(book.genre)};
+    "
+>
 
     </div>
 
     <div class="report-finish-date">
         ${formatShortDate(book.completed_date)}
     </div>
+
+    <div class="report-tooltip">
+
+    <h4>${book.title}</h4>
+
+    <p>${book.author}</p>
+
+    <hr>
+
+    <p>
+        ${book.genre || "Unknown Genre"}
+    </p>
+
+    <p>
+        ${book.page_count || "?"} pages
+    </p>
+
+    <p>
+        Finished
+        <br>
+        ${new Date(book.completed_date).toLocaleDateString()}
+    </p>
+    <p>
+        Rating
+        <br>
+        ${book.rating
+                ? "★".repeat(book.rating)
+                : "Unrated"
+            }
+    </p>
+    <p>
+        Tags
+        <br>
+        ${(book.tags || []).join(" • ")}
+    </p>
+    <p>
+
+    Reading Time
+
+    <br>
+
+    ${
+            getReadingDays(book)
+                ? `${getReadingDays(book)} days`
+                : "Unknown"
+    }
+
+</p>
+</div>
 
 </div>
 

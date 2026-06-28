@@ -585,6 +585,13 @@ button {
     height: 135px;
     object-fit: cover;
     border-radius: 8px;
+    box-sizing: border-box;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.report-book:hover .report-cover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.25);
 }
 
 .report-header {
@@ -599,6 +606,43 @@ button {
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    position: relative;
+}
+
+.report-tooltip {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    width: 220px;
+    padding: 14px;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    opacity: 0;
+    visibility: hidden;
+    transition: .2s;
+    z-index: 100;
+}
+
+.report-book:hover .report-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(10px);
+}
+
+.report-tooltip h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+}
+
+.report-tooltip p {
+    margin: 6px 0;
+    font-size: .85rem;
+}
+
+.report-tooltip hr {
+    margin: 10px 0;
 }
 
 .report-book-number {
@@ -634,6 +678,7 @@ button {
     font-weight: bold;
     box-shadow: 0 2px 6px rgba(0,0,0,.2);
     z-index: 5;
+    backdrop-filter: blur(4px);
 }
 
 .report-book-title {
