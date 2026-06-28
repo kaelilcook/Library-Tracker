@@ -141,6 +141,20 @@ function findBook(id) {
     );
 }
 
+function formatShortDate(dateString) {
+
+    if (!dateString) return "";
+
+    return new Date(dateString).toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric"
+        }
+    );
+
+}
+
 // ========================
 // STORAGE
 // ========================
@@ -342,6 +356,25 @@ function closeModal(modalId) {
 // ========================
 // BOOK DATA
 // ========================
+function groupBooksByMonth(books) {
+
+    const months = Array.from({ length: 12 }, () => []);
+
+    books.forEach(book => {
+
+        if (!book.completed_date) return;
+
+        const month =
+            new Date(book.completed_date).getMonth();
+
+        months[month].push(book);
+
+    });
+
+    return months;
+
+}
+
 let currentReadingGoal = null;
 
 async function loadReadingGoal(year) {
@@ -430,13 +463,45 @@ function renderAnnualReportHTML(report) {
             )
             : 0;
 
-    const covers = report.books.map((book, index) => `
+    const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];
 
-    <div class="report-book">
+    const months = groupBooksByMonth(report.books);
 
-        <div class="report-book-number">
-            #${index + 1}
-        </div>
+    const monthHTML = months.map((books, monthIndex) => {
+
+        if (!books.length) return "";
+
+        const covers = books.map(book => `
+
+<div class="report-book">
+
+    <div class="report-book-number">
+        #${report.books.indexOf(book) + 1}
+    </div>
+
+    <div class="report-cover-wrapper">
+
+        ${book.rating
+                ? `
+                <div class="report-rating-badge">
+                    ⭐${book.rating}
+                </div>
+                `
+                : ""
+            }
 
         <img
             src="${book.cover || ""}"
@@ -444,11 +509,36 @@ function renderAnnualReportHTML(report) {
             title="${book.title}"
         >
 
-        
-
     </div>
 
+    <div class="report-finish-date">
+        ${formatShortDate(book.completed_date)}
+    </div>
+
+</div>
+
 `).join("");
+
+        return `
+
+        <section class="report-month">
+
+            <h3>
+                ${monthNames[monthIndex]}
+                (${books.length})
+            </h3>
+
+            <div class="report-cover-grid">
+
+                ${covers}
+
+            </div>
+
+        </section>
+
+    `;
+
+    }).join("");
 
     return `
 
@@ -531,9 +621,9 @@ function renderAnnualReportHTML(report) {
 
 </div>
 
-        <div class="report-cover-grid">
-            ${covers}
-        </div>
+        <h2>Books Finished</h2>
+
+${monthHTML}
     `;
 }
 
