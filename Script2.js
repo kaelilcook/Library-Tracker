@@ -356,6 +356,48 @@ function closeModal(modalId) {
 // ========================
 // BOOK DATA
 // ========================
+function startReadingSession(book) {
+
+    book.reading_history ??= [];
+
+    const active =
+        book.reading_history.find(session => !session.endDate);
+
+    if (active) return;
+
+    book.reading_history.push({
+
+        startDate:
+            new Date()
+                .toISOString()
+                .split("T")[0],
+
+        endDate: ""
+
+    });
+
+}
+
+function finishReadingSession(book) {
+
+    if (!book.reading_history?.length)
+        return;
+
+    const active =
+        [...book.reading_history]
+            .reverse()
+            .find(session => !session.endDate);
+
+    if (!active)
+        return;
+
+    active.endDate =
+        new Date()
+            .toISOString()
+            .split("T")[0];
+
+}
+
 function getGenreColor(genre) {
 
     const colors = {
@@ -2682,7 +2724,7 @@ function openCurrentlyReadingModal() {
     setupCurrentlyReadingSearch();
 }
 
-function setupCurrentlyReadingSearch() {
+async function setupCurrentlyReadingSearch() {
 
     const searchInput =
         document.getElementById("currentSearch");
@@ -2729,7 +2771,7 @@ function setupCurrentlyReadingSearch() {
             matches.map(book => `
 
                 <div class="search-book-card"
-                     data-id="'${book.id}'">
+     data-id="${book.id}">
 
                     <img src="${book.cover || ""}">
 
@@ -2745,7 +2787,7 @@ function setupCurrentlyReadingSearch() {
             .querySelectorAll(".search-book-card")
             .forEach(card => {
 
-                card.addEventListener("click", () => {
+                card.addEventListener("click", async () => {
 
                     const book = myLibrary.find(
                         b => b.id == card.dataset.id
@@ -2753,12 +2795,16 @@ function setupCurrentlyReadingSearch() {
 
                     if (book) {
 
+                        startReadingSession(book);
+
                         book.status = "Reading";
 
-                        saveLibrary();
+                        await saveLibrary();
 
                         openCurrentlyReadingModal();
+
                     }
+
                 });
             });
     });
@@ -3172,6 +3218,35 @@ async function saveEditedBook() {
     const oldStatus = book.status;
     const newStatus = editStatus.value;
 
+    if (
+        newStatus === "Reading" &&
+        book.status !== "Reading"
+    ) {
+
+        startReadingSession(book);
+
+    }
+
+    if (
+        newStatus === "Finished" &&
+        book.status !== "Finished"
+    ) {
+
+        finishReadingSession(book);
+
+        if (!book.completed_date) {
+
+            book.completed_date =
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+
+        }
+
+    }
+
+    book.status = newStatus;
+
     let completedDate = book.completed_date || null;
 
     // If user just marked as Finished
@@ -3247,28 +3322,53 @@ async function saveEditedBook() {
 // READING STATUS ACTIONS
 // ------------------------
 
-function markFinished(id) {
+async function markFinished(id) {
+
     const book = findBook(id);
     if (!book) return;
 
+    const today =
+        new Date()
+            .toISOString()
+            .split("T")[0];
+
     book.status = "Finished";
 
-    // optional: auto-fill finish date
-    if (book.reading_history?.length) {
-        const last = book.reading_history.at(-1);
+    book.completed_date = today;
 
-        if (!last.finishDate) {
-            last.finishDate =
-                new Date().toISOString().split("T")[0];
-        }
+    book.reading_history ??= [];
+
+    const activeSession =
+        [...book.reading_history]
+            .reverse()
+            .find(session => !session.endDate);
+
+    if (activeSession) {
+
+        activeSession.endDate = today;
+
+    } else {
+
+        // Book somehow never had a reading session.
+        // Create one so the history stays complete.
+
+        book.reading_history.push({
+
+            startDate: today,
+            endDate: today
+
+        });
+
     }
 
-    saveLibrary();
+    await saveLibrary();
+
     renderLibrary();
     renderStats();
     renderAnnualReport();
 
     openCurrentlyReadingModal();
+
 }
 
 function addReadingSession(id, startDate, endDate) {
