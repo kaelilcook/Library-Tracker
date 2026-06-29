@@ -48,6 +48,8 @@ const supabaseClient = window.supabase.createClient(
 
 let activeShelf = "All";
 
+let activeTag = null;
+
 let currentEditId = null;
 
 let lastSearchQuery = "";
@@ -356,6 +358,23 @@ function closeModal(modalId) {
 // ========================
 // BOOK DATA
 // ========================
+function renderTags(book) {
+
+    return (book.tags || [])
+        .map(tag => `
+
+            <span
+                class="book-tag"
+                data-tag="${tag}"
+            >
+                ${tag}
+            </span>
+
+        `)
+        .join("");
+
+}
+
 function startReadingSession(book) {
 
     book.reading_history ??= [];
@@ -639,7 +658,9 @@ function renderAnnualReportHTML(report) {
     <p>
         Tags
         <br>
-        ${(book.tags || []).join(" • ")}
+        <div class="book-tags">
+    ${renderTags(book)}
+</div>
     </p>
     <p>
 
@@ -1638,7 +1659,9 @@ function renderLibrary() {
     <p>${book.author}</p>
 
     <p class="book-tags">
-        ${(book.tags || []).join(" • ")}
+        <div class="book-tags">
+    ${renderTags(book)}
+</div>
     </p>
 
     <button onclick="openBookModal('${book.id}')">
@@ -1651,6 +1674,24 @@ function renderLibrary() {
 
     // update shelf label count
     updateShelfLabel(books.length);
+
+    document.querySelectorAll(".book-tag")
+        .forEach(tag => {
+
+            tag.addEventListener("click", e => {
+
+                e.stopPropagation();
+
+                activeTag = tag.dataset.tag;
+
+                renderLibrary();
+                renderStats();
+                renderAnnualReport();
+                renderActiveTagBanner();
+
+            });
+
+        });
 }
 function renderShelfCheckboxes(book) {
 
@@ -3416,7 +3457,9 @@ function openEditMode() {
     renderShelfCheckboxes(book);
 
     document.getElementById("editTags").value =
+        
         (book.tags || []).join(", ");
+        
 
     editSection.style.display = "flex";
 }
@@ -3484,13 +3527,43 @@ const liveSearchBooks = debounce(searchBooks, 1000);
 // ========================
 // 7 FILTER SYSTEM
 // ========================
+function renderActiveTagBanner() {
+
+    const banner =
+        document.getElementById("activeTagBanner");
+
+    if (!banner) return;
+
+    if (!activeTag) {
+        banner.innerHTML = "";
+        return;
+    }
+
+    banner.innerHTML = `
+        <div class="active-tag-pill">
+            🏷️ ${activeTag}
+            <button onclick="clearActiveTag()">✕</button>
+        </div>
+    `;
+}
+
+function clearActiveTag() {
+
+    activeTag = null;
+
+    renderLibrary();
+    renderStats();
+    renderAnnualReport();
+
+    renderActiveTagBanner();
+}
 
 function getFilteredBooks() {
 
     let books = [...myLibrary];
 
     // ------------------------
-    // 1. STAT FILTER (status from stats panel)
+    // 1. STAT FILTER
     // ------------------------
     if (window.statFilter) {
         books = books.filter(
@@ -3508,30 +3581,40 @@ function getFilteredBooks() {
         (searchInput?.value || "")
             .toLowerCase()
             .trim();
-if (query) {
 
-    books = books.filter(book => {
+    if (query) {
 
-        const searchText = [
-            book.title,
-            book.author,
-            book.series,
-            book.genre,
-            book.isbn,
-            book.notes,
-            ...(book.shelves || []),
-            ...(book.tags || []),
-            ...(book.reading_history || []).map(r =>
-                `${r.startDate || ""} ${r.endDate || ""}`
-            )
-        ]
-            .join(" ")
-            .toLowerCase();
+        books = books.filter(book => {
 
-        return searchText.includes(query);
-    });
-}
+            const searchText = [
+                book.title,
+                book.author,
+                book.series,
+                book.genre,
+                book.isbn,
+                book.notes,
+                ...(book.shelves || []),
+                ...(book.tags || []),
+                ...(book.reading_history || []).map(r =>
+                    `${r.startDate || ""} ${r.endDate || ""}`
+                )
+            ]
+                .join(" ")
+                .toLowerCase();
 
+            return searchText.includes(query);
+        });
+    }
+
+    // ------------------------
+    // 3. TAG FILTER
+    // ------------------------
+    if (activeTag) {
+
+        books = books.filter(book =>
+            (book.tags || []).includes(activeTag)
+        );
+    }
 
     // ------------------------
     // 4. SORTING
@@ -3540,34 +3623,29 @@ if (query) {
         filterSort?.value || "newest";
 
     switch (sort) {
-
         case "newest":
-    books.sort(
-        (a, b) =>
-            (b.date_added || 0) - (a.date_added || 0)
-    );
-    break;
-
-case "oldest":
-    books.sort(
-        (a, b) =>
-            (a.date_added || 0) - (b.date_added || 0)
-    );
-    break;
-
+            books.sort(
+                (a, b) =>
+                    (b.date_added || 0) - (a.date_added || 0)
+            );
+            break;
+        case "oldest":
+            books.sort(
+                (a, b) =>
+                    (a.date_added || 0) - (b.date_added || 0)
+            );
+            break;
         case "titleAZ":
             books.sort((a, b) =>
                 (a.title || "").localeCompare(b.title || "")
             );
             break;
-
         case "titleZA":
             books.sort((a, b) =>
                 (b.title || "").localeCompare(a.title || "")
             );
             break;
     }
-
     return books;
 }
 
