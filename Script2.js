@@ -54,6 +54,10 @@ let currentEditId = null;
 
 let lastSearchQuery = "";
 
+const BOOKS_PER_PAGE = 50;
+
+let visibleBookCount = BOOKS_PER_PAGE;
+
 
 // ========================
 // CONFIG
@@ -1628,7 +1632,10 @@ function renderLibrary() {
         );
     }
 
-    books.forEach(book => {
+    const visibleBooks =
+        books.slice(0, visibleBookCount);
+
+    visibleBooks.forEach(book => {
 
         const shelfDots = (book.shelves || [])
             .map(name => {
@@ -1674,6 +1681,8 @@ function renderLibrary() {
 
     // update shelf label count
     updateShelfLabel(books.length);
+    renderLoadMoreButton(books.length);
+    renderActiveTagBanner();
 
     document.querySelectorAll(".book-tag")
         .forEach(tag => {
@@ -1684,14 +1693,48 @@ function renderLibrary() {
 
                 activeTag = tag.dataset.tag;
 
+                visibleBookCount = BOOKS_PER_PAGE;
+
                 renderLibrary();
                 renderStats();
                 renderAnnualReport();
-                renderActiveTagBanner();
 
             });
 
         });
+}
+
+function renderLoadMoreButton(totalBooks) {
+
+    const container =
+        document.getElementById("loadMoreContainer");
+
+    if (!container) return;
+
+    if (visibleBookCount >= totalBooks) {
+
+        container.innerHTML = "";
+
+        return;
+
+    }
+
+    container.innerHTML = `
+        <button id="loadMoreBtn">
+            Load More Books
+        </button>
+    `;
+
+    document
+        .getElementById("loadMoreBtn")
+        .onclick = () => {
+
+            visibleBookCount += BOOKS_PER_PAGE;
+
+            renderLibrary();
+
+        };
+
 }
 function renderShelfCheckboxes(book) {
 
