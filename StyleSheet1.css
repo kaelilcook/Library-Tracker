@@ -723,6 +723,52 @@ button {
 /* =========================
    5. BOOK CARD
 ========================= */
+.favorite-btn,
+.book-shelf-dots {
+    top: 10px;
+}
+
+.favorite-btn {
+    position: absolute;
+    top: -2px;
+    left: 10px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    z-index: 20;
+    transition: transform .2s ease;
+}
+
+    .favorite-btn .material-symbols-outlined {
+        font-size: 34px;
+        color: rgba(120,120,120,.65);
+        transition: color .2s, font-variation-settings .2s;
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    }
+
+    .favorite-btn:hover {
+        color: #555;
+        transform: translateY(-2px) scale(1.08);
+    }
+
+    .favorite-btn.active {
+        color: #d4af37;
+    }
+
+        .favorite-btn.active .material-symbols-outlined {
+            color: #D4AF37;
+            font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
+        }
+
+        .favorite-btn.active:hover {
+            transform: translateY(-2px) scale(1.15);
+        }
+
+.book-card.favorite {
+    border: 2px solid #d4af37;
+}
+
 .book-tags {
     display: flex;
     flex-wrap: wrap;
@@ -746,12 +792,12 @@ button {
     }
 
 .book-card {
-    padding: var(--space-4);
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
     max-width: 160px;
+    padding-top: 44px; /* header space */
 }
 
     .book-card:hover {
@@ -914,8 +960,13 @@ button {
 .book-shelf-dots {
     display: flex;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 0px;
     flex-wrap: wrap;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 20;
+    width: fit-content;
 }
 
 .shelf-dot {

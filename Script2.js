@@ -1272,8 +1272,6 @@ function renderBookGrid(books, showActions = false, actionType = "") {
     `;
 }
 
-
-
 function renderHabitModal() {
 
     const content =
@@ -1660,6 +1658,14 @@ function renderLibrary() {
         ${renderShelfDots(book)}
     </div>
 
+    <button
+        class="favorite-btn ${book.favorite ? "active" : ""}"
+        data-id="${book.id}">
+        <span class="material-symbols-outlined">
+            ${book.favorite ? "bookmark" : "bookmark_border"}
+        </span>
+    </button>
+
     ${book.cover ? `<img src="${book.cover}">` : ""}
 
     <h3>${book.title}</h3>
@@ -1683,6 +1689,28 @@ function renderLibrary() {
     updateShelfLabel(books.length);
     renderLoadMoreButton(books.length);
     renderActiveTagBanner();
+
+    document.querySelectorAll(".favorite-btn")
+        .forEach(btn => {
+
+            btn.addEventListener("click", async e => {
+
+                e.stopPropagation();
+
+                const book =
+                    findBook(btn.dataset.id);
+
+                if (!book) return;
+
+                book.favorite = !book.favorite;
+
+                await saveLibrary();
+
+                renderLibrary();
+
+            });
+
+        });
 
     document.querySelectorAll(".book-tag")
         .forEach(tag => {
