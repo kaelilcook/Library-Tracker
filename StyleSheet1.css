@@ -723,6 +723,26 @@ button {
 /* =========================
    5. BOOK CARD
 ========================= */
+.detail-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.detail-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #f3f3f3;
+    font-size: .9rem;
+}
+
+.favorite-pill {
+    background: #fff4c2;
+    color: #8a6d3b;
+    border: 1px solid #e5c55a;
+}
+
 .favorite-btn,
 .book-shelf-dots {
     top: 10px;
@@ -730,7 +750,7 @@ button {
 
 .favorite-btn {
     position: absolute;
-    top: -2px;
+    top: 5px;
     left: 10px;
     border: none;
     background: transparent;
@@ -774,6 +794,7 @@ button {
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 8px;
+    margin-left: 5px; 
 }
 
 .book-tag {

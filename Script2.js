@@ -1659,12 +1659,12 @@ function renderLibrary() {
     </div>
 
     <button
-        class="favorite-btn ${book.favorite ? "active" : ""}"
-        data-id="${book.id}">
-        <span class="material-symbols-outlined">
-            ${book.favorite ? "bookmark" : "bookmark_border"}
-        </span>
-    </button>
+    class="favorite-btn ${book.favorite ? "active" : ""}"
+    data-id="${book.id}">
+    <span class="material-symbols-outlined">
+        bookmark
+    </span>
+</button>
 
     ${book.cover ? `<img src="${book.cover}">` : ""}
 
@@ -1704,12 +1704,19 @@ function renderLibrary() {
 
                 book.favorite = !book.favorite;
 
-                await saveLibrary();
+                const { error } = await supabaseClient
+                    .from("books")
+                    .update({
+                        favorite: book.favorite
+                    })
+                    .eq("id", book.id);
 
+                if (error) {
+                    console.error(error);
+                    return;
+                }
                 renderLibrary();
-
             });
-
         });
 
     document.querySelectorAll(".book-tag")
@@ -2180,6 +2187,24 @@ function openBookModal(id) {
     };
 
     setSrc("detailCover", book.cover);
+    const pills = document.getElementById("detailPills");
+
+    if (pills) {
+
+        pills.innerHTML = `
+        ${book.favorite ? `
+            <span class="detail-pill favorite-pill">
+                🔖 Favorite
+            </span>
+        ` : ""}
+
+        ${(book.tags || []).map(tag => `
+            <span class="detail-pill">
+                ${tag}
+            </span>
+        `).join("")}
+    `;
+    }
     setText("detailTitle", book.title);
     setText("detailAuthor", book.author);
     setText("detailSeries", book.series || "");
