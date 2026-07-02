@@ -190,7 +190,7 @@ async function loadLibrary() {
     renderStats?.();
     loadReadingLog();
     renderAnnualReport();
-    
+    renderCollectionHighlights();
 }
 
 async function loadShelves() {
@@ -357,6 +357,86 @@ function closeModal(modalId) {
     if (!modal) return;
 
     modal.style.display = "none";
+}
+
+// ========================
+// MY COLLECTION
+// ========================
+
+function renderCollectionHighlights() {
+
+    const container =
+        document.getElementById("collectionHighlights");
+
+    if (!container) return;
+
+    const favorites =
+        myLibrary.filter(b => b.favorite);
+
+    const hallOfFame =
+        myLibrary.filter(book => book.rating === 5);
+
+    container.innerHTML = `
+
+        <div class="report-card"
+             id="favoritesTile">
+
+            <h2>${favorites.length}</h2>
+
+            <p>🔖 Favorites</p>
+
+        </div>
+
+        <div class="report-card"
+             id="hallOfFameTile">
+
+            <h2>${hallOfFame.length}</h2>
+
+            <p>🏆 Hall of Fame</p>
+
+        </div>
+
+    `;
+    document
+        .getElementById("favoritesTile")
+        ?.addEventListener("click", openFavorites);
+
+    document
+        .getElementById("hallOfFameTile")
+        ?.addEventListener("click", () => {
+            console.log("Hall of Fame clicked");
+            openHallOfFame();
+        });
+}
+
+function openFavorites() {
+
+    const books =
+        myLibrary.filter(b => b.favorite);
+
+    openModalView(
+
+        "🔖 Favorite Books",
+
+        books.length
+            ? renderBookGrid(books)
+            : `
+                <p class="empty-state">
+                    No favorites yet.
+                </p>
+            `
+    );
+}
+
+function openHallOfFame() {
+
+    const books =
+        myLibrary.filter(book => book.rating === 5);
+
+    openModalView(
+        "🏆 Hall of Fame",
+        renderBookGrid(books)
+    );
 }
 
 // ========================
@@ -1733,7 +1813,7 @@ function renderLibrary() {
                 renderLibrary();
                 renderStats();
                 renderAnnualReport();
-
+                renderCollectionHighlights();
             });
 
         });
@@ -2057,6 +2137,7 @@ function createShelfItem(label, shelfValue, isEditable, shelfObj) {
         renderLibrary(filtered);
         renderStats();
         renderAnnualReport();
+        renderCollectionHighlights();
     };
 
     if (isEditable) {
@@ -3189,6 +3270,7 @@ async function removeBook(id) {
     renderLibrary();
     renderStats();
     renderAnnualReport();
+    renderCollectionHighlights();
 }
 
 function confirmRemoveBook(id) {
@@ -3346,6 +3428,7 @@ renderLibrary();
 renderStats();
     closeManualAddModal();
     renderAnnualReport();
+    renderCollectionHighlights();
 }
 
 async function saveEditedBook() {
@@ -3503,7 +3586,7 @@ async function markFinished(id) {
     renderLibrary();
     renderStats();
     renderAnnualReport();
-
+    renderCollectionHighlights();
     openCurrentlyReadingModal();
 
 }
@@ -3519,7 +3602,7 @@ function addReadingSession(id, startDate, endDate) {
     renderLibrary();
     renderStats();
     renderAnnualReport();
-
+    renderCollectionHighlights();
 }
 
 // ------------------------
@@ -3600,7 +3683,7 @@ function updateCover() {
     renderAnnualReport();
     renderLibrary();
     renderStats();
-
+    renderCollectionHighlights();
 }
 function closeManualAddModal() {
 
@@ -3650,7 +3733,7 @@ function clearActiveTag() {
     renderLibrary();
     renderStats();
     renderAnnualReport();
-
+    renderCollectionHighlights();
     renderActiveTagBanner();
 }
 
@@ -3766,6 +3849,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderLibrary();
     renderStats();
     renderAnnualReport();
+    renderCollectionHighlights();
 
 
     // ========================
@@ -3954,6 +4038,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderLibrary();
         renderStats();
         renderAnnualReport();
+        renderCollectionHighlights();
     };
 
   
@@ -4078,12 +4163,14 @@ document.getElementById("importFileInput")
         renderLibrary();
         renderStats();
         renderAnnualReport();
+        renderCollectionHighlights();
     });
 
     filterSort?.addEventListener("change", () => {
         renderLibrary();
         renderStats();
         renderAnnualReport();
+        renderCollectionHighlights();
     });
 });
 
