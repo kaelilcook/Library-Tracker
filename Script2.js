@@ -393,6 +393,7 @@ function renderCollectionHighlights() {
             <h2>${hallOfFame.length}</h2>
 
             <p>🏆 Hall of Fame</p>
+            <p>My 5-Star Books</p>
 
         </div>
 
@@ -4071,13 +4072,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderReadingHistory(book);
     });
 
-    document.getElementById("closeHabitModal")
-        ?.addEventListener("click", () => {
-
-            document.getElementById("habitModal")
-                .style.display = "none";
-        });
-
     // ========================
     // EDIT / SAVE / DELETE
     // ========================
@@ -4141,11 +4135,16 @@ document.getElementById("importFileInput")
     // ========================
     openHabitBtn?.addEventListener("click", () => {
         renderHabitModal();
-        document.getElementById("habitModal").style.display = "flex";
+
+        document
+            .getElementById("habitModal")
+            .classList.remove("hidden");
     });
 
     closeHabitBtn?.addEventListener("click", () => {
-        document.getElementById("habitModal").style.display = "none";
+        document
+            .getElementById("habitModal")
+            .classList.add("hidden");
     });
 
     document.getElementById("openCurrentlyReadingBtn")
