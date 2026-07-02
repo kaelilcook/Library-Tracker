@@ -1330,29 +1330,50 @@ function renderStats() {
 </div>
     `;
 }
-function renderBookGrid(books, showActions = false, actionType = "") {
+function renderBookGrid(
+    books,
+    view = ""
+) {
 
     return `
         <div class="mini-library-grid">
+
             ${books.map(book => `
+
                 <div class="mini-book-card">
 
                     <img src="${book.cover || ""}">
+
                     <p>${book.title}</p>
+
                     <small>${book.author || ""}</small>
 
-                    ${showActions ? `
-                        <button onclick="${actionType}('${book.id}'')">
-                            Mark as Finished
-                        </button>
+                    ${view === "currentlyReading" ? `
+
+                        <div class="reading-actions">
+
+                            <button
+                                onclick="markFinished('${book.id}')">
+                                ✓ Finished
+                            </button>
+
+                            <button
+                                class="dnf-btn"
+                                onclick="markDNF('${book.id}')">
+                                🚫 DNF
+                            </button>
+
+                        </div>
+
                     ` : ""}
 
                 </div>
+
             `).join("")}
+
         </div>
     `;
 }
-
 function renderHabitModal() {
 
     const content =
@@ -2926,11 +2947,10 @@ function openCurrentlyReadingModal() {
         </div>
 
         ${readingBooks.length
-            ? renderBookGrid(
-                readingBooks,
-                true,
-                "markFinished"
-            )
+        ? renderBookGrid(
+            readingBooks,
+            "currentlyReading"
+        )
             : `
                 <p class="empty-state">
                     No books currently being read.
@@ -2941,6 +2961,37 @@ function openCurrentlyReadingModal() {
     `);
 
     setupCurrentlyReadingSearch();
+}
+
+async function markDNF(id) {
+
+    const book = findBook(id);
+
+    if (!book) return;
+
+    book.status = "DNF";
+
+    if (book.reading_history?.length) {
+
+        const last =
+            book.reading_history.at(-1);
+
+        if (!last.endDate) {
+
+            last.endDate =
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+        }
+    }
+
+    await saveBook(book);
+
+    renderLibrary();
+    renderStats();
+    renderAnnualReport();
+
+    openCurrentlyReadingModal();
 }
 
 async function setupCurrentlyReadingSearch() {

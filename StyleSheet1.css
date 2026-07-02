@@ -1170,6 +1170,25 @@ body.modal-open {
         transform: scale(1.1);
     }
 
+.reading-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+    .reading-actions button {
+        flex: 1;
+    }
+
+.dnf-btn {
+    background: #777;
+}
+
+    .dnf-btn:hover {
+        background: #666;
+    }
+
 
 /* =========================
    9. BOOK DETAILS
@@ -1418,6 +1437,7 @@ body.modal-open {
     padding: 12px;
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 150px;
 }
 
     .mini-book-card:hover {
