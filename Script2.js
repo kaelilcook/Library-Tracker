@@ -1769,6 +1769,8 @@ function renderLibrary() {
 </button>
 <div class="library-cover-wrapper">
 
+${book.cover ? `<img src="${book.cover}">` : ""}
+
         ${book.rating
                 ? `
                 <div class="library-rating-badge">
@@ -1778,7 +1780,7 @@ function renderLibrary() {
                 : ""
             }
             </div>
-    ${book.cover ? `<img src="${book.cover}">` : ""}
+    
 
     <h3>${book.title}</h3>
     <p>${book.author}</p>
