@@ -1767,7 +1767,17 @@ function renderLibrary() {
         bookmark
     </span>
 </button>
+<div class="library-cover-wrapper">
 
+        ${book.rating
+                ? `
+                <div class="library-rating-badge">
+                    ⭐${book.rating}
+                </div>
+                `
+                : ""
+            }
+            </div>
     ${book.cover ? `<img src="${book.cover}">` : ""}
 
     <h3>${book.title}</h3>

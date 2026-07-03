@@ -723,6 +723,25 @@ button {
 /* =========================
    5. BOOK CARD
 ========================= */
+.library-rating-badge {
+    position: absolute;
+    top: 20px;
+    right: 6px;
+    background: rgba(255,255,255,.95);
+    border-radius: 20px;
+    padding: 2px 6px;
+    font-size: .90rem;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    z-index: 5;
+    backdrop-filter: blur(4px);
+}
+
+.library-cover-wrapper {
+    position: relative;
+    display: inline-block;
+   }
+
 .detail-pills {
     display: flex;
     flex-wrap: wrap;
@@ -818,7 +837,7 @@ button {
     flex-direction: column;
     gap: var(--space-3);
     max-width: 160px;
-    padding-top: 44px; /* header space */
+    padding-top: 35px; /* header space */
 }
 
     .book-card:hover {
