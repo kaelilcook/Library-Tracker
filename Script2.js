@@ -218,9 +218,20 @@ async function loadShelves() {
 
 async function loadReadingLog() {
 
+    const {
+        data: { user },
+        error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+        console.error("No authenticated user.");
+        return;
+    }
+
     const { data, error } = await supabaseClient
         .from("reading_log")
-        .select("*");
+        .select("*")
+        .eq("user_id", user.id);
 
     if (error) {
         console.error(error);
@@ -231,6 +242,8 @@ async function loadReadingLog() {
         date: row.date,
         books: row.books || []
     }));
+
+    console.log("Loaded reading log:", readingLog);
 }
 
 
@@ -553,10 +566,21 @@ let currentReadingGoal = null;
 
 async function loadReadingGoal(year) {
 
+    const {
+        data: { user },
+        error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+        console.error("No authenticated user.");
+        return;
+    }
+
     const { data, error } =
         await supabaseClient
             .from("reading_goals")
             .select("*")
+            .eq("user_id", user.id)
             .eq("year", year)
             .maybeSingle();
 
@@ -955,13 +979,24 @@ async function saveReadingGoal(year) {
             ).value
         );
 
+    const {
+        data: { user },
+        error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+        console.error("No authenticated user.");
+        return;
+    }
+
     const { error } =
         await supabaseClient
             .from("reading_goals")
             .update({
                 books_goal: goal
             })
-            .eq("year", year);
+            .eq("year", year)
+            .eq("user_id", user.id);
 
     if (error) {
         console.error(error);
@@ -2408,12 +2443,9 @@ function progressBarRow(label, value, max) {
     `;
 }
 
-function openBookModal(id) {
-    console.log("Opening:", id);
+function openBookModal(id) {  
 
-    const book = myLibrary.find(b => String(b.id) === String(id));
-
-    console.log("Found book:", book);
+    const book = myLibrary.find(b => String(b.id) === String(id));    
 
     currentEditId = id;
 
@@ -2426,13 +2458,10 @@ function openBookModal(id) {
         const el = document.getElementById(id);
         if (el) el.src = value || "";
     };
-
-    console.log("1 - after book found");
-
+  
     setSrc("detailCover", book.cover);
 
-    console.log("2 - after cover");
-
+    
     const pills = document.getElementById("detailPills");
 
     if (pills) {
@@ -2449,17 +2478,13 @@ function openBookModal(id) {
             </span>
         `).join("")}
     `;
-    }
-
-    console.log("3 - after pills");
+    }   
 
     setText("detailTitle", book.title);
     setText("detailAuthor", book.author);
     setText("detailSeries", book.series || "");
     setText("detailGenre", book.genre || "");
-    setText("detailStatus", book.status);
-
-    console.log("4 - after text fields");
+    setText("detailStatus", book.status);    
     setText("detailRating", book.rating !== null &&
         book.rating !== undefined &&
         book.rating !== ""
@@ -2467,9 +2492,7 @@ function openBookModal(id) {
         : "Unrated");
     setText("detailISBN", book.isbn || "");
     setText("detailShelves", (book.shelves || []).join(", ") || "None");
-
-    console.log("5 - before reading history");
-
+    
     const history = book.reading_history || [];
 
     setText(
@@ -2481,14 +2504,9 @@ function openBookModal(id) {
             : "No reading history"
     );
 
-    console.log("6 - after reading history");
+    setText("detailNotes", book.notes || "No notes added.");   
 
-    setText("detailNotes", book.notes || "No notes added.");
-
-    console.log("7 - after notes");
-
-    const editSection = document.getElementById("editSection");
-    console.log("editSection:", editSection);
+    const editSection = document.getElementById("editSection");   
 
     if (editSection) {
         editSection.style.display = "none";
@@ -2732,15 +2750,26 @@ async function logReadingDay(date, selectedBookIds = []) {
     console.log("LOG READING DAY FIRED");
     console.log("logReadingDay called", date, selectedBookIds);
 
+    const {
+        data: { user },
+        error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+        console.error("No authenticated user.");
+        return;
+    }
+
     const { data, error } = await supabaseClient
         .from("reading_log")
         .upsert(
             {
+                user_id: user.id,
                 date,
                 books: selectedBookIds
             },
             {
-                onConflict: "date",
+                onConflict: "user_id,date",
                 ignoreDuplicates: false
             }
         )
@@ -3334,7 +3363,8 @@ async function addShelf() {
         .from("shelves")
         .insert({
             name: shelfName,
-            color: shelfColor
+            color: shelfColor,
+            user_id: user.id
         });
 
     if (error) {
