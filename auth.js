@@ -1,4 +1,6 @@
 // JavaScript source code
+let currentUser = null;
+
 async function signUp() {
 
     const email =
@@ -61,15 +63,17 @@ supabaseClient.auth.onAuthStateChange(
     async (event, session) => {
 
         if (session) {
-            document
-                .getElementById("authScreen")
+
+            currentUser = session.user;
+
+            document.getElementById("authScreen")
                 .classList.add("hidden");
 
-            document
-                .getElementById("app")
+            document.getElementById("app")
                 .classList.remove("hidden");
 
             await loadLibrary();
+
         }
 
         else {

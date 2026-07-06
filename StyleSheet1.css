@@ -1204,11 +1204,10 @@ button {
     align-items: center;
     padding: 2rem;
     overflow-y: auto;
-    /* IMPORTANT: prevents “inline layout weirdness” */
     pointer-events: auto;
 }
 
-    .modal.hidden {
+    .modal.modal-hidden {
         display: none;
     }
 

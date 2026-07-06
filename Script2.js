@@ -178,9 +178,10 @@ async function loadLibrary() {
     console.log("Loading from Supabase...");
 
     const { data, error } = await supabaseClient
-    .from("books")
-    .select("*")
-    .order("date_added", { ascending: false });
+        .from("books")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("date_added", { ascending: false });
 
     if (error) {
         console.error(error);
@@ -279,6 +280,7 @@ async function importLibraryFile(file) {
 
             // 🧼 CLEAN STEP (THIS IS WHAT YOU WERE MISSING)
             const cleaned = json.map(book => ({
+                user_id: currentUser.id,
                 title: book.title,
                 author: book.author,
                 isbn: book.isbn,
@@ -2407,8 +2409,11 @@ function progressBarRow(label, value, max) {
 }
 
 function openBookModal(id) {
+    console.log("Opening:", id);
 
     const book = myLibrary.find(b => String(b.id) === String(id));
+
+    console.log("Found book:", book);
 
     currentEditId = id;
 
@@ -2422,11 +2427,15 @@ function openBookModal(id) {
         if (el) el.src = value || "";
     };
 
+    console.log("1 - after book found");
+
     setSrc("detailCover", book.cover);
+
+    console.log("2 - after cover");
+
     const pills = document.getElementById("detailPills");
 
     if (pills) {
-
         pills.innerHTML = `
         ${book.favorite ? `
             <span class="detail-pill favorite-pill">
@@ -2441,11 +2450,16 @@ function openBookModal(id) {
         `).join("")}
     `;
     }
+
+    console.log("3 - after pills");
+
     setText("detailTitle", book.title);
     setText("detailAuthor", book.author);
     setText("detailSeries", book.series || "");
     setText("detailGenre", book.genre || "");
     setText("detailStatus", book.status);
+
+    console.log("4 - after text fields");
     setText("detailRating", book.rating !== null &&
         book.rating !== undefined &&
         book.rating !== ""
@@ -2453,6 +2467,8 @@ function openBookModal(id) {
         : "Unrated");
     setText("detailISBN", book.isbn || "");
     setText("detailShelves", (book.shelves || []).join(", ") || "None");
+
+    console.log("5 - before reading history");
 
     const history = book.reading_history || [];
 
@@ -2465,10 +2481,28 @@ function openBookModal(id) {
             : "No reading history"
     );
 
+    console.log("6 - after reading history");
+
     setText("detailNotes", book.notes || "No notes added.");
 
-    document.getElementById("editSection").style.display = "none";
-    document.getElementById("bookModal").style.display = "flex";
+    console.log("7 - after notes");
+
+    const editSection = document.getElementById("editSection");
+    console.log("editSection:", editSection);
+
+    if (editSection) {
+        editSection.style.display = "none";
+    }
+
+    const modal = document.getElementById("bookModal");
+    modal.classList.remove("modal-hidden");
+    modal.classList.add("modal-hidden");
+
+    if (modal) {
+        modal.style.display = "flex";
+    }
+
+    console.log("8 - modal should now be visible");
 }
 
 function openGenreModal() {
@@ -3478,6 +3512,7 @@ async function addToLibrary(bookData, shelf = "") {
     );
 
     const book = {
+        user_id: currentUser.id,
         title: bookData.title,
         author: bookData.author,
         genre: bookData.genre,
@@ -3576,6 +3611,7 @@ async function saveManualBook() {
     ].map(i => i.value);
 
     const newBook = {
+        user_id: currentUser.id,
         title: manualTitle.value.trim(),
         author: manualAuthor.value.trim(),
         isbn: manualISBN.value.trim(),
