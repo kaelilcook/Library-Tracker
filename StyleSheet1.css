@@ -128,6 +128,21 @@ p {
 /* =========================
    2. LAYOUT
 ========================= */
+#authScreen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#app {
+    display: flex;
+    min-height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
 
 #sidebar {
     width: 260px;
@@ -219,6 +234,31 @@ p {
 }
 
 @media (max-width: 412px) {
+    #app.hidden {
+        display: none !important;
+    }
+
+    #authScreen.hidden {
+        display: none !important;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--surface);
+        border-radius: 18px;
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+    }
+
+    #authScreen {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+    }
+
     .library-cover-wrapper {
         position: relative;
         display: inline-block;
@@ -261,6 +301,11 @@ p {
 
     #mainContent {
         margin-left: 0 !important;
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        overflow-x: hidden;        
+        box-sizing: border-box;
     }
 
     html,
@@ -323,15 +368,7 @@ p {
             overflow-wrap: break-word;
             word-break: break-word;
         }
-
-    #mainContent {
-        width: 100%;
-        max-width: 100%;
-        margin-left: 0 !important;
-        padding: 12px;
-        overflow-x: hidden;
-    }
-
+0
     .menu-toggle {
         display: block !important;
         position: fixed !important;
@@ -478,6 +515,10 @@ p {
 }
 
 @media (max-width: 412px) {
+    #app {
+        display: block;
+        min-height: 100vh;
+    }
 
     .mobile-topbar {
         display: flex;
@@ -490,14 +531,7 @@ p {
         color: white;
         box-sizing: border-box;
     }
-
-    #mainContent {
-        width: 100%;
-        max-width: 100%;
-        margin-left: 0 !important;
-        box-sizing: border-box;
-    }
-
+    
     body {
         display: block;
     }
@@ -1133,6 +1167,32 @@ button {
 /* =========================
    8. MODALS
 ========================= */
+.small-modal {
+    max-width: 420px;
+}
+
+.finish-rating-options {
+    display: grid;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.rating-option {
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+    .rating-option.selected {
+        background: var(--accent);
+        color: white;
+    }
+
+.finish-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
 
 .modal {
     display: flex;

@@ -58,6 +58,9 @@ const BOOKS_PER_PAGE = 50;
 
 let visibleBookCount = BOOKS_PER_PAGE;
 
+let finishingBookId = null;
+let selectedFinishRating = null;
+
 
 // ========================
 // CONFIG
@@ -642,6 +645,99 @@ function renderAnnualReport() {
         renderAnnualReportHTML(report);
 }
 
+function renderAnnualReportBook(book, report) {
+
+    const ratingBadge =
+        book.rating !== null &&
+            book.rating !== undefined &&
+            book.rating !== ""
+            ? `
+                <div class="report-rating-badge">
+                    ⭐${book.rating}
+                </div>
+            `
+            : "";
+
+    const ratingText =
+        book.rating !== null &&
+            book.rating !== undefined &&
+            book.rating !== ""
+            ? `${book.rating}/5`
+            : "Unrated";
+
+    return `
+
+<div class="report-book">
+
+    <div class="report-book-number">
+        #${report.books.indexOf(book) + 1}
+    </div>
+
+    <div class="report-cover-wrapper">
+
+        ${ratingBadge}
+
+        <img
+            src="${book.cover || ""}"
+            class="report-cover"
+            title="${book.title}"
+            style="border:4px solid ${getGenreColor(book.genre)};"
+        >
+
+    </div>
+
+    <div class="report-finish-date">
+        ${formatShortDate(book.completed_date)}
+    </div>
+
+    <div class="report-tooltip">
+
+        <h4>${book.title}</h4>
+
+        <p>${book.author}</p>
+
+        <hr>
+
+        <p>${book.genre || "Unknown Genre"}</p>
+
+        <p>${book.page_count || "?"} pages</p>
+
+        <p>
+            Finished
+            <br>
+            ${new Date(book.completed_date).toLocaleDateString()}
+        </p>
+
+        <p>
+            Rating
+            <br>
+            ${ratingText}
+        </p>
+
+        <p>
+            Tags
+            <br>
+            <div class="book-tags">
+                ${renderTags(book)}
+            </div>
+        </p>
+
+        <p>
+            Reading Time
+            <br>
+            ${getReadingDays(book)
+            ? `${getReadingDays(book)} days`
+            : "Unknown"
+        }
+        </p>
+
+    </div>
+
+</div>
+
+`;
+}
+
 function renderAnnualReportHTML(report) {
     const booksRead =
         getBooksReadForYear(report.year);
@@ -677,94 +773,11 @@ function renderAnnualReportHTML(report) {
 
         if (!books.length) return "";
 
-        const covers = books.map(book => `
-
-<div class="report-book">
-
-    <div class="report-book-number">
-        #${report.books.indexOf(book) + 1}
-    </div>
-
-    <div class="report-cover-wrapper">
-
-        ${book.rating
-                ? `
-                <div class="report-rating-badge">
-                    ⭐${book.rating}
-                </div>
-                `
-                : ""
-            }
-
-        <img
-    src="${book.cover || ""}"
-    class="report-cover"
-    title="${book.title}"
-    style="
-        border:4px solid ${getGenreColor(book.genre)};
-    "
->
-
-    </div>
-
-    <div class="report-finish-date">
-        ${formatShortDate(book.completed_date)}
-    </div>
-
-    <div class="report-tooltip">
-
-    <h4>${book.title}</h4>
-
-    <p>${book.author}</p>
-
-    <hr>
-
-    <p>
-        ${book.genre || "Unknown Genre"}
-    </p>
-
-    <p>
-        ${book.page_count || "?"} pages
-    </p>
-
-    <p>
-        Finished
-        <br>
-        ${new Date(book.completed_date).toLocaleDateString()}
-    </p>
-    <p>
-        Rating
-        <br>
-        ${book.rating
-                ? "★".repeat(book.rating)
-                : "Unrated"
-            }
-    </p>
-    <p>
-        Tags
-        <br>
-        <div class="book-tags">
-    ${renderTags(book)}
-</div>
-    </p>
-    <p>
-
-    Reading Time
-
-    <br>
-
-    ${
-            getReadingDays(book)
-                ? `${getReadingDays(book)} days`
-                : "Unknown"
-    }
-
-</p>
-</div>
-
-</div>
-
-`).join("");
+        const covers = books
+            .map(book =>
+                renderAnnualReportBook(book, report)
+            )
+            .join("");
 
         return `
 
@@ -1352,10 +1365,17 @@ function renderBookGrid(
 
                         <div class="reading-actions">
 
-                            <button
-                                onclick="markFinished('${book.id}')">
-                                ✓ Finished
-                            </button>
+                            ${actionType === "markFinished" ? `
+    <button onclick="openFinishBookModal('${book.id}')">
+        ✓ Finished
+    </button>
+
+    <button
+        class="dnf-button"
+        onclick="markDNF('${book.id}')">
+        DNF
+    </button>
+` : ""}
 
                             <button
                                 class="dnf-btn"
@@ -1771,25 +1791,34 @@ function renderLibrary() {
 
 ${book.cover ? `<img src="${book.cover}">` : ""}
 
-        ${book.rating
-                ? `
+       ${book.rating !== null &&
+                book.rating !== undefined &&
+                book.rating !== ""
+                ? (
+                    book.rating === 0
+                        ? `
+                <div class="library-rating-badge dnf-badge">
+                    DNF
+                </div>
+            `
+                        : `
                 <div class="library-rating-badge">
                     ⭐${book.rating}
                 </div>
-                `
+            `
+                )
                 : ""
-            }
+}
             </div>
     
 
     <h3>${book.title}</h3>
     <p>${book.author}</p>
 
-    <p class="book-tags">
-        <div class="book-tags">
+    <div class="book-tags">
     ${renderTags(book)}
 </div>
-    </p>
+    
 
     <button onclick="openBookModal('${book.id}')">
         Details
@@ -2024,7 +2053,7 @@ function getBooksThisMonth() {
 function getAverageRating(books = myLibrary) {
 
     const rated =
-        books.filter(b => b.rating);
+        books.filter(b => b.rating > 0);
 
     if (!rated.length) return "N/A";
 
@@ -2208,6 +2237,98 @@ function updateShelfLabel(count) {
 // ========================
 // MODALS
 // ========================
+function openFinishBookModal(id) {
+
+    finishingBookId = id;
+    selectedFinishRating = null;
+
+    const book = findBook(id);
+
+    document.getElementById("finishBookContent").innerHTML = `
+
+        <h2>⭐ You Finished</h2>
+
+        <h3>${book.title}</h3>
+
+        <p>How would you rate it?</p>
+
+        <div class="finish-rating-options">
+
+            <button class="rating-option" data-rating="">
+                Unrated
+            </button>
+
+            <button class="rating-option" data-rating="1">
+                ★☆☆☆☆
+            </button>
+
+            <button class="rating-option" data-rating="2">
+                ★★☆☆☆
+            </button>
+
+            <button class="rating-option" data-rating="3">
+                ★★★☆☆
+            </button>
+
+            <button class="rating-option" data-rating="4">
+                ★★★★☆
+            </button>
+
+            <button class="rating-option" data-rating="5">
+                ★★★★★
+            </button>
+
+        </div>
+
+        <div class="finish-buttons">
+
+            <button onclick="closeFinishBookModal()">
+                Skip
+            </button>
+
+            <button onclick="finishBookWithRating()">
+                Save
+            </button>
+
+        </div>
+
+    `;
+
+    document
+        .getElementById("finishBookModal")
+        .classList.remove("hidden");
+
+    document
+        .querySelectorAll(".rating-option")
+        .forEach(btn => {
+
+            btn.addEventListener("click", () => {
+
+                document
+                    .querySelectorAll(".rating-option")
+                    .forEach(b => b.classList.remove("selected"));
+
+                btn.classList.add("selected");
+
+                selectedFinishRating =
+                    btn.dataset.rating === ""
+                        ? null
+                        : Number(btn.dataset.rating);
+
+            });
+
+        });
+
+}
+
+function closeFinishBookModal() {
+
+    document
+        .getElementById("finishBookModal")
+        .classList.add("hidden");
+
+}
+
 function openLibraryModal() {
     openModalView("📚 Library", `
         <div class="mini-library-grid">
@@ -2325,7 +2446,11 @@ function openBookModal(id) {
     setText("detailSeries", book.series || "");
     setText("detailGenre", book.genre || "");
     setText("detailStatus", book.status);
-    setText("detailRating", book.rating ? `${book.rating}/5` : "Unrated");
+    setText("detailRating", book.rating !== null &&
+        book.rating !== undefined &&
+        book.rating !== ""
+        ? `${book.rating}/5`
+        : "Unrated");
     setText("detailISBN", book.isbn || "");
     setText("detailShelves", (book.shelves || []).join(", ") || "None");
 
@@ -2983,6 +3108,8 @@ async function markDNF(id) {
 
     book.status = "DNF";
 
+    book.rating = 0;
+
     if (book.reading_history?.length) {
 
         const last =
@@ -3606,7 +3733,7 @@ async function saveEditedBook() {
 // READING STATUS ACTIONS
 // ------------------------
 
-async function markFinished(id) {
+async function markFinished(id, rating = null) {
 
     const book = findBook(id);
     if (!book) return;
@@ -3617,6 +3744,8 @@ async function markFinished(id) {
             .split("T")[0];
 
     book.status = "Finished";
+
+    book.rating = rating;
 
     book.completed_date = today;
 
@@ -3652,6 +3781,17 @@ async function markFinished(id) {
     renderAnnualReport();
     renderCollectionHighlights();
     openCurrentlyReadingModal();
+
+}
+
+async function finishBookWithRating() {
+
+    closeFinishBookModal();
+
+    await markFinished(
+        finishingBookId,
+        selectedFinishRating
+    );
 
 }
 
