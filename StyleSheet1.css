@@ -129,7 +129,7 @@ p {
    2. LAYOUT
 ========================= */
 #authScreen {
-    display: flex;
+    display: flex;   
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -254,6 +254,7 @@ p {
     #authScreen {
         min-height: 100vh;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         padding: 24px;
