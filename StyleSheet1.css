@@ -19,8 +19,7 @@ body {
     line-height: 1.5;
     background-color: var(--bg);
     color: var(--text);
-    margin: 0;
-    display: flex;
+    margin: 0;    
     background: linear-gradient( rgba(255,255,255,0.4), rgba(255,255,255,0.4) ), #f6f1ea;
     background-image: radial-gradient( rgba(0,0,0,0.03) 1px, transparent 1px );
     background-size: 14px 14px;
@@ -138,6 +137,7 @@ p {
 #app {
     display: flex;
     min-height: 100vh;
+    width: 100%;
 }
 
 .hidden {
@@ -223,32 +223,30 @@ p {
     border-radius: 16px;
     box-shadow: var(--shadow-sm);
 }
-
 /* =========================
-   MOBILE
+   GLOBAL BOX SIZING
 ========================= */
+
 *,
 *::before,
 *::after {
     box-sizing: border-box;
 }
 
-@media (max-width: 412px) {
-    #app.hidden {
-        display: none !important;
-    }
 
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 412px) {
+
+    /* =========================
+       AUTH
+    ========================= */
+
+    #app.hidden,
     #authScreen.hidden {
         display: none !important;
-    }
-
-    .auth-card {
-        width: 100%;
-        max-width: 420px;
-        background: var(--surface);
-        border-radius: 18px;
-        padding: 32px;
-        box-shadow: var(--shadow-md);
     }
 
     #authScreen {
@@ -260,28 +258,35 @@ p {
         padding: 24px;
     }
 
-    .library-cover-wrapper {
-        position: relative;
-        display: inline-block;
+
+    /* =========================
+       PAGE LAYOUT
+    ========================= */
+
+    body {
+        width: 100%;
+        margin: 0;
+        overflow-x: hidden;
     }
 
-    .library-rating-badge {
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 3px;
-        padding: 4px 8px;
-        border-radius: 999px;
-        font-size: .75rem;        
-        white-space: nowrap;
-        z-index: 20;
-        font-weight: bold;
-        box-shadow: 0 2px 6px rgba(0,0,0,.2);
-        backdrop-filter: blur(4px);
+    #app {
+        display: block;
+        min-height: 100vh;
     }
+
+    #mainContent {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 12px;
+        margin-left: 0;
+        overflow-x: hidden;
+    }
+
+
+    /* =========================
+       SIDEBAR / MOBILE NAV
+    ========================= */
 
     #sidebar {
         position: fixed;
@@ -292,38 +297,95 @@ p {
         background: white;
         z-index: 1000;
         transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        display: block; /* IMPORTANT */
+        transition: transform .3s ease;
     }
 
         #sidebar.open {
             transform: translateX(0);
         }
 
-    #mainContent {
-        margin-left: 0 !important;
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         width: 100%;
-        max-width: 100%;
-        padding: 12px;
-        overflow-x: hidden;        
-        box-sizing: border-box;
+        height: 56px;
+        padding: 0 12px;
+        background: var(--accent);
+        color: white;
     }
 
-    html,
-    body {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-        margin: 0;
-        padding: 0;
+    .menu-toggle {
+        display: block !important;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 99999;
     }
 
-    button, input, select {
+
+    /* =========================
+       LIBRARY GRID
+    ========================= */
+
+    #library,
+    .book-grid,
+    .report-card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .book-card {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        overflow: hidden;
+    }
+
+        .book-card * {
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+
+    /* =========================
+       FORMS / BUTTONS
+    ========================= */
+
+    button,
+    input,
+    select {
         min-height: 44px;
         font-size: 16px;
+        min-width: 0;
     }
 
-    .shelf-button {
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    .search-section,
+    .search-controls,
+    .currently-reading-toolbar {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+
+    /* =========================
+       MODALS
+    ========================= */
+
+    .modal {
         padding: 12px;
     }
 
@@ -333,172 +395,41 @@ p {
         max-height: 90vh;
         overflow-y: auto;
         border-radius: 12px;
-        box-sizing: border-box;
     }
 
-    .modal {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 20000;
-        background: rgba(0,0,0,.5);
-    }
 
-    .book-card {
-        width: 100%;
-        max-width: 100%;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        overflow: hidden;
-    }
-
-    .library-cover-wrapper img {
-        width: 100%;
-        display: block;
-        height: auto;
-        margin-top: 5px;
-    }
-
-        .book-card,
-        .book-card * {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-word;
-        }
-0
-    .menu-toggle {
-        display: block !important;
-        position: fixed !important;
-        top: 10px;
-        right: 10px;
-        z-index: 99999;
-        background: #8b4c5c;
-        color: white;
-        padding: 10px 14px;
-        border-radius: 8px;
-        border: none;
-    }
-
-    .book-grid, .report-card-grid {
-        display: grid;
-        grid-template-columns: 1fr !important;
-        gap: 12px;
-        width: 100%;
-    }
-
-        .book-grid,
-        .search-results-grid {
-            grid-template-columns: 1fr !important;
-        }
-
-
-
-    .search-section,
-    .search-controls,
-    .currently-reading-toolbar {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        max-width: 100%;
-        gap: 10px;
-    }
-
-    input,
-    select,
-    button,
-    .search-section,
-    .currently-reading-toolbar {
-        min-width: 0;
-    }
-
-    #manualShelfCheckboxes label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    #manualShelfCheckboxes input[type="checkbox"] {
-        margin: 0;
-    }
-
-    #shelfCheckboxes label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    #shelfCheckboxes input[type="checkbox"] {
-        margin: 0;
-    }
-
-    #statsModal .modal-content {
-        width: 95%;
-        max-width: 95%;
-        box-sizing: border-box;
-    }
-
-    #statsModal .modal-body {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-        box-sizing: border-box;
-    }
-
-    .stat-row {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-        width: 100%;
-        padding: 10px 0;
-        border-bottom: 1px solid #ddd;
-    }
-
-        .stat-row > * {
-            min-width: 0;
-        }
-
-        .stat-row,
-        .stat-row * {
-            overflow-wrap: break-word;
-            word-break: break-word;
-        }
+    /* =========================
+       STATS / DASHBOARD
+    ========================= */
 
     .stats-grid,
-    .dashboard-grid {
+    .dashboard-grid,
+    .habit-stats-grid {
         grid-template-columns: 1fr;
     }
 
     .habit-stats-grid {
-        display: flex !important;
+        display: flex;
         flex-direction: column;
         width: 100%;
-        max-width: 100%;
         gap: 12px;
     }
 
     .habit-card {
         width: 100%;
-        max-width: 100%;
         min-width: 0;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         padding: 12px;
     }
 
-            .habit-card * {
-                max-width: 100%;
-                min-width: 0;
-                overflow-wrap: break-word;
-                word-break: break-word;
-                box-sizing: border-box;
-            }
+        .habit-card * {
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+
+
+    /* =========================
+       CHARTS
+    ========================= */
 
     canvas,
     .chart-container,
@@ -507,48 +438,6 @@ p {
     }
 }
 
-.mobile-topbar {
-    display: none;
-}
-
-.mobile-nav {
-    display: none;
-}
-
-@media (max-width: 412px) {
-    #app {
-        display: block;
-        min-height: 100vh;
-    }
-
-    .mobile-topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        height: 56px;
-        padding: 0 12px;
-        background: #8b4c5c;
-        color: white;
-        box-sizing: border-box;
-    }
-    
-    body {
-        display: block;
-    }
-
-    .mobile-nav {
-        display: block;
-        width: 100%;
-    }
-
-    #mainContent {
-        width: 100%;
-        margin-left: 0 !important;
-    }
-
-  
-}
 
 /* =========================
    3. SEARCH / FILTERS
@@ -600,9 +489,9 @@ button {
 
 #library {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 160px);
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
-    justify-content: center;
+    width: 100%;
     align-items: start;
 }
 
