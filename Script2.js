@@ -176,6 +176,7 @@ function saveLibrary() {
 async function loadLibrary() {
 
     console.log("Loading from Supabase...");
+    console.log("currentUser:", currentUser);
 
     const { data, error } = await supabaseClient
         .from("books")
@@ -1380,10 +1381,7 @@ function renderStats() {
 </div>
     `;
 }
-function renderBookGrid(
-    books,
-    view = ""
-) {
+function renderBookGrid(books, view = "") {
 
     return `
         <div class="mini-library-grid">
@@ -1392,27 +1390,19 @@ function renderBookGrid(
 
                 <div class="mini-book-card">
 
-                    <img src="${book.cover || ""}">
+                    <img src="${book.cover || ""}" alt="${book.title}">
 
                     <p>${book.title}</p>
 
                     <small>${book.author || ""}</small>
 
                     ${view === "currentlyReading" ? `
-
                         <div class="reading-actions">
 
-                            ${actionType === "markFinished" ? `
-    <button onclick="openFinishBookModal('${book.id}')">
-        ✓ Finished
-    </button>
-
-    <button
-        class="dnf-button"
-        onclick="markDNF('${book.id}')">
-        DNF
-    </button>
-` : ""}
+                            <button
+                                onclick="openFinishBookModal('${book.id}')">
+                                ✓ Finished
+                            </button>
 
                             <button
                                 class="dnf-btn"
@@ -1421,7 +1411,6 @@ function renderBookGrid(
                             </button>
 
                         </div>
-
                     ` : ""}
 
                 </div>
@@ -2606,6 +2595,7 @@ function openRatingModal() {
 }
 
 function openReadingDashboard() {
+    console.log("Opening Reading Dashboard...");
 
     const currentStreak = getCurrentStreak();
     const longestStreak = getLongestStreak();
@@ -2633,6 +2623,7 @@ function openReadingDashboard() {
         </div>
 
     `);
+    console.log("Reading Dashboard opened.");
 }
 function openReadingLogDashboard() {
 
@@ -3126,6 +3117,7 @@ function openModalView(title, html) {
 }
 
 function openCurrentlyReadingModal() {
+    console.log("OPEN CURRENTLY READING MODAL FIRED");
 
     const readingBooks =
         myLibrary.filter(b => b.status === "Reading");
@@ -3159,6 +3151,7 @@ function openCurrentlyReadingModal() {
         }
 
     `);
+    console.log("CURRENTLY READING MODAL OPENED");
 
     setupCurrentlyReadingSearch();
 }

@@ -233,6 +233,10 @@ p {
     box-sizing: border-box;
 }
 
+.menu-toggle {
+    display: none;
+}
+
 
 /* =========================
    MOBILE
@@ -313,15 +317,21 @@ p {
         padding: 0 12px;
         background: var(--accent);
         color: white;
-    }
-
+    }    
+    
     .menu-toggle {
-        display: block !important;
+        display: block;
         position: fixed;
         top: 10px;
         right: 10px;
         z-index: 99999;
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 8px;
     }
+
 
 
     /* =========================
