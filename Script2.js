@@ -829,83 +829,158 @@ function renderFriendSearchResults(results) {
         `).join("");
 }
 
-async function sendFriendRequest(friendId) {
+async function loadFriendRequests() {
 
-    console.log(
-        "Sending request to:",
-        friendId
-    );
-
-    if (friendId === currentUser.id) {
-
-        alert(
-            "You can't add yourself."
+    const container =
+        document.getElementById(
+            "notificationsList"
         );
 
-        return;
 
-    }
-
-    const { data: sentRequest, error: sentError } =
+    const { data, error } =
         await supabaseClient
             .from("friendships")
-            .select("*")
-            .eq("user_id", currentUser.id)
-            .eq("friend_id", friendId);
-
-    if (sentError) {
-        console.error(sentError);
-        return;
-    }
-
-    const { data: receivedRequest, error: receivedError } =
-        await supabaseClient
-            .from("friendships")
-            .select("*")
-            .eq("user_id", friendId)
-            .eq("friend_id", currentUser.id);
-
-    if (receivedError) {
-        console.error(receivedError);
-        return;
-    }
-
-    if (sentRequest.length || receivedRequest.length) {
-
-        alert("A friendship or request already exists.");
-
-        return;
-
-    }
-
-    const { error } =
-        await supabaseClient
-            .from("friendships")
-            .insert({
-
-                user_id: currentUser.id,
-
-                friend_id: friendId,
-
-                status: "pending"
-
-            });
+            .select(`
+                id,
+                user_id,
+                created_at,
+                profiles:user_id (
+                    username,
+                    display_name,
+                    avatar_url
+                )
+            `)
+            .eq(
+                "friend_id",
+                currentUser.id
+            )
+            .eq(
+                "status",
+                "pending"
+            );
 
     if (error) {
 
         console.error(error);
+        return;
 
-        alert(
-            "Unable to send request."
+    }
+
+    if (!data.length) {
+
+        container.innerHTML = `
+            <p>
+                No new requests.
+            </p>
+        `;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        data.map(request => `
+
+            <div class="friend-request">
+
+                <img 
+                src="${request.profiles.avatar_url || ""}"
+                class="friend-avatar">
+
+
+                <span>
+                    ${request.profiles.display_name ||
+            request.profiles.username
+            }
+                </span>
+
+
+                <button
+                onclick="acceptFriendRequest('${request.id}')">
+                    Accept
+                </button>
+
+                <button
+                onclick="declineFriendRequest('${request.id}')">
+                    Decline
+                </button>
+
+            </div>
+
+        `).join("");
+
+}
+
+async function acceptFriendRequest(friendshipId) {
+
+    const { error } =
+        await supabaseClient
+            .from("friendships")
+            .update({
+                status: "accepted"
+            })
+            .eq(
+                "id",
+                friendshipId
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Accept request failed:",
+            error
+        );
+
+        alert(error.message);
+
+        return;
+    }
+
+
+    console.log(
+        "Friend request accepted"
+    );
+
+
+    await loadFriendRequests();
+
+    await loadFriends();
+
+}
+
+async function declineFriendRequest(friendshipId) {
+
+
+    const { error } =
+        await supabaseClient
+            .from("friendships")
+            .delete()
+            .eq(
+                "id",
+                friendshipId
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Decline failed:",
+            error
         );
 
         return;
 
     }
 
-    alert(
-        "Friend request sent!"
+
+    console.log(
+        "Friend request declined"
     );
+
+
+    await loadFriendRequests();
+
 }
 
 // ========================

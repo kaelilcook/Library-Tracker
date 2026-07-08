@@ -67,42 +67,45 @@
 
 
             <aside id="sidebar">
-                <button id="notificationsBtn">
-                    🔔 Notifications
-                    <span id="notificationBadge" class="notification-badge hidden">
-                        0
-                    </span>
-                </button>
-
-                <button id="accountBtn">
-                    👤 Account
-                </button>
-
-                <button id="logoutBtn">
-                    Logout
-                </button>
-
-                <h2>My Shelves</h2>
-
-                <nav id="shelfNav"></nav>
-
-                <section class="add-shelf-section">
-
-                    <input type="text"
-                           id="newShelfInput"
-                           placeholder="New shelf name">
-
-                    <button id="addShelfBtn">
-                        Add Shelf
+                <div class="sidebar-scroll">
+                    <button id="notificationsBtn">
+                        🔔 Notifications
+                        <span id="notificationBadge" class="notification-badge hidden">
+                            0
+                        </span>
                     </button>
 
-                    <div class="data-tools">
-                        <button id="exportLibraryBtn">📤 Export Library</button>
-                        <button id="importLibraryBtn">📥 Import Library</button>
+                    <button id="accountBtn">
+                        👤 Account
+                    </button>
 
-                        <!-- hidden file input -->
-                        <input type="file" id="importFileInput" accept=".json" hidden>
-                    </div>
+                    <button id="logoutBtn">
+                        Logout
+                    </button>
+
+                    <h2>My Shelves</h2>
+
+                    <nav id="shelfNav"></nav>
+
+                    <section class="add-shelf-section">
+
+                        <input type="text"
+                               id="newShelfInput"
+                               placeholder="New shelf name">
+
+                        <button id="addShelfBtn">
+                            Add Shelf
+                        </button>
+
+                        <div class="data-tools">
+                            <button id="exportLibraryBtn">📤 Export Library</button>
+                            <button id="importLibraryBtn">📥 Import Library</button>
+
+                            <!-- hidden file input -->
+                            <input type="file" id="importFileInput" accept=".json" hidden>
+                        </div>
+
+                    </section>
 
                     <div class="friends-section">
 
@@ -124,8 +127,7 @@
                         </div>
 
                     </div>
-
-                </section>
+                </div>
 
             </aside>
 

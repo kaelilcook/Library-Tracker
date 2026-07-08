@@ -61,30 +61,28 @@ async function resetPasswordRequest() {
             .value
             .trim();
 
+    console.log("Sending reset email to:", email);
 
     if (!email) {
-
-        alert(
-            "Please enter your email address first."
-        );
-
+        alert("Please enter your email first.");
         return;
     }
 
+
     const { error } =
-        await supabaseClient.auth
-            .resetPasswordForEmail(
-                email,
-                {
-                    redirectTo:
-                        "https://kaelicook.github.io/Library-Tracker/reset-password.html"
-                }
-            );
+        await supabaseClient.auth.resetPasswordForEmail(
+            email,
+            {
+                redirectTo:
+                    "https://kaelilcook.github.io/Library-Tracker/reset-password.html"
+            }
+        );
+
 
     if (error) {
 
         console.error(
-            "Password reset error:",
+            "Reset error:",
             error
         );
 
@@ -93,8 +91,9 @@ async function resetPasswordRequest() {
         return;
     }
 
+
     alert(
-        "Password reset email sent. Check your inbox."
+        "Password reset email sent."
     );
 }
 

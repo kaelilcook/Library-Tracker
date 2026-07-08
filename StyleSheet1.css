@@ -153,6 +153,14 @@ p {
     position: sticky;
     top: 0;
     height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 20px;
 }
 
 #mainContent {
@@ -454,12 +462,15 @@ p {
         position: fixed;
         top: 0;
         left: 0;
-        height: 100vh;
+        height: 100dvh;
         width: 260px;
         background: white;
         z-index: 1000;
         transform: translateX(-100%);
-        transition: transform .3s ease;
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
         #sidebar.open {
@@ -490,7 +501,10 @@ p {
         border-radius: 8px;
     }
 
-
+    .friends-section {
+        margin-top: 20px;
+        padding-bottom: 30px;
+    }
 
     /* =========================
        LIBRARY GRID
