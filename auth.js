@@ -7,7 +7,8 @@ async function signUp() {
     const email =
         document
             .getElementById("email")
-            .value;
+            .value
+            .trim();
 
     const password =
         document
@@ -16,8 +17,15 @@ async function signUp() {
 
     const { error } =
         await supabaseClient.auth.signUp({
+
             email,
-            password
+            password,
+
+            options: {
+                emailRedirectTo:
+                    "https://kaelilcook.github.io/Library-Tracker/"
+            }
+
         });
 
     if (error) {
