@@ -223,6 +223,164 @@ p {
     border-radius: 16px;
     box-shadow: var(--shadow-sm);
 }
+
+/* =========================
+   FRIENDS
+========================= */
+.friends-section {
+    margin-top: 20px;
+}
+
+
+.sidebar-section-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 1rem;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text);
+}
+
+
+.friends-list {
+    display: none;
+    padding: 8px 12px;
+    color: var(--text);
+}
+
+    .friends-list.open {
+        display: block;
+    }
+
+.friend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    color: var(--text);
+}
+
+    .friend-item:hover {
+        background: var(--surface-2);
+    }
+
+    .friend-item span {
+        color: var(--text);
+    }
+
+.empty-friends {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.add-friend-btn {
+    width: 100%;
+    margin: 8px 0;
+}
+
+.friend-modal-content {
+    max-width: 500px;
+    width: 100%;
+}
+
+.friend-search {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.friend-search-divider {
+    text-align: center;
+    color: var(--text-light);
+    font-weight: bold;
+}
+
+.friend-search-results {
+    margin-top: 24px;
+}
+
+.empty-search {
+    text-align: center;
+    color: var(--text-light);
+}
+
+.friend-result {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.friend-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.friend-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+/* =========================
+   NOTIFICATIONS
+========================= */
+#notificationsBtn {
+    margin-bottom: 5px;
+}
+
+/* =========================
+   ACCOUNT
+========================= */
+.account-modal-content {
+    width: min(500px, 90%);
+}
+
+
+.account-profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--surface-2);
+}
+
+
+.account-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+.friend-code-row {
+    display: flex;
+    gap: 8px;
+}
+
+
+    .friend-code-row input {
+        flex: 1;
+    }
+
 /* =========================
    GLOBAL BOX SIZING
 ========================= */
@@ -415,7 +573,8 @@ p {
     .stats-grid,
     .dashboard-grid,
     .habit-stats-grid {
-        grid-template-columns: 1fr;
+        display: flex !important;
+        flex-direction: column;
     }
 
     .habit-stats-grid {

@@ -54,6 +54,10 @@
                 Create Account
             </button>
 
+            <button id="forgotPasswordBtn" class="text-button">
+                Forgot Password?
+            </button>
+
         </div>
         <div id="app" class="hidden">
 
@@ -63,9 +67,19 @@
 
 
             <aside id="sidebar">
+                <button id="notificationsBtn">
+                    🔔 Notifications
+                    <span id="notificationBadge" class="notification-badge hidden">
+                        0
+                    </span>
+                </button>
+
+                <button id="accountBtn">
+                    👤 Account
+                </button>
 
                 <button id="logoutBtn">
-                    Log Out
+                    Logout
                 </button>
 
                 <h2>My Shelves</h2>
@@ -88,6 +102,27 @@
 
                         <!-- hidden file input -->
                         <input type="file" id="importFileInput" accept=".json" hidden>
+                    </div>
+
+                    <div class="friends-section">
+
+                        <div class="friends-header">
+                            <button id="addFriendBtn" class="add-friend-btn">
+                                + Add Friend
+                            </button>
+
+                            <button id="toggleFriendsBtn" class="sidebar-section-toggle">
+                                👥 Friends
+                                <span id="friendsArrow">▼</span>
+                            </button>
+                        </div>
+
+                        <div id="friendsList" class="friends-list">
+                            <p class="empty-friends">
+                                No friends yet.
+                            </p>
+                        </div>
+
                     </div>
 
                 </section>
@@ -678,18 +713,204 @@
                 </div>
             </div>
 
-
-
-
             <!-- =========================
-             SCRIPTS
+          ACCOUNT MODAL
         ========================== -->
 
-            <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script src="Script2.js"></script>
-            <script src="auth.js"></script>
+            <div id="accountModal" class="modal modal-hidden">
+
+                <div class="modal-content account-modal-content">
+
+                    <span class="close"
+                          onclick="closeAccountModal()">
+                        &times;
+                    </span>
+
+                    <div class="modal-header">
+                        <h2>My Account</h2>
+                    </div>
+
+                    <div class="account-profile-section">
+
+                        <img id="accountAvatar"
+                             src=""
+                             alt="Profile Picture"
+                             class="profile-avatar">
+
+
+                        <input type="file"
+                               id="avatarUpload"
+                               accept="image/*">
+
+                    </div>
+
+                    <div class="account-fields">
+
+                        <label>
+                            Username
+
+                            <input id="accountUsername"
+                                   type="text">
+                        </label>
+
+                        <label>
+                            Display Name
+
+                            <input id="accountDisplayName"
+                                   type="text">
+                        </label>
+
+                        <label>
+                            Email
+                            <input id="accountEmail"
+                                   type="email"
+                                   disabled>
+                        </label>
+
+                        <label>
+                            Friend Code
+
+                            <div class="friend-code-row">
+
+                                <input id="accountFriendCode"
+                                       disabled>
+
+                                <button id="copyFriendCodeBtn">
+                                    Copy
+                                </button>
+
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+
+                        <button id="saveAccountBtn">
+                            Save Changes
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- =========================
+          PASSWORD RECOVERY MODAL
+        ========================== -->
+            <div id="forgotPasswordModal" class="modal modal-hidden">
+
+                <div class="modal-content">
+
+                    <span class="close"
+                          onclick="closeForgotPasswordModal()">
+                        &times;
+                    </span>
+
+                    <h2>Reset Password</h2>
+
+                    <p>
+                        Enter your email address and we'll send you a password reset link.
+                    </p>
+
+                    <input id="resetEmail"
+                           type="email"
+                           placeholder="Email">
+
+                    <button id="sendResetBtn">
+                        Send Reset Email
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- =========================
+          NOTIFICATION MODAL
+        ========================== -->
+            <div id="notificationsModal" class="modal modal-hidden">
+
+                <div class="modal-content notifications-modal">
+
+                    <span class="close"
+                          onclick="closeNotificationsModal()">
+                        &times;
+                    </span>
+
+                    <div class="modal-header">
+                        <h2>Notifications</h2>
+                    </div>
+
+                    <div id="notificationsList">
+
+                    </div>
+
+                    <div class="notification-card">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- =========================
+          FRIEND MODAL
+        ========================== -->
+
+            <div id="friendModal" class="modal modal-hidden">
+
+                <div class="modal-content friend-modal-content">
+
+                    <span class="close"
+                          onclick="closeFriendModal()">
+                        &times;
+                    </span>
+
+                    <div class="modal-header">
+                        <h2>Add Friend</h2>
+                    </div>
+
+                    <div class="friend-search">
+
+                        <label>
+
+                            Search
+
+                            <input id="friendSearchInput"
+                                   placeholder="Username or Friend Code">
+
+                        </label>
+
+                        <button id="searchFriendBtn">
+                            Search
+                        </button>
+
+                    </div>
+
+                    <div id="friendSearchResults"
+                         class="friend-search-results">
+
+                        <p class="empty-search">
+                            Search for someone to get started.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
+
+
+        <!-- =========================
+         SCRIPTS
+    ========================== -->
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="Script2.js"></script>
+        <script src="auth.js"></script>
+        
+    </div>
     </div>
 </body>
 

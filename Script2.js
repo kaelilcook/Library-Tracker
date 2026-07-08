@@ -61,6 +61,9 @@ let visibleBookCount = BOOKS_PER_PAGE;
 let finishingBookId = null;
 let selectedFinishRating = null;
 
+let friends = [];
+
+let notifications = [];
 
 // ========================
 // CONFIG
@@ -80,17 +83,6 @@ function upgradeUrl(url) {
     if (!url) return "";
     return url.replace("http://", "https://");
 }
-
-document.addEventListener("DOMContentLoaded", async () => {
-
-    await loadShelves();
-    await loadLibrary();
-    await loadShelves();
-    await loadReadingGoal(
-        new Date().getFullYear()
-    );
-});
-
 
 // ========================
 // DOM ELEMENTS
@@ -134,6 +126,39 @@ window.calendarYear ??= today.getFullYear();
 // ========================
 // CORE UTILITIES
 // ========================
+async function initializeApp() {
+
+    await ensureProfileExists();
+
+    await loadProfile();
+
+    await loadFriends();
+
+    await loadShelves();
+
+    await loadReadingGoal(
+        new Date().getFullYear()
+    );
+
+    await loadLibrary();
+
+
+    renderApp();
+
+}
+
+function renderApp() {
+
+    renderShelfNav();
+
+    renderLibrary();
+
+    renderStats();
+
+    renderAnnualReport();
+
+    renderCollectionHighlights();
+}
 
 function debounce(func, delay) {
     let timeout;
@@ -175,14 +200,16 @@ function saveLibrary() {
 
 async function loadLibrary() {
 
-    console.log("Loading from Supabase...");
-    console.log("currentUser:", currentUser);
+    console.log("Loading library...");
 
-    const { data, error } = await supabaseClient
-        .from("books")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .order("date_added", { ascending: false });
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .order("date_added", {
+                ascending: false
+            });
 
     if (error) {
         console.error(error);
@@ -191,11 +218,7 @@ async function loadLibrary() {
 
     myLibrary = data || [];
 
-    renderLibrary();
-    renderStats?.();
-    loadReadingLog();
-    renderAnnualReport();
-    renderCollectionHighlights();
+    await loadReadingLog();
 }
 
 async function loadShelves() {
@@ -219,12 +242,7 @@ async function loadShelves() {
 
 async function loadReadingLog() {
 
-    const {
-        data: { user },
-        error: userError
-    } = await supabaseClient.auth.getUser();
-
-    if (userError || !user) {
+    if (!currentUser) {
         console.error("No authenticated user.");
         return;
     }
@@ -232,7 +250,7 @@ async function loadReadingLog() {
     const { data, error } = await supabaseClient
         .from("reading_log")
         .select("*")
-        .eq("user_id", user.id);
+        .eq("user_id", currentUser.id);
 
     if (error) {
         console.error(error);
@@ -334,12 +352,13 @@ async function importLibraryFile(file) {
             }
 
             alert("Library imported successfully!");
-await loadLibrary();
-            await loadReadingLog();
+            await loadLibrary();            
             await loadShelves();
             await loadReadingGoal(
                 new Date().getFullYear()
             );
+
+            renderApp();
 
         } catch (err) {
             alert("Invalid JSON file.");
@@ -353,7 +372,6 @@ await loadLibrary();
 // ========================
 // MODALS
 // ========================
-
 function countBy(keyFn) {
     const counts = {};
 
@@ -456,6 +474,437 @@ function openHallOfFame() {
     openModalView(
         "🏆 Hall of Fame",
         renderBookGrid(books)
+    );
+}
+
+// ========================
+// NOTIFICATIONS
+// ========================
+async function loadNotifications() {
+
+    const { data, error } =
+        await supabaseClient
+            .from("friendships")
+            .select("*")
+            .eq("friend_id", currentUser.id)
+            .eq("status", "pending");
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    notifications = await Promise.all(
+
+        (data || []).map(async request => {
+
+            const { data: profile } =
+                await supabaseClient
+                    .from("profiles")
+                    .select("*")
+                    .eq("id", request.user_id)
+                    .single();
+
+            return {
+
+                ...request,
+
+                sender: profile
+
+            };
+
+        })
+
+    );
+
+    console.log(notifications);
+
+}
+
+function renderNotifications() {
+
+    const container =
+        document.getElementById(
+            "notificationsList"
+        );
+
+    if (!notifications.length) {
+
+        container.innerHTML =
+            "<p>No notifications.</p>";
+
+        return;
+
+    }
+
+    container.innerHTML =
+        notifications.map(notification => `
+
+            <div class="notification-card">
+
+                <img
+                    src="${notification.sender.avatar_url || ""
+            }"
+                    class="friend-avatar">
+
+                <div class="notification-content">
+
+                    <strong>
+                        ${notification.sender.display_name ||
+            notification.sender.username
+            }
+                    </strong>
+
+                    <p>
+                        sent you a friend request.
+                    </p>
+
+                    <div class="notification-actions">
+
+                        <button
+                            onclick="acceptFriendRequest('${notification.id}')">
+
+                            Accept
+
+                        </button>
+
+                        <button
+                            onclick="declineFriendRequest('${notification.id}')">
+
+                            Decline
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `).join("");
+
+}
+
+async function acceptFriendRequest(id) {
+
+    console.log("Accepting", id);
+
+}
+
+async function declineFriendRequest(id) {
+
+    console.log("Declining", id);
+
+}
+
+async function openNotificationsModal() {
+
+    await loadNotifications();
+
+    renderNotifications();
+
+    document
+        .getElementById("notificationsModal")
+        .classList.remove("modal-hidden");
+
+}
+
+function closeNotificationsModal() {
+
+    document
+        .getElementById("notificationsModal")
+        .classList.add("modal-hidden");
+
+}
+
+document
+    .getElementById("notificationsBtn")
+    .addEventListener(
+        "click",
+        openNotificationsModal
+    );
+// ========================
+// FRIENDS
+// ========================
+async function loadFriends() {
+
+    const { data, error } =
+        await supabaseClient
+            .from("friendships")
+            .select("*")
+            .eq("status", "accepted")
+            .or(
+                `user_id.eq.${currentUser.id},friend_id.eq.${currentUser.id}`
+            );
+
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+
+    const friendIds =
+        data.map(row =>
+            row.user_id === currentUser.id
+                ? row.friend_id
+                : row.user_id
+        );
+
+
+    const { data: profiles } =
+        await supabaseClient
+            .from("profiles")
+            .select("*")
+            .in("id", friendIds);
+
+
+    friends = profiles || [];
+
+    renderFriends();
+}
+
+function renderFriends() {
+
+    const container =
+        document.getElementById("friendsList");
+
+    if (!container) return;
+
+
+    if (!friends.length) {
+
+        container.innerHTML = `
+            <p class="empty-friends">
+                No friends yet.
+            </p>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        friends.map(item => {
+
+            const friend = item.friend;
+
+            if (!friend) {
+                return "";
+            }
+
+
+            return `
+                <div class="friend-item">
+
+                    <img 
+                        src="${friend.avatar_url || "default-avatar.png"}"
+                        class="friend-avatar"
+                        alt="Profile picture"
+                    >
+
+                    <span>
+                        ${friend.display_name ||
+                friend.username ||
+                "Unknown User"
+                }
+                    </span>
+
+                </div>
+            `;
+
+        }).join("");
+
+}
+
+function openFriendModal() {
+
+    document
+        .getElementById("friendModal")
+        .classList
+        .remove("modal-hidden");
+
+    document
+        .getElementById("friendSearchInput")
+        .focus();
+
+}
+
+function closeFriendModal() {
+
+    document
+        .getElementById("friendModal")
+        .classList
+        .add("modal-hidden");
+
+}
+
+async function searchFriends() {
+
+    const search =
+        document
+            .getElementById("friendSearchInput")
+            .value
+            .trim();
+
+    if (!search) return;
+
+    console.log("Searching:", search);
+
+    const isFriendCode =
+        search.length === 8;
+
+    console.log(isFriendCode);
+
+    let query =
+        supabaseClient
+            .from("profiles")
+            .select("*");
+
+    if (isFriendCode) {
+
+        query =
+            query.eq(
+                "friend_code",
+                search.toUpperCase()
+            );
+
+    }
+
+    else {
+
+        query =
+            query.ilike("username", `%${search}%`);
+
+    }
+
+    const { data, error } =
+        await query;
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+    renderFriendSearchResults(data);
+}
+
+function renderFriendSearchResults(results) {
+
+    const container =
+        document.getElementById(
+            "friendSearchResults"
+        );
+
+    if (!results.length) {
+        container.innerHTML =
+            "<p>No users found.</p>";
+        return;
+    }
+
+    container.innerHTML =
+        results.map(user => `
+            <div class="friend-result">
+                <img
+                    src="${user.avatar_url || ""}"
+                    class="friend-avatar">
+                <div class="friend-info">
+                    <strong>
+                        ${user.display_name ||
+            user.username
+            }
+                    </strong>
+                    <small>
+                        @${user.username}
+                    </small>
+                </div>
+                <button
+    onclick="sendFriendRequest('${user.id}')">
+    Add Friend
+</button>
+            </div>
+        `).join("");
+}
+
+async function sendFriendRequest(friendId) {
+
+    console.log(
+        "Sending request to:",
+        friendId
+    );
+
+    if (friendId === currentUser.id) {
+
+        alert(
+            "You can't add yourself."
+        );
+
+        return;
+
+    }
+
+    const { data: sentRequest, error: sentError } =
+        await supabaseClient
+            .from("friendships")
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .eq("friend_id", friendId);
+
+    if (sentError) {
+        console.error(sentError);
+        return;
+    }
+
+    const { data: receivedRequest, error: receivedError } =
+        await supabaseClient
+            .from("friendships")
+            .select("*")
+            .eq("user_id", friendId)
+            .eq("friend_id", currentUser.id);
+
+    if (receivedError) {
+        console.error(receivedError);
+        return;
+    }
+
+    if (sentRequest.length || receivedRequest.length) {
+
+        alert("A friendship or request already exists.");
+
+        return;
+
+    }
+
+    const { error } =
+        await supabaseClient
+            .from("friendships")
+            .insert({
+
+                user_id: currentUser.id,
+
+                friend_id: friendId,
+
+                status: "pending"
+
+            });
+
+    if (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to send request."
+        );
+
+        return;
+
+    }
+
+    alert(
+        "Friend request sent!"
     );
 }
 
@@ -3567,12 +4016,12 @@ async function addToLibrary(bookData, shelf = "") {
         return;
     }
 
-    await loadLibrary();
-    await loadReadingLog();
+    await loadLibrary();    
     await loadShelves();
     await loadReadingGoal(
         new Date().getFullYear()
     );
+    renderApp();
 }
 
 function findPossibleDuplicates(newBook) {
@@ -3777,12 +4226,12 @@ async function saveEditedBook() {
         return;
     }
 
-    await loadLibrary();
-    await loadReadingLog();
+    await loadLibrary();    
     await loadShelves();
     await loadReadingGoal(
         new Date().getFullYear()
     );
+    renderApp();
 
     document.getElementById("bookModal").style.display = "none";
     currentEditId = null;
@@ -4097,24 +4546,7 @@ function getFilteredBooks() {
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // ========================
-    // INITIAL LOAD
-    // ========================
-    await loadLibrary();
-
-    await loadReadingLog();
-
-    await loadReadingGoal(
-        new Date().getFullYear()
-    );
-
-    renderShelfNav();
-    renderLibrary();
-    renderStats();
-    renderAnnualReport();
-    renderCollectionHighlights();
-
-
+    
     // ========================
     // HELPERS (DOM CACHE)
     // ========================
@@ -4191,7 +4623,43 @@ document.addEventListener("DOMContentLoaded", async () => {
             sidebar.classList.remove("open");
         }
     });
+    // ========================
+    // FRIENDS
+    // ========================
+    document
+        .getElementById("toggleFriendsBtn")
+        ?.addEventListener("click", () => {
 
+            const list =
+                document.getElementById("friendsList");
+
+            const arrow =
+                document.getElementById("friendsArrow");
+
+
+            list.classList.toggle("open");
+
+
+            arrow.textContent =
+                list.classList.contains("open")
+                    ? "▲"
+                    : "▼";
+
+        });
+
+    document
+        .getElementById("addFriendBtn")
+        ?.addEventListener(
+            "click",
+            openFriendModal
+    );
+
+    document
+        .getElementById("searchFriendBtn")
+        ?.addEventListener(
+            "click",
+            searchFriends
+        );
 
     // ========================
     // MANUAL ADD MODAL
@@ -4295,13 +4763,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .eq("name", editingShelf.name);
 
         document.getElementById("shelfEditModal")
-            .classList.add("hidden");
-
-        renderShelfNav();
-        renderLibrary();
-        renderStats();
-        renderAnnualReport();
-        renderCollectionHighlights();
+            .classList.add("hidden");       
     };
 
   
