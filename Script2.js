@@ -142,6 +142,8 @@ async function initializeApp() {
 
     await loadLibrary();
 
+    await updateNotificationBadge();
+
 
     renderApp();
 
@@ -585,15 +587,63 @@ function renderNotifications() {
 
 }
 
-async function acceptFriendRequest(id) {
+async function updateNotificationBadge() {
 
-    console.log("Accepting", id);
+    const badge =
+        document.getElementById(
+            "notificationBadge"
+        );
 
-}
 
-async function declineFriendRequest(id) {
+    if (!badge) return;
 
-    console.log("Declining", id);
+
+    const { count, error } =
+        await supabaseClient
+            .from("friendships")
+            .select("*", {
+                count: "exact",
+                head: true
+            })
+            .eq(
+                "friend_id",
+                currentUser.id
+            )
+            .eq(
+                "status",
+                "pending"
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Notification count failed:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    if (count > 0) {
+
+        badge.textContent = count;
+
+        badge.classList.remove(
+            "hidden"
+        );
+
+    }
+
+    else {
+
+        badge.classList.add(
+            "hidden"
+        );
+
+    }
 
 }
 
@@ -688,21 +738,48 @@ function renderFriends() {
         friends.map(friend => {
 
             return `
-            <div class="friend-item">
+           <div class="friend-item"
+         data-user-id="${friend.id}">
 
-                <img 
-                    src="${friend.avatar_url || "default-avatar.png"}"
-                    class="friend-avatar"
-                    alt="Profile picture"
-                >
+        <img
+            src="${friend.avatar_url || ""}"
+            class="friend-avatar">
 
-                <span>
+
+        <span class="friend-name">
+            ${friend.display_name ||
+                friend.username}
+        </span>
+
+
+        <div class="friend-hover-card">
+
+            <img
+                src="${friend.avatar_url || ""}"
+                class="friend-large-avatar">
+
+
+            <div>
+
+                <strong>
                     ${friend.display_name ||
-                friend.username ||
-                "Unknown User"}
-                </span>
+                friend.username}
+                </strong>
+
+                <small>
+                    @${friend.username}
+                </small>
 
             </div>
+
+
+            <button class="view-profile-btn">
+                View Profile
+            </button>
+
+        </div>
+
+    </div>
         `;
 
         }).join("");
@@ -1042,6 +1119,8 @@ async function acceptFriendRequest(friendshipId) {
 
     await loadFriendRequests();
 
+    await updateNotificationBadge();
+
     await loadFriends();
 
 }
@@ -1077,6 +1156,8 @@ async function declineFriendRequest(friendshipId) {
 
 
     await loadFriendRequests();
+
+    await updateNotificationBadge();
 
 }
 
