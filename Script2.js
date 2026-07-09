@@ -792,53 +792,72 @@ function renderFriendSearchResults(results) {
         );
 
     if (!results.length) {
+
         container.innerHTML =
             "<p>No users found.</p>";
+
         return;
     }
 
+
     container.innerHTML =
         results.map(user => `
+
             <div class="friend-result">
+
                 <img
                     src="${user.avatar_url || ""}"
                     class="friend-avatar">
+
                 <div class="friend-info">
+
                     <strong>
                         ${user.display_name ||
-            user.username
-            }
+            user.username}
                     </strong>
+
                     <small>
                         @${user.username}
                     </small>
+
                 </div>
+
+
                 <button
-    class="add-friend-result-btn"
-    data-user-id="${user.id}">
-    Add Friend
-</button>
+                    class="add-friend-result-btn"
+                    data-user-id="${user.id}">
+                    Add Friend
+                </button>
+
             </div>
+
         `).join("");
+
+
+    document
+        .querySelectorAll(".add-friend-result-btn")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const friendId =
+                        button.dataset.userId;
+
+                    console.log(
+                        "Add friend clicked:",
+                        friendId
+                    );
+
+                    sendFriendRequest(friendId);
+
+                }
+            );
+
+        });
+
 }
-
-document
-    .querySelectorAll(".add-friend-result-btn")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const friendId =
-                    button.dataset.userId;
-
-                sendFriendRequest(friendId);
-
-            }
-        );
-
-    });
 
 async function sendFriendRequest(friendId) {
 
