@@ -685,33 +685,25 @@ function renderFriends() {
 
 
     container.innerHTML =
-        friends.map(item => {
-
-            const friend = item.friend;
-
-            if (!friend) {
-                return "";
-            }
-
+        friends.map(friend => {
 
             return `
-                <div class="friend-item">
+            <div class="friend-item">
 
-                    <img 
-                        src="${friend.avatar_url || "default-avatar.png"}"
-                        class="friend-avatar"
-                        alt="Profile picture"
-                    >
+                <img 
+                    src="${friend.avatar_url || "default-avatar.png"}"
+                    class="friend-avatar"
+                    alt="Profile picture"
+                >
 
-                    <span>
-                        ${friend.display_name ||
+                <span>
+                    ${friend.display_name ||
                 friend.username ||
-                "Unknown User"
-                }
-                    </span>
+                "Unknown User"}
+                </span>
 
-                </div>
-            `;
+            </div>
+        `;
 
         }).join("");
 
@@ -827,6 +819,73 @@ function renderFriendSearchResults(results) {
 </button>
             </div>
         `).join("");
+}
+
+async function sendFriendRequest(friendId) {
+
+    console.log("Sending friend request to:", friendId);
+
+    if (!currentUser) {
+        console.error("No logged in user.");
+        return;
+    }
+
+    const { data: existing, error: checkError } =
+        await supabaseClient
+            .from("friendships")
+            .select("*")
+            .or(
+                `and(user_id.eq.${currentUser.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${currentUser.id})`
+            );
+
+    if (checkError) {
+
+        console.error(
+            "Friendship check failed:",
+            checkError
+        );
+        return;
+    }
+
+    if (existing.length) {
+
+        alert(
+            "A friendship request already exists."
+        );
+        return;
+    }
+
+    const { error } =
+        await supabaseClient
+            .from("friendships")
+            .insert({
+
+                user_id: currentUser.id,
+
+                friend_id: friendId,
+
+                status: "pending"
+            });
+
+    if (error) {
+
+        console.error(
+            "Friend request failed:",
+            error
+        );
+
+        alert(error.message);
+
+        return;
+    }
+
+    alert(
+        "Friend request sent!"
+    );
+
+    console.log(
+        "Friend request sent successfully"
+    );
 }
 
 async function loadFriendRequests() {
