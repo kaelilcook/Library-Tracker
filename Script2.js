@@ -814,12 +814,31 @@ function renderFriendSearchResults(results) {
                     </small>
                 </div>
                 <button
-    onclick="sendFriendRequest('${user.id}')">
+    class="add-friend-result-btn"
+    data-user-id="${user.id}">
     Add Friend
 </button>
             </div>
         `).join("");
 }
+
+document
+    .querySelectorAll(".add-friend-result-btn")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const friendId =
+                    button.dataset.userId;
+
+                sendFriendRequest(friendId);
+
+            }
+        );
+
+    });
 
 async function sendFriendRequest(friendId) {
 

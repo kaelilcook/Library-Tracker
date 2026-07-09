@@ -454,6 +454,13 @@ p {
     display: flex;
     flex-direction: column;
 }
+
+.add-friend-result-btn {
+    min-height: 44px;
+    min-width: 90px;
+    padding: 10px 16px;
+    touch-action: manipulation;
+}
 /* =========================
    NOTIFICATIONS
 ========================= */
