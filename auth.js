@@ -3,44 +3,114 @@ let currentUser = null;
 let currentProfile = null;
 
 async function signUp() {
+    console.log("Sign up clicked");
 
     const email =
         document
-            .getElementById("email")
+            .getElementById("signupEmail")
             .value
             .trim();
 
+
+    const username =
+        document
+            .getElementById("signupUsername")
+            .value
+            .trim();
+
+
     const password =
         document
-            .getElementById("password")
+            .getElementById("signupPassword")
             .value;
 
-    const { error } =
+
+    const confirmPassword =
+        document
+            .getElementById("signupConfirmPassword")
+            .value;
+
+
+    if (password !== confirmPassword) {
+
+        alert(
+            "Passwords do not match."
+        );
+
+        return;
+    }
+
+
+    const { data, error } =
         await supabaseClient.auth.signUp({
 
             email,
             password,
 
             options: {
+
                 emailRedirectTo:
-                    "https://kaelilcook.github.io/Library-Tracker/"
+                    "https://kaelilcook.github.io/Library-Tracker/",
+
+                data: {
+                    username
+                }
+
             }
 
         });
 
+
     if (error) {
+
         alert(error.message);
         return;
+
     }
 
+
     alert(
-        "Account created! Please check your email to confirm your account."
+        "Account created! Check your email."
     );
+
 }
 
 document
+    .getElementById("submitSignupBtn")
+    .addEventListener(
+        "click",
+        signUp
+    );
+
+document
     .getElementById("signupBtn")
-    .addEventListener("click", signUp);
+    .addEventListener("click", () => {
+
+        console.log("Create Account clicked");
+
+        openSignupModal();
+
+    });
+
+function openSignupModal() {
+
+    console.log("Opening signup modal");
+
+    document
+        .getElementById("signupModal")
+        .classList
+        .remove("modal-hidden");
+}
+
+
+function closeSignupModal() {
+
+    document
+        .getElementById("signupModal")
+        .classList
+        .add("modal-hidden");
+
+}
 
 async function login() {
 

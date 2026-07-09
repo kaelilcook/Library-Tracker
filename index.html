@@ -50,20 +50,78 @@
                 Sign In
             </button>
 
-            <button id="signupBtn">
-                Create Account
-            </button>
-
             <button id="forgotPasswordBtn" class="text-button">
                 Forgot Password?
             </button>
 
+            <p>Don't have account?</p>
+            <button id="signupBtn">
+                Create Account
+            </button>
+
+            <!-- =========================
+      SIGN UP MODAL
+    ========================== -->
+            <div id="signupModal" class="modal modal-hidden">
+
+                <div class="modal-content">
+
+                    <span class="close"
+                          onclick="closeSignupModal()">
+                        &times;
+                    </span>
+
+
+                    <div class="modal-header">
+                        <h2>Create Account</h2>
+                    </div>
+
+
+                    <label>
+                        Email
+
+                        <input id="signupEmail"
+                               type="email">
+                    </label>
+
+
+                    <label>
+                        Username
+
+                        <input id="signupUsername"
+                               type="text">
+                    </label>
+
+
+                    <label>
+                        Password
+
+                        <input id="signupPassword"
+                               type="password">
+                    </label>
+
+
+                    <label>
+                        Confirm Password
+
+                        <input id="signupConfirmPassword"
+                               type="password">
+                    </label>
+
+
+                    <button id="submitSignupBtn">
+                        Create Account
+                    </button>
+
+                </div>
+
+            </div>
         </div>
         <div id="app" class="hidden">
 
             <!-- =========================
-             SIDEBAR
-        ========================== -->
+         SIDEBAR
+    ========================== -->
 
 
             <aside id="sidebar">
@@ -133,8 +191,8 @@
 
 
             <!-- =========================
-             MAIN CONTENT
-        ========================== -->
+         MAIN CONTENT
+    ========================== -->
             <section class="mobile-nav">
                 <div class="mobile-topbar">
 
@@ -156,8 +214,8 @@
                 </header>
 
                 <!-- =========================
-                 SEARCH
-            ========================== -->
+             SEARCH
+        ========================== -->
 
                 <h1 class="section-title">Add Book</h1>
 
@@ -180,8 +238,8 @@
                 <section id="searchResults"></section>
 
                 <!-- =========================
-                 COLLECTION HIGHLIGHTS
-            ========================== -->
+             COLLECTION HIGHLIGHTS
+        ========================== -->
 
                 <h2>Collection Highlights</h2>
 
@@ -190,8 +248,8 @@
                 </div>
 
                 <!-- =========================
-                 STATS
-            ========================== -->
+             STATS
+        ========================== -->
 
                 <section class="stats-section">
 
@@ -235,8 +293,8 @@
                     <div id="annualReportContent"></div>
                 </div>
                 <!-- =========================
-                 LIBRARY
-            ========================== -->
+             LIBRARY
+        ========================== -->
 
                 <section class="library-section">
 
@@ -245,8 +303,8 @@
                     <div id="activeTagBanner" class="active-filter-banner"></div>
 
                     <!-- =========================
-                     FILTERS
-                ========================== -->
+                 FILTERS
+            ========================== -->
 
                     <section class="filters">
 
@@ -285,8 +343,8 @@
 
 
             <!-- =========================
-             BOOK DETAILS MODAL
-        ========================== -->
+         BOOK DETAILS MODAL
+    ========================== -->
 
             <div id="bookModal" class="modal modal-hidden">
 
@@ -303,8 +361,8 @@
 
 
                     <!-- =========================
-                     BOOK HEADER
-                ========================== -->
+                 BOOK HEADER
+            ========================== -->
 
                     <section class="modal-header">
 
@@ -334,8 +392,8 @@
 
 
                     <!-- =========================
-                     BOOK STATS
-                ========================== -->
+                 BOOK STATS
+            ========================== -->
 
                     <section class="stats">
 
@@ -365,8 +423,8 @@
 
 
                     <!-- =========================
-                     NOTES
-                ========================== -->
+                 NOTES
+            ========================== -->
 
                     <section class="notes">
 
@@ -378,8 +436,8 @@
 
 
                     <!-- =========================
-                     MODAL ACTIONS
-                ========================== -->
+                 MODAL ACTIONS
+            ========================== -->
 
                     <section class="modal-actions">
 
@@ -395,8 +453,8 @@
 
 
                     <!-- =========================
-                     EDIT SECTION
-                ========================== -->
+                 EDIT SECTION
+            ========================== -->
 
                     <section id="editSection"
                              class="edit-section">
@@ -604,8 +662,8 @@
             </div>
 
             <!-- =========================
-             MANUAL ADD MODAL
-        ========================== -->
+         MANUAL ADD MODAL
+    ========================== -->
 
             <div id="manualAddModal" class="modal hidden">
 
@@ -682,8 +740,8 @@
             </div>
 
             <!-- =========================
-             STATS MODAL
-        ========================== -->
+         STATS MODAL
+    ========================== -->
             <div id="statsModal" class="modal modal-hidden">
                 <div class="modal-content stats-modal-content">
 
@@ -695,8 +753,8 @@
 
 
             <!-- =========================
-             SHELF EDIT MODAL
-        ========================== -->
+         SHELF EDIT MODAL
+    ========================== -->
 
             <div id="shelfEditModal" class="modal hidden">
                 <div class="modal-content">
@@ -716,8 +774,8 @@
             </div>
 
             <!-- =========================
-          ACCOUNT MODAL
-        ========================== -->
+      ACCOUNT MODAL
+    ========================== -->
 
             <div id="accountModal" class="modal modal-hidden">
 
@@ -796,8 +854,8 @@
             </div>
 
             <!-- =========================
-          PASSWORD RECOVERY MODAL
-        ========================== -->
+      PASSWORD RECOVERY MODAL
+    ========================== -->
             <div id="forgotPasswordModal" class="modal modal-hidden">
 
                 <div class="modal-content">
@@ -826,8 +884,8 @@
             </div>
 
             <!-- =========================
-          NOTIFICATION MODAL
-        ========================== -->
+      NOTIFICATION MODAL
+    ========================== -->
             <div id="notificationsModal" class="modal modal-hidden">
 
                 <div class="modal-content notifications-modal">
@@ -851,11 +909,11 @@
 
                 </div>
 
-            </div>
+            </div>   
 
-            <!-- =========================
-          FRIEND MODAL
-        ========================== -->
+    <!-- =========================
+      FRIEND MODAL
+    ========================== -->
 
             <div id="friendModal" class="modal modal-hidden">
 

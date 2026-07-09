@@ -128,7 +128,8 @@ p {
    2. LAYOUT
 ========================= */
 #authScreen {
-    display: flex;   
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -230,6 +231,37 @@ p {
     border: 1px solid var(--border);
     border-radius: 16px;
     box-shadow: var(--shadow-sm);
+}
+
+/* =========================
+   AUTH SCREEN
+========================= */
+#password {
+    margin-bottom: 12px;
+}
+
+#loginBtn {
+    width: 25%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+#forgotPasswordBtn {
+    width: 25%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 12px;
 }
 
 /* =========================
