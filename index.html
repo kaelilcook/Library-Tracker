@@ -11,6 +11,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
           rel="stylesheet">
 
@@ -32,91 +35,171 @@
 </head>
 
 <body>
-    <div class="auth-card">
+    <div id="authScreen">
 
-        <div id="authScreen">
+        <div class="auth-card">
 
-            <h1>My Library</h1>
+            <div class="auth-header">
 
-            <input id="email"
-                   type="email"
-                   placeholder="Email">
+                <h1>📚 Library Tracker</h1>
 
-            <input id="password"
-                   type="password"
-                   placeholder="Password">
+                <p>
+                    Organize your books, track your reading,
+                    and connect with friends.
+                </p>
 
-            <button id="loginBtn">
-                Sign In
-            </button>
+            </div>
 
-            <button id="forgotPasswordBtn" class="text-button">
+
+            <div class="auth-form">
+
+                <label>
+
+                    Email
+
+                    <input id="email"
+                           type="email"
+                           placeholder="Enter your email">
+
+                </label>
+
+
+                <label>
+                    Password
+
+                    <div class="password-wrapper">
+
+                        <input id="password"
+                               type="password"
+                               placeholder="Enter your password">
+
+                        <button id="togglePasswordBtn"
+                                type="button"
+                                class="password-toggle">
+
+                            <i class="bi bi-eye"></i>
+
+                        </button>
+
+                    </div>
+
+                </label>
+
+
+                <button id="loginBtn"
+                        class="primary-btn">
+
+                    Sign In
+
+                </button>
+
+            </div>
+
+
+            <button id="forgotPasswordBtn"
+                    class="text-button">
+
                 Forgot Password?
+
             </button>
 
-            <p>Don't have account?</p>
-            <button id="signupBtn">
+
+            <div class="auth-divider">
+
+                <span>New here?</span>
+
+            </div>
+
+
+            <button id="signupBtn"
+                    class="secondary-btn">
+
                 Create Account
+
             </button>
+
+        </div>
+
+    </div>
 
             <!-- =========================
       SIGN UP MODAL
     ========================== -->
-            <div id="signupModal" class="modal modal-hidden">
+    <div id="signupModal" class="modal modal-hidden">
+        
+        <div class="modal-content">
+            <div class="modal-header">               
 
-                <div class="modal-content">
+                <p>
 
-                    <span class="close"
-                          onclick="closeSignupModal()">
-                        &times;
-                    </span>
+                    Create your free Library Tracker account.
 
-
-                    <div class="modal-header">
-                        <h2>Create Account</h2>
-                    </div>
-
-
-                    <label>
-                        Email
-
-                        <input id="signupEmail"
-                               type="email">
-                    </label>
-
-
-                    <label>
-                        Username
-
-                        <input id="signupUsername"
-                               type="text">
-                    </label>
-
-
-                    <label>
-                        Password
-
-                        <input id="signupPassword"
-                               type="password">
-                    </label>
-
-
-                    <label>
-                        Confirm Password
-
-                        <input id="signupConfirmPassword"
-                               type="password">
-                    </label>
-
-
-                    <button id="submitSignupBtn">
-                        Create Account
-                    </button>
-
-                </div>
+                </p>
 
             </div>
+
+            <span class="close"
+                  onclick="closeSignupModal()">
+                &times;
+            </span>
+
+
+            <div class="modal-header">
+                <h2>Create Account</h2>
+            </div>
+
+
+            <label>
+                Email
+
+                <input id="signupEmail"
+                       type="email">
+            </label>
+
+
+            <label>
+                Username
+
+                <input id="signupUsername"
+                       type="text">
+            </label>
+
+            <small class="input-help">
+
+                Friends will use this username to find you.
+
+            </small>
+
+
+            <label>
+                Password
+
+                <input id="signupPassword"
+                       type="password">
+            </label>
+
+            <small class="input-help">
+
+                Must be at least 8 characters.
+
+            </small>
+
+            <label>
+                Confirm Password
+
+                <input id="signupConfirmPassword"
+                       type="password">
+            </label>
+
+
+            <button id="submitSignupBtn">
+                Create Account
+            </button>
+
         </div>
+
+    </div>
+        
         <div id="app" class="hidden">
 
             <!-- =========================
