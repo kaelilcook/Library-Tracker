@@ -1231,6 +1231,9 @@ async function showFriendPreviewCard(friend, x, y) {
     const favoriteAuthor =
         await getFriendFavoriteAuthor(friend.id);
 
+    const topGenre =
+        await getFriendTopGenre(friend.id);
+
     const card =
         document.getElementById(
             "friendPreviewCard"
@@ -1243,7 +1246,10 @@ async function showFriendPreviewCard(friend, x, y) {
         buildFriendPreview(
             friend,
             currentlyReading,
-            finishedCount
+            finishedCount,
+            averageRating,
+            favoriteAuthor,
+            topGenre
         );
 
     const isMobile =
@@ -1294,7 +1300,8 @@ function buildFriendPreview(
     currentlyReading,
     finishedCount,
     averageRating, 
-    favoriteAuthor
+    favoriteAuthor,
+    topGenre
 ) {
 
     
@@ -1313,7 +1320,7 @@ function buildFriendPreview(
         </p>
 
         <p class="preview-bio">
-            ${friend.bio || "No bio yet."}
+           👤 ${friend.bio || "No bio yet."}
         </p>
 
         <div class="preview-divider"></div>
@@ -1400,13 +1407,17 @@ function buildFriendPreview(
 
         <div class="preview-row">
 
-            <span>📚 Favorite Genre</span>
+    <span>🏷️ Top Genre Read</span>
 
-            <strong>
-                ${friend.favorite_genre || "Not set"}
-            </strong>
+    <strong>
+        ${
+        topGenre
+            ? topGenre
+            : "No finished books yet"
+        }
+    </strong>
 
-        </div>
+</div>
 
         <button id="previewProfileBtn">
             View Full Profile
@@ -1858,6 +1869,68 @@ async function getFriendFavoriteAuthor(friendId) {
         "Finished books for author calculation:",
         data
     );
+
+}
+
+async function getFriendTopGenre(friendId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select("genre")
+            .eq(
+                "user_id",
+                friendId
+            )
+            .eq(
+                "status",
+                "Finished"
+            )
+            .not(
+                "genre",
+                "is",
+                null
+            );
+
+    if (error) {
+
+        console.error(
+            "Error loading top genre:",
+            error
+        );
+
+        return null;
+
+    }
+
+    if (!data.length) {
+
+        return null;
+
+    }
+
+    const genreCounts = {};
+
+    data.forEach(book => {
+
+        const genre = book.genre;
+
+        if (!genre) return;
+
+        genreCounts[genre] =
+            (genreCounts[genre] || 0) + 1;
+
+    });
+
+    const topGenre =
+        Object.keys(genreCounts)
+            .sort(
+                (a, b) =>
+                    genreCounts[b] -
+                    genreCounts[a]
+            )[0];
+
+    return topGenre || null;
 
 }
 
