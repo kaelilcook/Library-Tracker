@@ -790,7 +790,7 @@ function renderFriends() {
 
                     e.stopPropagation();
 
-                    showFriendHoverCard(
+                    showFriendPreviewCard(
                         friend,
                         e.clientX,
                         e.clientY
@@ -825,7 +825,7 @@ document.addEventListener(
             !clickedFriend
         ) {
 
-            hideFriendHoverCard();
+            hideFriendPreviewCard();
 
         }
 
@@ -1210,14 +1210,17 @@ async function declineFriendRequest(friendshipId) {
 // ========================
 // FRIEND PROFILES
 // ========================
-function showFriendHoverCard(friend, x, y) {
-
+async function showFriendPreviewCard(friend, x, y) {
+    
     console.log(
         "Opening friend card",
         friend.username,
         x,
         y
     );
+
+    const currentlyReading =
+        await getFriendCurrentlyReading(friend.id);
 
     const card =
         document.getElementById(
@@ -1228,7 +1231,10 @@ function showFriendHoverCard(friend, x, y) {
 
 
     card.innerHTML =
-        buildFriendCard(friend);
+        buildFriendPreview(
+            friend,
+            currentlyReading
+        );
 
     const isMobile =
         window.matchMedia("(hover: none)").matches;
@@ -1243,8 +1249,8 @@ function showFriendHoverCard(friend, x, y) {
 
     } else {
 
-        card.style.left = (x + 20) + "px";
-        card.style.top = y + "px";
+        card.style.left = "320px";
+        card.style.top = "120px";
 
     }
 
@@ -1264,7 +1270,7 @@ function showFriendHoverCard(friend, x, y) {
 
 
     document
-        .getElementById("hoverProfileBtn")
+        .getElementById("previewProfileBtn")
         .onclick = () => {
 
             openFriendProfile(friend.id);
@@ -1272,8 +1278,13 @@ function showFriendHoverCard(friend, x, y) {
         };
 
 }
-function buildFriendCard(friend) {
 
+function buildFriendPreview(
+    friend,
+    currentlyReading
+) {
+
+    
     return `
 
         <img
@@ -1281,35 +1292,90 @@ function buildFriendCard(friend) {
             class="friend-large-avatar">
 
         <h3>
-
-            ${friend.display_name}
-
+            ${friend.display_name || friend.username}
         </h3>
 
-        <p>
-
+        <p class="preview-username">
             @${friend.username}
-
         </p>
 
-        <p>
-
+        <p class="preview-bio">
             ${friend.bio || "No bio yet."}
-
         </p>
 
-        <button
-            id="hoverProfileBtn">
+        <div class="preview-divider"></div>
 
-            View Profile
+       <div class="preview-row currently-reading-preview">
 
+    <span>📖 Currently Reading</span>
+
+
+    ${
+        currentlyReading
+            ?
+            `
+        <div class="current-book">
+
+            <img
+                src="${currentlyReading.cover || "default-cover.png"}"
+                class="preview-book-cover"
+                alt="Book cover">
+
+
+            <div class="current-book-info">
+
+                <strong>
+                    ${currentlyReading.title}
+                </strong>
+
+
+                <small>
+                    ${currentlyReading.author || ""}
+                </small>
+
+            </div>
+
+        </div>
+        `
+            :
+            `
+        <strong>
+            Nothing right now
+        </strong>
+        `
+    }
+
+</div>
+
+        <div class="preview-row">
+
+            <span>⭐ Favorite Author</span>
+
+            <strong>
+                ${friend.favorite_author || "Not set"}
+            </strong>
+
+        </div>
+
+        <div class="preview-row">
+
+            <span>📚 Favorite Genre</span>
+
+            <strong>
+                ${friend.favorite_genre || "Not set"}
+            </strong>
+
+        </div>
+
+        <button id="previewProfileBtn">
+            View Full Profile
         </button>
 
     `;
 
 }
 
-function hideFriendHoverCard() {
+function hideFriendPreviewCard() {
 
     const card =
         document.getElementById(
@@ -1324,17 +1390,17 @@ function hideFriendHoverCard() {
         "hidden"
     );
 
-    const closeHoverCardButton =
+    const closePreviewCardButton =
         document.querySelector(".close-preview-card");
 
 
-    if (closeHoverCardButton) {
+    if (closePreviewCardButton) {
 
-        closeHoverCardButton.addEventListener(
+        closePreviewCardButton.addEventListener(
             "click",
             () => {
 
-                hideFriendHoverCard();
+                hideFriendPreviewCard();
 
             }
         );
@@ -1525,6 +1591,44 @@ function renderProfileHeader(profile) {
     `;
 
 }
+
+async function getFriendCurrentlyReading(friendId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select(`
+                title,
+                author,
+                cover
+            `)
+            .eq(
+                "user_id",
+                friendId
+            )
+            .eq(
+                "status",
+                "Reading"
+            )
+            .limit(3);
+
+
+    if (error) {
+
+        console.error(
+            "Error loading currently reading:",
+            error
+        );
+
+        return null;
+
+    }
+
+
+    return data?.[0] || null;
+
+}
+
 function renderCurrentReadingSection() {
 
     return `

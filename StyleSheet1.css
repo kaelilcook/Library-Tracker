@@ -556,6 +556,65 @@ p {
     border-top: 1px solid var(--border);
 }
 
+.preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px 0;
+}
+
+.preview-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0;
+}
+
+.preview-username {
+    color: var(--text-light);
+    margin-top: -6px;
+    margin-bottom: 14px;
+}
+
+.preview-bio {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 18px;
+}
+
+.current-book {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+
+.preview-book-cover {
+    width: 45px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: var(--shadow-sm);
+}
+
+
+.current-book-info {
+    display: flex;
+    flex-direction: column;
+}
+
+
+    .current-book-info strong {
+        font-size: 0.95rem;
+    }
+
+
+    .current-book-info small {
+        color: var(--text-light);
+        margin-top: 4px;
+    }
+
 /* =========================
    NOTIFICATIONS
 ========================= */
