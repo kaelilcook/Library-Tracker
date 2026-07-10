@@ -1228,6 +1228,9 @@ async function showFriendPreviewCard(friend, x, y) {
     const averageRating =
         await getFriendAverageRating(friend.id);
 
+    const favoriteAuthor =
+        await getFriendFavoriteAuthor(friend.id);
+
     const card =
         document.getElementById(
             "friendPreviewCard"
@@ -1290,7 +1293,8 @@ function buildFriendPreview(
     friend,
     currentlyReading,
     finishedCount,
-    averageRating
+    averageRating, 
+    favoriteAuthor
 ) {
 
     
@@ -1382,13 +1386,17 @@ function buildFriendPreview(
 
         <div class="preview-row">
 
-            <span>⭐ Favorite Author</span>
+    <span> ✍️ Most Read Author</span>
 
-            <strong>
-                ${friend.favorite_author || "Not set"}
-            </strong>
+    <strong>
+        ${
+        favoriteAuthor
+            ? favoriteAuthor
+            : "No finished books yet"
+        }
+    </strong>
 
-        </div>
+</div>
 
         <div class="preview-row">
 
@@ -1592,7 +1600,7 @@ function renderProfileHeader(profile) {
                 <div>
 
                     <strong>
-                        Favorite Author
+                        Most Read Author
                     </strong>
 
                     <p>
@@ -1767,6 +1775,89 @@ async function getFriendAverageRating(friendId) {
     return (
         total / data.length
     ).toFixed(1);
+
+}
+
+async function getFriendFavoriteAuthor(friendId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select("author")
+            .eq(
+                "user_id",
+                friendId
+            )
+            .eq(
+                "status",
+                "Finished"
+            )
+            .not(
+                "author",
+                "is",
+                null
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Error loading favorite author:",
+            error
+        );
+
+        return null;
+
+    }
+
+
+    if (!data.length) {
+
+        return null;
+
+    }
+
+
+    const authorCounts = {};
+
+
+    data.forEach(book => {
+
+        const author =
+            book.author;
+
+
+        if (!author) return;
+
+
+        if (authorCounts[author]) {
+
+            authorCounts[author]++;
+
+        } else {
+
+            authorCounts[author] = 1;
+
+        }
+
+    });
+
+
+    const favoriteAuthor =
+        Object.keys(authorCounts)
+            .sort(
+                (a, b) =>
+                    authorCounts[b] -
+                    authorCounts[a]
+            )[0];
+
+
+    return favoriteAuthor || null;
+
+    console.log(
+        "Finished books for author calculation:",
+        data
+    );
 
 }
 

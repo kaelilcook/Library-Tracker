@@ -407,7 +407,7 @@ p {
 
 .friend-preview-card {
     position: fixed;
-    width: 280px;
+    width: 380px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
