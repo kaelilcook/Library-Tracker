@@ -1225,6 +1225,9 @@ async function showFriendPreviewCard(friend, x, y) {
     const finishedCount =
         await getFriendFinishedCount(friend.id);
 
+    const averageRating =
+        await getFriendAverageRating(friend.id);
+
     const card =
         document.getElementById(
             "friendPreviewCard"
@@ -1286,7 +1289,8 @@ async function showFriendPreviewCard(friend, x, y) {
 function buildFriendPreview(
     friend,
     currentlyReading,
-    finishedCount
+    finishedCount,
+    averageRating
 ) {
 
     
@@ -1358,6 +1362,20 @@ function buildFriendPreview(
 
     <strong>
         ${finishedCount} books
+    </strong>
+
+</div>
+
+<div class="preview-row">
+
+    <span>⭐ Average Rating</span>
+
+    <strong>
+        ${
+        averageRating
+            ? `${averageRating} / 5`
+            : "No ratings yet"
+        }
     </strong>
 
 </div>
@@ -1699,6 +1717,56 @@ async function getFriendFinishedCount(friendId) {
 
 
     return count || 0;
+
+}
+
+async function getFriendAverageRating(friendId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select("rating")
+            .eq(
+                "user_id",
+                friendId
+            )
+            .not(
+                "rating",
+                "is",
+                null
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Error loading average rating:",
+            error
+        );
+
+        return null;
+
+    }
+
+
+    if (!data.length) {
+
+        return null;
+
+    }
+
+
+    const total =
+        data.reduce(
+            (sum, book) =>
+                sum + book.rating,
+            0
+        );
+
+
+    return (
+        total / data.length
+    ).toFixed(1);
 
 }
 
