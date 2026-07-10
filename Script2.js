@@ -1222,6 +1222,9 @@ async function showFriendPreviewCard(friend, x, y) {
     const currentlyReading =
         await getFriendCurrentlyReading(friend.id);
 
+    const finishedCount =
+        await getFriendFinishedCount(friend.id);
+
     const card =
         document.getElementById(
             "friendPreviewCard"
@@ -1233,7 +1236,8 @@ async function showFriendPreviewCard(friend, x, y) {
     card.innerHTML =
         buildFriendPreview(
             friend,
-            currentlyReading
+            currentlyReading,
+            finishedCount
         );
 
     const isMobile =
@@ -1281,7 +1285,8 @@ async function showFriendPreviewCard(friend, x, y) {
 
 function buildFriendPreview(
     friend,
-    currentlyReading
+    currentlyReading,
+    finishedCount
 ) {
 
     
@@ -1344,6 +1349,16 @@ function buildFriendPreview(
         </strong>
         `
     }
+
+</div>
+
+<div class="preview-row">
+
+    <span>📚 Finished This Year</span>
+
+    <strong>
+        ${finishedCount} books
+    </strong>
 
 </div>
 
@@ -1626,6 +1641,64 @@ async function getFriendCurrentlyReading(friendId) {
 
 
     return data?.[0] || null;
+
+}
+
+async function getFriendFinishedCount(friendId) {
+
+    const currentYear =
+        new Date().getFullYear();
+
+
+    const startOfYear =
+        `${currentYear}-01-01`;
+
+
+    const startOfNextYear =
+        `${currentYear + 1}-01-01`;
+
+
+    const { count, error } =
+        await supabaseClient
+            .from("books")
+            .select(
+                "id",
+                {
+                    count: "exact",
+                    head: true
+                }
+            )
+            .eq(
+                "user_id",
+                friendId
+            )
+            .eq(
+                "status",
+                "Finished"
+            )
+            .gte(
+                "completed_date",
+                startOfYear
+            )
+            .lt(
+                "completed_date",
+                startOfNextYear
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Error loading finished count:",
+            error
+        );
+
+        return 0;
+
+    }
+
+
+    return count || 0;
 
 }
 
