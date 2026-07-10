@@ -382,11 +382,14 @@ p {
 .friend-item {
     position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 10px;
     padding: 8px;
     border-radius: 10px;
     cursor: pointer;
+    width: 200px;
+    touch-action: manipulation;
 }
 
 
@@ -402,24 +405,56 @@ p {
         color: var(--text);
     }
 
-.friend-hover-card {
-    display: none;
-    position: absolute;
-    left: -15px;
-    top: 45px;
-    width: 220px;
-    padding: 16px;
+.friend-preview-card {
+    position: fixed;
+    width: 280px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: var(--shadow-md);
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
     z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    min-height: 320px;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
-.friend-item:hover .friend-hover-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    .friend-preview-card.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .friend-preview-card.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .friend-preview-card button {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .friend-preview-card h3 {
+        margin: 14px 0 4px;
+    }
+
+    .friend-preview-card p {
+        margin: 6px 0;
+        color: var(--text-light);
+    }
+
+.friend-large-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: block;
+    margin: 0 auto 16px;
 }
 
 .empty-friends {
@@ -487,6 +522,40 @@ p {
     padding: 10px 16px;
     touch-action: manipulation;
 }
+
+/* =========================
+   FRIEND PROFILES
+========================= */
+.friend-profile-modal {
+    max-width: 900px;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+}
+
+.favorite-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.profile-section {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
 /* =========================
    NOTIFICATIONS
 ========================= */
@@ -573,6 +642,24 @@ p {
 /* =========================
    MOBILE
 ========================= */
+@media (hover: none) {
+
+    .friend-preview-card {
+        left: 16px;
+        right: 16px;
+        bottom: 400px;
+        top: auto;
+        width: auto;
+        max-width: none;
+        transform: translateY(20px);
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+        .friend-preview-card.visible {
+            transform: translateY(0);
+        }
+}
 
 @media (max-width: 412px) {
 
@@ -598,10 +685,7 @@ p {
        FRIENDS
     ========================= */
 
-    .friend-hover-card {
-        display: none;
-    }
-
+    
     /* =========================
        PAGE LAYOUT
     ========================= */

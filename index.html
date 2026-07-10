@@ -200,848 +200,883 @@
 
     </div>
         
-        <div id="app" class="hidden">
+    <div id="app" class="hidden">
 
-            <!-- =========================
+        <!-- =========================
          SIDEBAR
     ========================== -->
 
 
-            <aside id="sidebar">
-                <div class="sidebar-scroll">
-                    <button id="notificationsBtn">
-                        🔔 Notifications
-                        <span id="notificationBadge" class="notification-badge hidden">
-                            0
-                        </span>
+        <aside id="sidebar">
+            <div class="sidebar-scroll">
+                <button id="notificationsBtn">
+                    🔔 Notifications
+                    <span id="notificationBadge" class="notification-badge hidden">
+                        0
+                    </span>
+                </button>
+
+                <button id="accountBtn">
+                    👤 Account
+                </button>
+
+                <button id="logoutBtn">
+                    Logout
+                </button>
+
+                <h2>My Shelves</h2>
+
+                <nav id="shelfNav"></nav>
+
+                <section class="add-shelf-section">
+
+                    <input type="text"
+                           id="newShelfInput"
+                           placeholder="New shelf name">
+
+                    <button id="addShelfBtn">
+                        Add Shelf
                     </button>
 
-                    <button id="accountBtn">
-                        👤 Account
-                    </button>
+                    <div class="data-tools">
+                        <button id="exportLibraryBtn">📤 Export Library</button>
+                        <button id="importLibraryBtn">📥 Import Library</button>
 
-                    <button id="logoutBtn">
-                        Logout
-                    </button>
+                        <!-- hidden file input -->
+                        <input type="file" id="importFileInput" accept=".json" hidden>
+                    </div>
 
-                    <h2>My Shelves</h2>
+                </section>
 
-                    <nav id="shelfNav"></nav>
+                <div class="friends-section">
 
-                    <section class="add-shelf-section">
-
-                        <input type="text"
-                               id="newShelfInput"
-                               placeholder="New shelf name">
-
-                        <button id="addShelfBtn">
-                            Add Shelf
+                    <div class="friends-header">
+                        <button id="addFriendBtn" class="add-friend-btn">
+                            + Add Friend
                         </button>
 
-                        <div class="data-tools">
-                            <button id="exportLibraryBtn">📤 Export Library</button>
-                            <button id="importLibraryBtn">📥 Import Library</button>
-
-                            <!-- hidden file input -->
-                            <input type="file" id="importFileInput" accept=".json" hidden>
-                        </div>
-
-                    </section>
-
-                    <div class="friends-section">
-
-                        <div class="friends-header">
-                            <button id="addFriendBtn" class="add-friend-btn">
-                                + Add Friend
-                            </button>
-
-                            <button id="toggleFriendsBtn" class="sidebar-section-toggle">
-                                👥 Friends
-                                <span id="friendsArrow">▼</span>
-                            </button>
-                        </div>
-
-                        <div id="friendsList" class="friends-list">
-                            <p class="empty-friends">
-                                No friends yet.
-                            </p>
-                        </div>
-
+                        <button id="toggleFriendsBtn" class="sidebar-section-toggle">
+                            👥 Friends
+                            <span id="friendsArrow">▼</span>
+                        </button>
                     </div>
+
+                    <div id="friendsList" class="friends-list">
+                        <p class="empty-friends">
+                            No friends yet.
+                        </p>
+                    </div>
+
                 </div>
+            </div>
 
-            </aside>
+        </aside>
 
 
-            <!-- =========================
+        <!-- =========================
          MAIN CONTENT
     ========================== -->
-            <section class="mobile-nav">
-                <div class="mobile-topbar">
+        <section class="mobile-nav">
+            <div class="mobile-topbar">
 
-                    <button id="mobileMenuBtn" class="menu-toggle">☰</button>
+                <button id="mobileMenuBtn" class="menu-toggle">☰</button>
 
+            </div>
+        </section>
+
+
+        <main id="mainContent">
+
+            <!-- HEADER -->
+
+            <header>
+                <div class="header">
+                    <h1>My Personal Library</h1>
+                    <p class="subtitle">Track, Log, and Curate Your Reading</p>
                 </div>
-            </section>
+            </header>
 
-
-            <main id="mainContent">
-
-                <!-- HEADER -->
-
-                <header>
-                    <div class="header">
-                        <h1>My Personal Library</h1>
-                        <p class="subtitle">Track, Log, and Curate Your Reading</p>
-                    </div>
-                </header>
-
-                <!-- =========================
+            <!-- =========================
              SEARCH
         ========================== -->
 
-                <h1 class="section-title">Add Book</h1>
+            <h1 class="section-title">Add Book</h1>
 
-                <section class="search-section">
+            <section class="search-section">
 
-                    <input type="text"
-                           id="searchInput"
-                           placeholder="Search by title, author, or ISBN">
+                <input type="text"
+                       id="searchInput"
+                       placeholder="Search by title, author, or ISBN">
 
-                    <button id="searchBtn">
-                        Search
-                    </button>
+                <button id="searchBtn">
+                    Search
+                </button>
 
-                    <button id="openManualAddBtn">
-                        + Add Book Manually
-                    </button>
+                <button id="openManualAddBtn">
+                    + Add Book Manually
+                </button>
 
-                </section>
+            </section>
 
-                <section id="searchResults"></section>
+            <section id="searchResults"></section>
 
-                <!-- =========================
+            <!-- =========================
              COLLECTION HIGHLIGHTS
         ========================== -->
 
-                <h2>Collection Highlights</h2>
+            <h2>Collection Highlights</h2>
 
-                <div id="collectionHighlights"
-                     class="library-grid">
-                </div>
+            <div id="collectionHighlights"
+                 class="library-grid">
+            </div>
 
-                <!-- =========================
+            <!-- =========================
              STATS
         ========================== -->
 
-                <section class="stats-section">
+            <section class="stats-section">
 
-                    <h1 class="section-title">My Stats</h1>
+                <h1 class="section-title">My Stats</h1>
 
-                    <div id="statsPanel"></div>
-
-
-                </section>
-
-                <!-- BUTTON ON MAIN PAGE -->
-                <div class="reading-dashboard-actions">
-
-                    <button id="openCurrentlyReadingBtn"
-                            class="reading-dashboard-btn">
-                        📚 Currently Reading
-                    </button>
-
-                    <button id="openReadingDashboardBtn"
-                            class="reading-dashboard-btn secondary-dashboard-btn">
-                        🔥 Reading Dashboard
-                    </button>
-
-                    <button id="openReadingLogBtn"
-                            class="reading-dashboard-btn secondary-dashboard-btn">
-                        📖 Log Today’s Reading
-                    </button>
+                <div id="statsPanel"></div>
 
 
+            </section>
+
+            <!-- BUTTON ON MAIN PAGE -->
+            <div class="reading-dashboard-actions">
+
+                <button id="openCurrentlyReadingBtn"
+                        class="reading-dashboard-btn">
+                    📚 Currently Reading
+                </button>
+
+                <button id="openReadingDashboardBtn"
+                        class="reading-dashboard-btn secondary-dashboard-btn">
+                    🔥 Reading Dashboard
+                </button>
+
+                <button id="openReadingLogBtn"
+                        class="reading-dashboard-btn secondary-dashboard-btn">
+                    📖 Log Today’s Reading
+                </button>
+
+
+            </div>
+
+            <div id="annualReportView">
+                <div class="report-header">
+                    <h2>📚 Annual Reading Report</h2>
+
+                    <select id="reportYear">
+                        <option value="2026">2026</option>
+                    </select>
                 </div>
 
-                <div id="annualReportView">
-                    <div class="report-header">
-                        <h2>📚 Annual Reading Report</h2>
-
-                        <select id="reportYear">
-                            <option value="2026">2026</option>
-                        </select>
-                    </div>
-
-                    <div id="annualReportContent"></div>
-                </div>
-                <!-- =========================
+                <div id="annualReportContent"></div>
+            </div>
+            <!-- =========================
              LIBRARY
         ========================== -->
 
-                <section class="library-section">
+            <section class="library-section">
 
-                    <h1 class="section-title">My Collection</h1>
-                    <h2 id="activeShelfLabel">All Books</h2>
-                    <div id="activeTagBanner" class="active-filter-banner"></div>
+                <h1 class="section-title">My Collection</h1>
+                <h2 id="activeShelfLabel">All Books</h2>
+                <div id="activeTagBanner" class="active-filter-banner"></div>
 
-                    <!-- =========================
+                <!-- =========================
                  FILTERS
             ========================== -->
 
-                    <section class="filters">
+                <section class="filters">
 
-                        <input id="filterTitle"
-                               placeholder="Search title, author, series, genre...">
+                    <input id="filterTitle"
+                           placeholder="Search title, author, series, genre...">
 
-                        <select id="filterSort">
+                    <select id="filterSort">
 
-                            <option value="newest">
-                                Newest First
+                        <option value="newest">
+                            Newest First
+                        </option>
+
+                        <option value="oldest">
+                            Oldest First
+                        </option>
+
+                        <option value="titleAZ">
+                            Title A–Z
+                        </option>
+
+                        <option value="titleZA">
+                            Title Z–A
+                        </option>
+
+                    </select>
+
+                </section>
+
+                <div id="library"></div>
+
+                <div id="loadMoreContainer"></div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =========================
+         BOOK DETAILS MODAL
+    ========================== -->
+
+        <div id="bookModal" class="modal modal-hidden">
+
+            <div class="modal-content">
+
+                <!-- CLOSE BUTTON -->
+
+                <span id="closeModal"
+                      class="close">
+
+                    &times;
+
+                </span>
+
+
+                <!-- =========================
+                 BOOK HEADER
+            ========================== -->
+
+                <section class="modal-header">
+
+                    <div class="cover-wrapper">
+
+                        <img id="detailCover"
+                             class="detail-cover"
+                             src=""
+                             alt="Book Cover">
+
+                    </div>
+
+                    <div class="detail-main">
+                        <div id="detailPills" class="detail-pills"></div>
+
+                        <h2 id="detailTitle"></h2>
+
+                        <p id="detailAuthor"></p>
+
+                        <p id="detailSeries"></p>
+
+                        <p id="detailGenre"></p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                 BOOK STATS
+            ========================== -->
+
+                <section class="stats">
+
+                    <div>
+                        <strong>Status:</strong>
+                        <span id="detailStatus"></span>
+                    </div>
+
+                    <div>
+                        <strong>Rating:</strong>
+                        <span id="detailRating"></span>
+                    </div>
+
+                    <div>
+                        <strong>ISBN:</strong>
+                        <span id="detailISBN"></span>
+                    </div>
+
+                    <div>
+                        <strong>Shelves:</strong>
+                        <span id="detailShelves"></span>
+                    </div>
+
+                    <div id="detailReadingHistory"></div>
+
+                </section>
+
+
+                <!-- =========================
+                 NOTES
+            ========================== -->
+
+                <section class="notes">
+
+                    <h3>Notes</h3>
+
+                    <p id="detailNotes"></p>
+
+                </section>
+
+
+                <!-- =========================
+                 MODAL ACTIONS
+            ========================== -->
+
+                <section class="modal-actions">
+
+                    <button id="editBtn">
+                        Edit
+                    </button>
+
+                    <button id="deleteBtn">
+                        Delete
+                    </button>
+
+                </section>
+
+
+                <!-- =========================
+                 EDIT SECTION
+            ========================== -->
+
+                <section id="editSection"
+                         class="edit-section">
+
+                    <!-- COVER -->
+
+                    <input id="editCoverInput"
+                           placeholder="New cover URL">
+
+                    <button id="saveCoverBtn">
+                        Update Cover
+                    </button>
+
+
+                    <!-- BOOK FIELDS -->
+
+                    <label>
+                        Title
+                        <input id="editTitle">
+                    </label>
+
+                    <label>
+                        Author
+                        <input id="editAuthor">
+                    </label>
+
+                    <label>
+                        Series
+                        <input id="editSeries">
+                    </label>
+
+                    <label>
+                        Genre
+                        <input id="editGenre">
+                    </label>
+
+                    <label>
+                        ISBN
+                        <input id="editISBN">
+                    </label>
+
+                    <label>
+                        Page Count
+                        <input id="editPageCount"
+                               type="number"
+                               min="1">
+                    </label>
+
+
+                    <!-- RATING -->
+
+                    <label>
+
+                        Rating
+
+                        <select id="editRating">
+
+                            <option value="">
+                                Unrated
                             </option>
 
-                            <option value="oldest">
-                                Oldest First
+                            <option value="0">DNF (0★)</option>
+
+                            <option value="1">
+                                1 ★
                             </option>
 
-                            <option value="titleAZ">
-                                Title A–Z
+                            <option value="2">
+                                2 ★★
                             </option>
 
-                            <option value="titleZA">
-                                Title Z–A
+                            <option value="3">
+                                3 ★★★
+                            </option>
+
+                            <option value="4">
+                                4 ★★★★
+                            </option>
+
+                            <option value="5">
+                                5 ★★★★★
                             </option>
 
                         </select>
 
-                    </section>
+                    </label>
 
-                    <div id="library"></div>
 
-                    <div id="loadMoreContainer"></div>
+                    <!-- STATUS -->
 
-                </section>
+                    <label>
 
-            </main>
+                        Status
 
+                        <select id="editStatus">
 
-            <!-- =========================
-         BOOK DETAILS MODAL
-    ========================== -->
+                            <option>Unread</option>
+                            <option>Reading</option>
+                            <option>Finished</option>
+                            <option>DNF</option>
 
-            <div id="bookModal" class="modal modal-hidden">
-
-                <div class="modal-content">
-
-                    <!-- CLOSE BUTTON -->
-
-                    <span id="closeModal"
-                          class="close">
-
-                        &times;
-
-                    </span>
-
-
-                    <!-- =========================
-                 BOOK HEADER
-            ========================== -->
-
-                    <section class="modal-header">
-
-                        <div class="cover-wrapper">
-
-                            <img id="detailCover"
-                                 class="detail-cover"
-                                 src=""
-                                 alt="Book Cover">
-
-                        </div>
-
-                        <div class="detail-main">
-                            <div id="detailPills" class="detail-pills"></div>
-
-                            <h2 id="detailTitle"></h2>
-
-                            <p id="detailAuthor"></p>
-
-                            <p id="detailSeries"></p>
-
-                            <p id="detailGenre"></p>
-
-                        </div>
-
-                    </section>
-
-
-                    <!-- =========================
-                 BOOK STATS
-            ========================== -->
-
-                    <section class="stats">
-
-                        <div>
-                            <strong>Status:</strong>
-                            <span id="detailStatus"></span>
-                        </div>
-
-                        <div>
-                            <strong>Rating:</strong>
-                            <span id="detailRating"></span>
-                        </div>
-
-                        <div>
-                            <strong>ISBN:</strong>
-                            <span id="detailISBN"></span>
-                        </div>
-
-                        <div>
-                            <strong>Shelves:</strong>
-                            <span id="detailShelves"></span>
-                        </div>
-
-                        <div id="detailReadingHistory"></div>
-
-                    </section>
-
-
-                    <!-- =========================
-                 NOTES
-            ========================== -->
-
-                    <section class="notes">
-
-                        <h3>Notes</h3>
-
-                        <p id="detailNotes"></p>
-
-                    </section>
-
-
-                    <!-- =========================
-                 MODAL ACTIONS
-            ========================== -->
-
-                    <section class="modal-actions">
-
-                        <button id="editBtn">
-                            Edit
-                        </button>
-
-                        <button id="deleteBtn">
-                            Delete
-                        </button>
-
-                    </section>
-
-
-                    <!-- =========================
-                 EDIT SECTION
-            ========================== -->
-
-                    <section id="editSection"
-                             class="edit-section">
-
-                        <!-- COVER -->
-
-                        <input id="editCoverInput"
-                               placeholder="New cover URL">
-
-                        <button id="saveCoverBtn">
-                            Update Cover
-                        </button>
-
-
-                        <!-- BOOK FIELDS -->
-
-                        <label>
-                            Title
-                            <input id="editTitle">
-                        </label>
-
-                        <label>
-                            Author
-                            <input id="editAuthor">
-                        </label>
-
-                        <label>
-                            Series
-                            <input id="editSeries">
-                        </label>
-
-                        <label>
-                            Genre
-                            <input id="editGenre">
-                        </label>
-
-                        <label>
-                            ISBN
-                            <input id="editISBN">
-                        </label>
-
-                        <label>
-                            Page Count
-                            <input id="editPageCount"
-                                   type="number"
-                                   min="1">
-                        </label>
-
-
-                        <!-- RATING -->
-
-                        <label>
-
-                            Rating
-
-                            <select id="editRating">
-
-                                <option value="">
-                                    Unrated
-                                </option>
-
-                                <option value="0">DNF (0★)</option>
-
-                                <option value="1">
-                                    1 ★
-                                </option>
-
-                                <option value="2">
-                                    2 ★★
-                                </option>
-
-                                <option value="3">
-                                    3 ★★★
-                                </option>
-
-                                <option value="4">
-                                    4 ★★★★
-                                </option>
-
-                                <option value="5">
-                                    5 ★★★★★
-                                </option>
-
-                            </select>
-
-                        </label>
-
-
-                        <!-- STATUS -->
-
-                        <label>
-
-                            Status
-
-                            <select id="editStatus">
-
-                                <option>Unread</option>
-                                <option>Reading</option>
-                                <option>Finished</option>
-                                <option>DNF</option>
-
-                            </select>
-
-                        </label>
-
-                        <label>
-                            Completed Date
-                            <input id="editCompletedDate"
-                                   type="date">
-                        </label>
-
-
-                        <!-- READING HISTORY -->
-
-                        <section class="reading-history-section">
-
-                            <h3>Reading History</h3>
-
-                            <div id="readingHistoryContainer"></div>
-
-                            <button id="addReadingSessionBtn">
-                                Add Reading Session
-                            </button>
-
-                        </section>
-
-
-                        <!-- SHELVES -->
-
-                        <section>
-
-                            <h3>Shelves</h3>
-
-                            <div id="shelfCheckboxes"></div>
-
-                        </section>
-
-
-                        <!-- TAGS -->
-
-                        <label>
-
-                            <input id="editTags"
-                                   placeholder="fantasy, favorites, signed">
-
-                        </label>
-
-
-                        <!-- NOTES -->
-
-                        <label>
-
-                            Notes
-
-                            <textarea id="editNotes"></textarea>
-
-                        </label>
-
-
-                        <!-- ACTION BUTTONS -->
-
-                        <div class="edit-buttons">
-
-                            <button id="saveEditBtn">
-                                Save
-                            </button>
-
-                            <button id="cancelEditBtn">
-                                Cancel
-                            </button>
-
-                        </div>
-
-                    </section>
-
-                </div>
-
-            </div>
-
-            <!-- HABIT MODAL -->
-
-            <div id="habitModal" class="modal hidden">
-                <div class="modal-content large-modal">
-                    <span id="closeHabitModal" class="close">&times;</span>
-                    <h2 class="section-title">Reading Log</h2>
-                    <div class="modal-body"></div>
-                </div>
-            </div>
-
-            <!-- RATING MODAL -->
-
-            <div id="finishBookModal" class="modal hidden">
-
-                <div class="modal-content small-modal">
-
-                    <button id="closeFinishModal"
-                            class="close-btn">
-                        ✕
-                    </button>
-
-                    <div id="finishBookContent"></div>
-
-                </div>
-
-            </div>
-
-            <!-- =========================
-         MANUAL ADD MODAL
-    ========================== -->
-
-            <div id="manualAddModal" class="modal hidden">
-
-                <div class="modal-content">
-
-                    <h2>Add Book</h2>
-
-
-                    <!-- BASIC INFO -->
-
-                    <input id="manualTitle"
-                           placeholder="Title">
-
-                    <input id="manualAuthor"
-                           placeholder="Author">
-
-                    <input id="manualISBN"
-                           placeholder="ISBN">
-
-                    <input id="manualPageCount"
-                           type="number"
-                           min="1"
-                           placeholder="Page Count">
-
-
-                    <input id="manualGenre"
-                           placeholder="Genre">
-
-                    <input id="manualSeries"
-                           placeholder="Series">
-
-                    <input id="manualCover"
-                           placeholder="Cover Image URL">
-
-
-                    <!-- TAGS -->
-
-                    <label for="manualTags">
+                        </select>
 
                     </label>
 
-                    <input type="text"
-                           id="manualTags"
-                           placeholder="fantasy, signed, favorites">
+                    <label>
+                        Completed Date
+                        <input id="editCompletedDate"
+                               type="date">
+                    </label>
 
 
-                    <!-- NOTES -->
+                    <!-- READING HISTORY -->
 
-                    <textarea id="manualNotes"
-                              placeholder="Notes"></textarea>
+                    <section class="reading-history-section">
+
+                        <h3>Reading History</h3>
+
+                        <div id="readingHistoryContainer"></div>
+
+                        <button id="addReadingSessionBtn">
+                            Add Reading Session
+                        </button>
+
+                    </section>
 
 
                     <!-- SHELVES -->
 
-                    <div id="manualShelfCheckboxes"></div>
+                    <section>
+
+                        <h3>Shelves</h3>
+
+                        <div id="shelfCheckboxes"></div>
+
+                    </section>
 
 
-                    <!-- ACTIONS -->
+                    <!-- TAGS -->
 
-                    <div class="modal-buttons">
+                    <label>
 
-                        <button id="saveManualBookBtn">
-                            Save Book
+                        <input id="editTags"
+                               placeholder="fantasy, favorites, signed">
+
+                    </label>
+
+
+                    <!-- NOTES -->
+
+                    <label>
+
+                        Notes
+
+                        <textarea id="editNotes"></textarea>
+
+                    </label>
+
+
+                    <!-- ACTION BUTTONS -->
+
+                    <div class="edit-buttons">
+
+                        <button id="saveEditBtn">
+                            Save
                         </button>
 
-                        <button id="closeManualAddBtn">
+                        <button id="cancelEditBtn">
                             Cancel
                         </button>
 
                     </div>
 
-                </div>
+                </section>
 
             </div>
 
-            <!-- =========================
-         STATS MODAL
-    ========================== -->
-            <div id="statsModal" class="modal modal-hidden">
-                <div class="modal-content stats-modal-content">
+        </div>
 
-                    <span class="close" onclick="closeModal('statsModal')">&times;</span>
+        <!-- HABIT MODAL -->
 
-                    <div class="modal-body"></div>
-                </div>
+        <div id="habitModal" class="modal hidden">
+            <div class="modal-content large-modal">
+                <span id="closeHabitModal" class="close">&times;</span>
+                <h2 class="section-title">Reading Log</h2>
+                <div class="modal-body"></div>
+            </div>
+        </div>
+
+        <!-- RATING MODAL -->
+
+        <div id="finishBookModal" class="modal hidden">
+
+            <div class="modal-content small-modal">
+
+                <button id="closeFinishModal"
+                        class="close-btn">
+                    ✕
+                </button>
+
+                <div id="finishBookContent"></div>
+
             </div>
 
+        </div>
 
-            <!-- =========================
-         SHELF EDIT MODAL
+        <!-- =========================
+         MANUAL ADD MODAL
     ========================== -->
 
-            <div id="shelfEditModal" class="modal hidden">
-                <div class="modal-content">
+        <div id="manualAddModal" class="modal hidden">
 
-                    <h3>Edit Shelf</h3>
+            <div class="modal-content">
 
-                    <input type="text" id="editShelfName" />
-
-                    <div id="colorPicker" class="color-picker"></div>
-
-                    <div class="modal-actions">
-                        <button id="saveShelfEditBtn">Save</button>
-                        <button id="cancelShelfEditBtn">Cancel</button>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- =========================
-      ACCOUNT MODAL
-    ========================== -->
-
-            <div id="accountModal" class="modal modal-hidden">
-
-                <div class="modal-content account-modal-content">
-
-                    <span class="close"
-                          onclick="closeAccountModal()">
-                        &times;
-                    </span>
-
-                    <div class="modal-header">
-                        <h2>My Account</h2>
-                    </div>
-
-                    <div class="account-profile-section">
-
-                        <img id="accountAvatar"
-                             src=""
-                             alt="Profile Picture"
-                             class="profile-avatar">
+                <h2>Add Book</h2>
 
 
-                        <input type="file"
-                               id="avatarUpload"
-                               accept="image/*">
+                <!-- BASIC INFO -->
 
-                    </div>
+                <input id="manualTitle"
+                       placeholder="Title">
 
-                    <div class="account-fields">
+                <input id="manualAuthor"
+                       placeholder="Author">
 
-                        <label>
-                            Username
+                <input id="manualISBN"
+                       placeholder="ISBN">
 
-                            <input id="accountUsername"
-                                   type="text">
-                        </label>
+                <input id="manualPageCount"
+                       type="number"
+                       min="1"
+                       placeholder="Page Count">
 
-                        <label>
-                            Display Name
 
-                            <input id="accountDisplayName"
-                                   type="text">
-                        </label>
+                <input id="manualGenre"
+                       placeholder="Genre">
 
-                        <label>
-                            Email
-                            <input id="accountEmail"
-                                   type="email"
-                                   disabled>
-                        </label>
+                <input id="manualSeries"
+                       placeholder="Series">
 
-                        <label>
-                            Friend Code
+                <input id="manualCover"
+                       placeholder="Cover Image URL">
 
-                            <div class="friend-code-row">
 
-                                <input id="accountFriendCode"
-                                       disabled>
+                <!-- TAGS -->
 
-                                <button id="copyFriendCodeBtn">
-                                    Copy
-                                </button>
+                <label for="manualTags">
 
-                            </div>
-                        </label>
-                    </div>
+                </label>
 
-                    <div class="modal-actions">
+                <input type="text"
+                       id="manualTags"
+                       placeholder="fantasy, signed, favorites">
 
-                        <button id="saveAccountBtn">
-                            Save Changes
-                        </button>
 
-                    </div>
-                </div>
-            </div>
+                <!-- NOTES -->
 
-            <!-- =========================
-      PASSWORD RECOVERY MODAL
-    ========================== -->
-            <div id="forgotPasswordModal" class="modal modal-hidden">
+                <textarea id="manualNotes"
+                          placeholder="Notes"></textarea>
 
-                <div class="modal-content">
 
-                    <span class="close"
-                          onclick="closeForgotPasswordModal()">
-                        &times;
-                    </span>
+                <!-- SHELVES -->
 
-                    <h2>Reset Password</h2>
+                <div id="manualShelfCheckboxes"></div>
 
-                    <p>
-                        Enter your email address and we'll send you a password reset link.
-                    </p>
 
-                    <input id="resetEmail"
-                           type="email"
-                           placeholder="Email">
+                <!-- ACTIONS -->
 
-                    <button id="sendResetBtn">
-                        Send Reset Email
+                <div class="modal-buttons">
+
+                    <button id="saveManualBookBtn">
+                        Save Book
                     </button>
 
-                </div>
-
-            </div>
-
-            <!-- =========================
-      NOTIFICATION MODAL
-    ========================== -->
-            <div id="notificationsModal" class="modal modal-hidden">
-
-                <div class="modal-content notifications-modal">
-
-                    <span class="close"
-                          onclick="closeNotificationsModal()">
-                        &times;
-                    </span>
-
-                    <div class="modal-header">
-                        <h2>Notifications</h2>
-                    </div>
-
-                    <div id="notificationsList">
-
-                    </div>
-
-                    <div class="notification-card">
-
-                    </div>
-
-                </div>
-
-            </div>   
-
-    <!-- =========================
-      FRIEND MODAL
-    ========================== -->
-
-            <div id="friendModal" class="modal modal-hidden">
-
-                <div class="modal-content friend-modal-content">
-
-                    <span class="close"
-                          onclick="closeFriendModal()">
-                        &times;
-                    </span>
-
-                    <div class="modal-header">
-                        <h2>Add Friend</h2>
-                    </div>
-
-                    <div class="friend-search">
-
-                        <label>
-
-                            Search
-
-                            <input id="friendSearchInput"
-                                   placeholder="Username or Friend Code">
-
-                        </label>
-
-                        <button id="searchFriendBtn">
-                            Search
-                        </button>
-
-                    </div>
-
-                    <div id="friendSearchResults"
-                         class="friend-search-results">
-
-                        <p class="empty-search">
-                            Search for someone to get started.
-                        </p>
-
-                    </div>
+                    <button id="closeManualAddBtn">
+                        Cancel
+                    </button>
 
                 </div>
 
             </div>
 
         </div>
+
+        <!-- =========================
+         STATS MODAL
+    ========================== -->
+        <div id="statsModal" class="modal modal-hidden">
+            <div class="modal-content stats-modal-content">
+
+                <span class="close" onclick="closeModal('statsModal')">&times;</span>
+
+                <div class="modal-body"></div>
+            </div>
+        </div>
+
+
+        <!-- =========================
+         SHELF EDIT MODAL
+    ========================== -->
+
+        <div id="shelfEditModal" class="modal hidden">
+            <div class="modal-content">
+
+                <h3>Edit Shelf</h3>
+
+                <input type="text" id="editShelfName" />
+
+                <div id="colorPicker" class="color-picker"></div>
+
+                <div class="modal-actions">
+                    <button id="saveShelfEditBtn">Save</button>
+                    <button id="cancelShelfEditBtn">Cancel</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- =========================
+      ACCOUNT MODAL
+    ========================== -->
+
+        <div id="accountModal" class="modal modal-hidden">
+
+            <div class="modal-content account-modal-content">
+
+                <span class="close"
+                      onclick="closeAccountModal()">
+                    &times;
+                </span>
+
+                <div class="modal-header">
+                    <h2>My Account</h2>
+                </div>
+
+                <div class="account-profile-section">
+
+                    <img id="accountAvatar"
+                         src=""
+                         alt="Profile Picture"
+                         class="profile-avatar">
+
+
+                    <input type="file"
+                           id="avatarUpload"
+                           accept="image/*">
+
+                </div>
+
+                <div class="account-fields">
+
+                    <label>
+                        Username
+
+                        <input id="accountUsername"
+                               type="text">
+                    </label>
+
+                    <label>
+                        Display Name
+
+                        <input id="accountDisplayName"
+                               type="text">
+                    </label>
+
+                    <label>
+                        Email
+                        <input id="accountEmail"
+                               type="email"
+                               disabled>
+                    </label>
+
+                    <label>
+                        Friend Code
+
+                        <div class="friend-code-row">
+
+                            <input id="accountFriendCode"
+                                   disabled>
+
+                            <button id="copyFriendCodeBtn">
+                                Copy
+                            </button>
+
+                        </div>
+                    </label>
+                </div>
+
+                <div class="modal-actions">
+
+                    <button id="saveAccountBtn">
+                        Save Changes
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+      PASSWORD RECOVERY MODAL
+    ========================== -->
+        <div id="forgotPasswordModal" class="modal modal-hidden">
+
+            <div class="modal-content">
+
+                <span class="close"
+                      onclick="closeForgotPasswordModal()">
+                    &times;
+                </span>
+
+                <h2>Reset Password</h2>
+
+                <p>
+                    Enter your email address and we'll send you a password reset link.
+                </p>
+
+                <input id="resetEmail"
+                       type="email"
+                       placeholder="Email">
+
+                <button id="sendResetBtn">
+                    Send Reset Email
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+      NOTIFICATION MODAL
+    ========================== -->
+        <div id="notificationsModal" class="modal modal-hidden">
+
+            <div class="modal-content notifications-modal">
+
+                <span class="close"
+                      onclick="closeNotificationsModal()">
+                    &times;
+                </span>
+
+                <div class="modal-header">
+                    <h2>Notifications</h2>
+                </div>
+
+                <div id="notificationsList">
+
+                </div>
+
+                <div class="notification-card">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+      FRIEND CARD MODAL
+    ========================== -->
+        <div id="friendPreviewCard"
+             class="friend-preview-card hidden">
+
+            <button class="close-preview-card">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <!-- =========================
+      FRIEND PROFILE MODAL
+    ========================== -->
+        <div id="friendProfileModal"
+             class="modal modal-hidden">
+
+            <div class="modal-content friend-profile-modal">
+
+                <span class="close"
+                      onclick="closeFriendProfileModal()">
+                    &times;
+                </span>
+
+                <div id="friendProfileContent">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+      FRIEND MODAL
+    ========================== -->
+
+        <div id="friendModal" class="modal modal-hidden">
+
+            <div class="modal-content friend-modal-content">
+
+                <span class="close"
+                      onclick="closeFriendModal()">
+                    &times;
+                </span>
+
+                <div class="modal-header">
+                    <h2>Add Friend</h2>
+                </div>
+
+                <div class="friend-search">
+
+                    <label>
+
+                        Search
+
+                        <input id="friendSearchInput"
+                               placeholder="Username or Friend Code">
+
+                    </label>
+
+                    <button id="searchFriendBtn">
+                        Search
+                    </button>
+
+                </div>
+
+                <div id="friendSearchResults"
+                     class="friend-search-results">
+
+                    <p class="empty-search">
+                        Search for someone to get started.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 
         <!-- =========================

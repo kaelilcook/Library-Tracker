@@ -702,11 +702,28 @@ async function loadFriends() {
         );
 
 
-    const { data: profiles } =
+    const { data: profiles, error: profileError } =
         await supabaseClient
             .from("profiles")
-            .select("*")
+            .select(`
+            id,
+            username,
+            display_name,
+            avatar_url,
+            bio,
+            favorite_book,
+            favorite_author,
+            favorite_genre
+        `)
             .in("id", friendIds);
+
+    if (profileError) {
+
+        console.error(profileError);
+
+        return;
+
+    }
 
 
     friends = profiles || [];
@@ -738,53 +755,82 @@ function renderFriends() {
         friends.map(friend => {
 
             return `
-           <div class="friend-item"
-         data-user-id="${friend.id}">
+<div class="friend-item"
+     data-user-id="${friend.id}">
 
-        <img
-            src="${friend.avatar_url || ""}"
-            class="friend-avatar">
+    <img
+        src="${friend.avatar_url || ""}"
+        class="friend-avatar">
 
+    <span class="friend-name">
+        ${friend.display_name || friend.username}
+    </span>
 
-        <span class="friend-name">
-            ${friend.display_name ||
-                friend.username}
-        </span>
-
-
-        <div class="friend-hover-card">
-
-            <img
-                src="${friend.avatar_url || ""}"
-                class="friend-large-avatar">
-
-
-            <div>
-
-                <strong>
-                    ${friend.display_name ||
-                friend.username}
-                </strong>
-
-                <small>
-                    @${friend.username}
-                </small>
-
-            </div>
-
-
-            <button class="view-profile-btn">
-                View Profile
-            </button>
-
-        </div>
-
-    </div>
-        `;
+</div>
+`;
 
         }).join("");
 
+    document
+        .querySelectorAll(".friend-item")
+        .forEach(item => {
+
+            const friend =
+                friends.find(f =>
+                    f.id === item.dataset.userId
+                );
+
+
+            if (!friend) return;
+
+
+            item.addEventListener(
+                "click",
+                e => {
+
+                    e.stopPropagation();
+
+                    showFriendHoverCard(
+                        friend,
+                        e.clientX,
+                        e.clientY
+                    );
+
+                }
+            );
+
+        });
 }
+
+document.addEventListener(
+    "click",
+    e => {
+
+        const card =
+            document.getElementById(
+                "friendPreviewCard"
+            );
+
+
+        const clickedFriend =
+            e.target.closest(
+                ".friend-item"
+            );
+
+
+        if (
+            card &&
+            card.classList.contains("visible") &&
+            !card.contains(e.target) &&
+            !clickedFriend
+        ) {
+
+            hideFriendHoverCard();
+
+        }
+
+    }
+);
 
 function openFriendModal() {
 
@@ -1158,6 +1204,394 @@ async function declineFriendRequest(friendshipId) {
     await loadFriendRequests();
 
     await updateNotificationBadge();
+
+}
+
+// ========================
+// FRIEND PROFILES
+// ========================
+function showFriendHoverCard(friend, x, y) {
+
+    console.log(
+        "Opening friend card",
+        friend.username,
+        x,
+        y
+    );
+
+    const card =
+        document.getElementById(
+            "friendPreviewCard"
+        );
+
+    console.log("Card:", card);
+
+
+    card.innerHTML =
+        buildFriendCard(friend);
+
+    const isMobile =
+        window.matchMedia("(hover: none)").matches;
+
+
+    if (isMobile) {
+
+        card.style.left = "";
+        card.style.top = "";
+        card.style.right = "";
+        card.style.bottom = "";
+
+    } else {
+
+        card.style.left = (x + 20) + "px";
+        card.style.top = y + "px";
+
+    }
+
+
+    card.classList.remove(
+        "hidden"
+    );
+
+
+    card.classList.add(
+        "visible"
+    );
+
+    console.log(
+        card.className
+    );
+
+
+    document
+        .getElementById("hoverProfileBtn")
+        .onclick = () => {
+
+            openFriendProfile(friend.id);
+
+        };
+
+}
+function buildFriendCard(friend) {
+
+    return `
+
+        <img
+            src="${friend.avatar_url || ""}"
+            class="friend-large-avatar">
+
+        <h3>
+
+            ${friend.display_name}
+
+        </h3>
+
+        <p>
+
+            @${friend.username}
+
+        </p>
+
+        <p>
+
+            ${friend.bio || "No bio yet."}
+
+        </p>
+
+        <button
+            id="hoverProfileBtn">
+
+            View Profile
+
+        </button>
+
+    `;
+
+}
+
+function hideFriendHoverCard() {
+
+    const card =
+        document.getElementById(
+            "friendPreviewCard"
+        );
+
+    card.classList.remove(
+        "visible"
+    );
+
+    card.classList.add(
+        "hidden"
+    );
+
+    const closeHoverCardButton =
+        document.querySelector(".close-preview-card");
+
+
+    if (closeHoverCardButton) {
+
+        closeHoverCardButton.addEventListener(
+            "click",
+            () => {
+
+                hideFriendHoverCard();
+
+            }
+        );
+
+    }
+
+}
+
+async function getUserProfile(userId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("profiles")
+            .select(`
+                id,
+                username,
+                display_name,
+                avatar_url,
+                bio,
+                favorite_book,
+                favorite_author,
+                favorite_genre
+            `)
+            .eq("id", userId)
+            .single();
+
+    if (error) {
+
+        console.error(error);
+
+        return null;
+
+    }
+
+    return data;
+
+}
+function closeFriendProfileModal() {
+
+    document
+        .getElementById("friendProfileModal")
+        .classList
+        .add("modal-hidden");
+
+}
+async function openFriendProfile(userId) {
+
+    const profile =
+        await getUserProfile(userId);
+
+    if (!profile) return;
+
+    renderFriendProfile(profile);
+
+    document
+        .getElementById("friendProfileModal")
+        .classList
+        .remove("modal-hidden");
+
+}
+async function getUserProfile(userId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("profiles")
+            .select(`
+                id,
+                username,
+                display_name,
+                avatar_url,
+                bio,
+                favorite_book,
+                favorite_author,
+                favorite_genre
+            `)
+            .eq("id", userId)
+            .single();
+
+    if (error) {
+
+        console.error(error);
+
+        return null;
+
+    }
+
+    return data;
+
+}
+function renderFriendProfile(profile) {
+
+    const container =
+        document.getElementById(
+            "friendProfileContent"
+        );
+
+    container.innerHTML = `
+
+        ${renderProfileHeader(profile)}
+
+        ${renderCurrentReadingSection()}
+
+        ${renderReadingStatsSection()}
+
+        ${renderRecentActivitySection()}
+
+    `;
+
+}
+function renderProfileHeader(profile) {
+
+    return `
+
+        <section class="profile-header">
+
+            <img
+                src="${profile.avatar_url || ""}"
+                class="profile-avatar">
+
+            <h2>
+
+                ${profile.display_name ||
+        profile.username}
+
+            </h2>
+
+            <p>
+
+                @${profile.username}
+
+            </p>
+
+            <p class="profile-bio">
+
+                ${profile.bio ||
+        "No bio yet."}
+
+            </p>
+
+            <div class="favorite-grid">
+
+                <div>
+
+                    <strong>
+                        Favorite Book
+                    </strong>
+
+                    <p>
+
+                        ${profile.favorite_book || "—"}
+
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <strong>
+                        Favorite Author
+                    </strong>
+
+                    <p>
+
+                        ${profile.favorite_author || "—"}
+
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <strong>
+                        Favorite Genre
+                    </strong>
+
+                    <p>
+
+                        ${profile.favorite_genre || "—"}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    `;
+
+}
+function renderCurrentReadingSection() {
+
+    return `
+
+        <section class="profile-section">
+
+            <h3>
+
+                📖 Currently Reading
+
+            </h3>
+
+            <p>
+
+                Coming soon...
+
+            </p>
+
+        </section>
+
+    `;
+
+}
+function renderReadingStatsSection() {
+
+    return `
+
+        <section class="profile-section">
+
+            <h3>
+
+                📚 Reading Statistics
+
+            </h3>
+
+            <p>
+
+                Coming soon...
+
+            </p>
+
+        </section>
+
+    `;
+
+}
+function renderRecentActivitySection() {
+
+    return `
+
+        <section class="profile-section">
+
+            <h3>
+
+                🔥 Recent Activity
+
+            </h3>
+
+            <p>
+
+                Coming soon...
+
+            </p>
+
+        </section>
+
+    `;
 
 }
 
