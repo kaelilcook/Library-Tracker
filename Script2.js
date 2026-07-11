@@ -1646,38 +1646,87 @@ function renderProfileHeader(profile) {
 
 async function getFriendCurrentlyReading(friendId) {
 
-    const { data, error } =
+    // Step 1: Get the featured book ID
+    const { data: profile, error: profileError } =
         await supabaseClient
-            .from("books")
-            .select(`
-                title,
-                author,
-                cover
-            `)
-            .eq(
-                "user_id",
-                friendId
-            )
-            .eq(
-                "status",
-                "Reading"
-            )
-            .limit(3);
+            .from("profiles")
+            .select("featured_reading_book_id")
+            .eq("id", friendId)
+            .single();
 
+    if (profileError) {
 
-    if (error) {
-
-        console.error(
-            "Error loading currently reading:",
-            error
-        );
+        console.error(profileError);
 
         return null;
 
     }
 
+    // Step 2: If they chose one, load it
+    if (profile.featured_reading_book_id) {
 
-    return data?.[0] || null;
+        const { data: featuredBook, error } =
+            await supabaseClient
+                .from("books")
+                .select("*")
+                .eq(
+                    "id",
+                    profile.featured_reading_book_id
+                )
+                .single();
+
+        if (!error && featuredBook) {
+
+            return featuredBook;
+
+        }
+
+    }
+
+    // Step 3: Otherwise fall back
+    const { data: readingBooks, error } =
+        await supabaseClient
+            .from("books")
+            .select("*")
+            .eq("user_id", friendId)
+            .eq("status", "Reading");
+
+    if (error) {
+
+        console.error(error);
+
+        return null;
+
+    }
+
+    if (!readingBooks.length) {
+
+        return null;
+
+    }
+
+    return readingBooks[0];
+
+}
+
+async function getFeaturedReadingBookId() {
+
+    const { data, error } =
+        await supabaseClient
+            .from("profiles")
+            .select("featured_reading_book_id")
+            .eq("id", currentUser.id)
+            .single();
+
+    if (error) {
+
+        console.error(error);
+
+        return null;
+
+    }
+
+    return data.featured_reading_book_id;
 
 }
 
@@ -4695,7 +4744,7 @@ function openModalView(title, html) {
     modal.classList.remove("hidden");
 }
 
-function openCurrentlyReadingModal() {
+async function openCurrentlyReadingModal() {
     console.log("OPEN CURRENTLY READING MODAL FIRED");
 
     const readingBooks =
@@ -4733,14 +4782,27 @@ function openCurrentlyReadingModal() {
     console.log("CURRENTLY READING MODAL OPENED");
 
     setupCurrentlyReadingSearch();
-    setupFeaturedReadingButtons();
+    await setupFeaturedReadingButtons();
 }
 
-function setupFeaturedReadingButtons() {
+async function setupFeaturedReadingButtons() {
+
+    const featuredBookId =
+        await getFeaturedReadingBookId();
 
     document
         .querySelectorAll(".feature-reading-btn")
         .forEach(button => {
+
+            if (
+                button.dataset.bookId ===
+                featuredBookId
+            ) {
+
+                button.textContent =
+                    "⭐ Showing on Profile";
+
+            }
 
             button.addEventListener(
                 "click",
@@ -4749,14 +4811,20 @@ function setupFeaturedReadingButtons() {
                     const bookId =
                         button.dataset.bookId;
 
-                    await setFeaturedReadingBook(
-                        bookId
-                    );
+                    await setFeaturedReadingBook(bookId);
+
+                    document
+                        .querySelectorAll(".feature-reading-btn")
+                        .forEach(btn => {
+
+                            btn.textContent =
+                                "⭐ Show on Profile";
+
+                        });
 
                     button.textContent =
-                        "⭐ Featured on Profile";
+                        "⭐ Showing on Profile";
 
-                    button.disabled = true;
                 }
             );
 
