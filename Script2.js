@@ -963,17 +963,17 @@ function renderFriendSearchResults(results) {
 
             button.addEventListener(
                 "click",
-                () => {
+                async () => {
 
                     const friendId =
                         button.dataset.userId;
 
-                    console.log(
-                        "Add friend clicked:",
-                        friendId
-                    );
+                    button.disabled = true;
+                    button.textContent = "Sending...";
 
-                    sendFriendRequest(friendId);
+                    await sendFriendRequest(friendId);
+
+                    button.textContent = "Request Sent";
 
                 }
             );
@@ -1679,6 +1679,34 @@ async function getFriendCurrentlyReading(friendId) {
 
     return data?.[0] || null;
 
+}
+
+async function setFeaturedReadingBook(bookId) {
+
+    const { error } =
+        await supabaseClient
+            .from("profiles")
+            .update({
+                featured_reading_book_id: bookId
+            })
+            .eq(
+                "id",
+                currentUser.id
+            );
+
+    if (error) {
+
+        console.error(
+            "Failed to set featured reading book:",
+            error
+        );
+        return;
+    }
+
+    console.log(
+        "Featured reading book saved:",
+        bookId
+    );
 }
 
 async function getFriendFinishedCount(friendId) {
@@ -2941,22 +2969,28 @@ function renderBookGrid(books, view = "") {
 
                     <small>${book.author || ""}</small>
 
-                    ${view === "currentlyReading" ? `
-                        <div class="reading-actions">
+                   ${view === "currentlyReading" ? `
+    <div class="reading-actions">
 
-                            <button
-                                onclick="openFinishBookModal('${book.id}')">
-                                ✓ Finished
-                            </button>
+        <button
+            onclick="openFinishBookModal('${book.id}')">
+            ✓ Finished
+        </button>
 
-                            <button
-                                class="dnf-btn"
-                                onclick="markDNF('${book.id}')">
-                                🚫 DNF
-                            </button>
+        <button
+            class="dnf-btn"
+            onclick="markDNF('${book.id}')">
+            🚫 DNF
+        </button>
 
-                        </div>
-                    ` : ""}
+        <button
+            class="feature-reading-btn"
+            data-book-id="${book.id}">
+            ⭐ Show on Profile
+        </button>
+
+    </div>
+` : ""}
 
                 </div>
 
@@ -4699,6 +4733,34 @@ function openCurrentlyReadingModal() {
     console.log("CURRENTLY READING MODAL OPENED");
 
     setupCurrentlyReadingSearch();
+    setupFeaturedReadingButtons();
+}
+
+function setupFeaturedReadingButtons() {
+
+    document
+        .querySelectorAll(".feature-reading-btn")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const bookId =
+                        button.dataset.bookId;
+
+                    await setFeaturedReadingBook(
+                        bookId
+                    );
+
+                    button.textContent =
+                        "⭐ Featured on Profile";
+
+                    button.disabled = true;
+                }
+            );
+
+        });
 }
 
 async function markDNF(id) {
