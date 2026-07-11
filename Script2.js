@@ -1327,7 +1327,7 @@ function buildFriendPreview(
 
        <div class="preview-row currently-reading-preview">
 
-    <span>📖 Currently Reading</span>
+    <span>📖 Featured Reading</span>
 
 
     ${
@@ -1458,189 +1458,6 @@ function hideFriendPreviewCard() {
         );
 
     }
-
-}
-
-async function getUserProfile(userId) {
-
-    const { data, error } =
-        await supabaseClient
-            .from("profiles")
-            .select(`
-                id,
-                username,
-                display_name,
-                avatar_url,
-                bio,
-                favorite_book,
-                favorite_author,
-                favorite_genre
-            `)
-            .eq("id", userId)
-            .single();
-
-    if (error) {
-
-        console.error(error);
-
-        return null;
-
-    }
-
-    return data;
-
-}
-function closeFriendProfileModal() {
-
-    document
-        .getElementById("friendProfileModal")
-        .classList
-        .add("modal-hidden");
-
-}
-async function openFriendProfile(userId) {
-
-    const profile =
-        await getUserProfile(userId);
-
-    if (!profile) return;
-
-    renderFriendProfile(profile);
-
-    document
-        .getElementById("friendProfileModal")
-        .classList
-        .remove("modal-hidden");
-
-}
-async function getUserProfile(userId) {
-
-    const { data, error } =
-        await supabaseClient
-            .from("profiles")
-            .select(`
-                id,
-                username,
-                display_name,
-                avatar_url,
-                bio,
-                favorite_book,
-                favorite_author,
-                favorite_genre
-            `)
-            .eq("id", userId)
-            .single();
-
-    if (error) {
-
-        console.error(error);
-
-        return null;
-
-    }
-
-    return data;
-
-}
-function renderFriendProfile(profile) {
-
-    const container =
-        document.getElementById(
-            "friendProfileContent"
-        );
-
-    container.innerHTML = `
-
-        ${renderProfileHeader(profile)}
-
-        ${renderCurrentReadingSection()}
-
-        ${renderReadingStatsSection()}
-
-        ${renderRecentActivitySection()}
-
-    `;
-
-}
-function renderProfileHeader(profile) {
-
-    return `
-
-        <section class="profile-header">
-
-            <img
-                src="${profile.avatar_url || ""}"
-                class="profile-avatar">
-
-            <h2>
-
-                ${profile.display_name ||
-        profile.username}
-
-            </h2>
-
-            <p>
-
-                @${profile.username}
-
-            </p>
-
-            <p class="profile-bio">
-
-                ${profile.bio ||
-        "No bio yet."}
-
-            </p>
-
-            <div class="favorite-grid">
-
-                <div>
-
-                    <strong>
-                        Favorite Book
-                    </strong>
-
-                    <p>
-
-                        ${profile.favorite_book || "—"}
-
-                    </p>
-
-                </div>
-
-                <div>
-
-                    <strong>
-                        Most Read Author
-                    </strong>
-
-                    <p>
-
-                        ${profile.favorite_author || "—"}
-
-                    </p>
-
-                </div>
-
-                <div>
-
-                    <strong>
-                        Favorite Genre
-                    </strong>
-
-                    <p>
-
-                        ${profile.favorite_genre || "—"}
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    `;
 
 }
 
@@ -2011,27 +1828,240 @@ async function getFriendTopGenre(friendId) {
 
 }
 
-function renderCurrentReadingSection() {
+// ========================
+// FULL PROFILE MODAL
+// ========================
+
+async function getUserProfile(userId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("profiles")
+            .select(`
+                id,
+                username,
+                display_name,
+                avatar_url,
+                bio,
+                favorite_book,
+                favorite_author,
+                favorite_genre
+            `)
+            .eq("id", userId)
+            .single();
+
+    if (error) {
+
+        console.error(error);
+
+        return null;
+
+    }
+
+    return data;
+
+}
+function closeFriendProfileModal() {
+
+    document
+        .getElementById("friendProfileModal")
+        .classList
+        .add("modal-hidden");
+
+}
+async function openFriendProfile(userId) {
+
+    const profile =
+        await getUserProfile(userId);
+
+    if (!profile) return;
+
+    const readingBooks =
+        await getFriendReadingBooks(userId);    
+
+    renderFriendProfile(
+        profile,
+        readingBooks,        
+    );
+
+    document
+        .getElementById("friendProfileModal")
+        .classList.remove("modal-hidden");
+
+}
+
+async function getFriendReadingBooks(userId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("status", "Reading");
+
+    if (error) {
+
+        console.error(error);
+
+        return [];
+
+    }
+
+    return data;
+
+}
+
+function renderFriendProfile(
+    profile,
+    readingBooks
+) {
+
+    const container =
+        document.getElementById(
+            "friendProfileContent"
+        );
+
+    container.innerHTML = `
+
+        ${renderProfileHeader(profile)}
+
+        ${renderCurrentReadingSection(
+            readingBooks
+        ) }
+
+        ${renderReadingStatsSection()}
+
+        ${renderRecentActivitySection()}
+
+    `;
+
+}
+
+function renderProfileHeader(profile) {
 
     return `
 
-        <section class="profile-section">
+        <section class="profile-header">
 
-            <h3>
+            <img
+                src="${profile.avatar_url || ""}"
+                class="profile-avatar">
 
-                📖 Currently Reading
+            <h2>
 
-            </h3>
+                ${profile.display_name ||
+        profile.username}
+
+            </h2>
 
             <p>
 
-                Coming soon...
+                @${profile.username}
 
             </p>
+
+            <p class="profile-bio">
+
+                ${profile.bio ||
+        "No bio yet."}
+
+            </p>
+
+            <div class="favorite-grid">
+
+                <div>
+
+                    <strong>
+                        Favorite Book
+                    </strong>
+
+                    <p>
+
+                        ${profile.favorite_book || "—"}
+
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <strong>
+                        Most Read Author
+                    </strong>
+
+                    <p>
+
+                        ${profile.favorite_author || "—"}
+
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <strong>
+                        Top Read Genre
+                    </strong>
+
+                    <p>
+
+                        ${profile.favorite_genre || "—"}
+
+                    </p>
+
+                </div>
+
+            </div>
 
         </section>
 
     `;
+
+}
+
+function renderCurrentReadingSection(books) {
+
+    return `
+
+<section class="profile-section">
+
+    <h3>
+
+        📖 Currently Reading
+
+    </h3>
+
+    <div class="current-reading-grid">
+
+        ${books.map(book => `
+
+            <div class="current-book-card">
+
+    <img
+        src="${book.cover || ""}"
+        class="current-book-cover">
+
+    <h4>
+
+        ${book.title}
+
+    </h4>
+
+    <p>
+
+        ${book.author || ""}
+
+    </p>
+
+</div>
+
+        `).join("")}
+
+    </div>
+
+</section>
+
+`;
 
 }
 function renderReadingStatsSection() {
