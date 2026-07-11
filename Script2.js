@@ -4902,12 +4902,27 @@ async function addShelf() {
         .insert({
             name: shelfName,
             color: shelfColor,
-            user_id: user.id
+            user_id: currentUser.id
         });
 
     if (error) {
-        console.error("Shelf insert failed:", error);
+
+        console.error(
+            "Shelf insert failed:",
+            error
+        );
+
+        return;
     }
+
+
+    shelves.push({
+        name: shelfName,
+        color: shelfColor
+    });
+
+
+    input.value = "";
 
     await loadShelves();
 
