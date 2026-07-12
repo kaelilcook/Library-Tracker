@@ -1297,6 +1297,7 @@ async function showFriendPreviewCard(friend, x, y) {
 
 function buildFriendPreview(
     friend,
+    avatar_url,
     currentlyReading,
     finishedCount,
     averageRating, 
