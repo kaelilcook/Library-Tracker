@@ -459,6 +459,110 @@ async function saveAccount() {
     closeAccountModal();
 }
 
+async function uploadAvatar(event) {
+
+    const file =
+        event.target.files[0];
+
+    if (!file)
+        return;
+
+
+    const {
+        data: { user }
+    } =
+        await supabaseClient.auth.getUser();
+
+
+    const extension =
+        file.name
+            .split(".")
+            .pop();
+
+    const filePath =
+        `${user.id}/avatar.${extension}`;
+
+    console.log(filePath);
+
+    const { error } =
+        await supabaseClient
+            .storage
+            .from("avatars")
+            .upload(
+                filePath,
+                file,
+                {
+                    upsert: true
+                }
+            );
+
+    if (error) {
+
+        console.error(
+            "Upload failed:",
+            error
+        );
+
+        return;
+
+    }
+
+    console.log("Upload successful!");
+
+    const {
+        data: publicUrlData
+    } =
+        supabaseClient
+            .storage
+            .from("avatars")
+            .getPublicUrl(filePath);
+
+
+    const avatarUrl =
+        publicUrlData.publicUrl;
+
+
+    console.log(
+        "Avatar URL:",
+        avatarUrl
+    );
+
+    const { error: profileError } =
+        await supabaseClient
+            .from("profiles")
+            .update({
+
+                avatar_url: avatarUrl
+
+            })
+            .eq(
+                "id",
+                user.id
+            );
+
+
+    if (profileError) {
+
+        console.error(
+            "Profile update failed:",
+            profileError
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "Profile avatar updated!"
+    );
+
+    document
+        .getElementById("accountAvatar")
+        .src = avatarUrl;
+
+}
+
 document
     .getElementById("avatarUpload")
     .addEventListener(
