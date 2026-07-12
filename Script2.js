@@ -2322,6 +2322,114 @@ function renderRecentActivitySection() {
 
 }
 
+const defaultAvatars = {
+
+    Books: [
+        "images/avatars/book-stack.png",
+        "images/avatars/floral-book.jpg",
+        "images/avatars/open-book.jpg",
+        "images/avatars/key-book.jpg",
+    ],
+
+    Fantasy: [
+        "images/avatars/fantasy-era.jpg",
+        "images/avatars/sword-book.jpg",
+        "images/avatars/dragon.jpg",
+        "images/avatars/magic-owl.jpg",
+    ],
+
+    Mystery: [
+        "images/avatars/ghost.jpg",
+        
+    ],
+
+    Cozy: [
+        "images/avatars/romantic-letter.png",
+        "images/avatars/geese.jpg",
+        "images/avatars/cozy-girl.jpg", 
+        "images/avatars/fairytales.jpg"
+    ]
+
+};
+
+document
+    .getElementById(
+        "chooseDefaultAvatarBtn"
+    )
+    .onclick =
+    openAvatarPicker;
+
+function openAvatarPicker() {
+
+    const grid =
+        document.getElementById(
+            "avatarGrid"
+        );
+
+    grid.innerHTML =
+        Object.values(defaultAvatars)
+    .flat()
+    .map(path => `
+
+        <img
+            src="${path}"
+            class="default-avatar"
+            onclick="selectDefaultAvatar('${path}')">
+
+    `)
+    .join("");
+
+    document
+        .getElementById(
+            "avatarPickerModal"
+        )
+        .classList
+        .remove("modal-hidden");
+
+}
+
+async function selectDefaultAvatar(path) {
+
+    const {
+        data: { user }
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
+
+    await supabaseClient
+        .from("profiles")
+        .update({
+
+            avatar_url: path
+
+        })
+        .eq(
+            "id",
+            user.id
+        );
+
+    document
+        .getElementById(
+            "accountAvatar"
+        )
+        .src = path;
+
+    closeAvatarPicker();
+
+}
+
+function closeAvatarPicker() {
+
+    document
+        .getElementById(
+            "avatarPickerModal"
+        )
+        .classList
+        .add("modal-hidden");
+
+}
+
 // ========================
 // BOOK DATA
 // ========================

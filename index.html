@@ -236,7 +236,7 @@
 
                     <button id="addShelfBtn">
                         Add Shelf
-                    </button>                   
+                    </button>
 
                 </section>
 
@@ -881,6 +881,14 @@
 
                     </button>
 
+                    <input type="file"
+                           id="avatarUpload"
+                           accept="image/*">
+
+                    <button id="chooseDefaultAvatarBtn">
+                        📚 Choose Default Avatar
+                    </button>
+
                 </div>
 
                 <div class="account-fields">
@@ -951,6 +959,32 @@
 
                 </div>
             </div>
+        </div>
+
+        <div id="avatarPickerModal"
+             class="modal modal-hidden">
+
+            <div class="modal-content avatar-picker">
+
+                <span class="close"
+                      onclick="closeAvatarPicker()">
+
+                    &times;
+
+                </span>
+
+                <h2>
+
+                    Choose an Avatar
+
+                </h2>
+
+                <div id="avatarGrid" class="avatarGrid">
+
+                </div>
+
+            </div>
+
         </div>
 
         <!-- =========================

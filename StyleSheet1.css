@@ -749,7 +749,6 @@ p {
     gap: 12px;
 }
 
-
 .profile-avatar {
     width: 120px;
     height: 120px;
@@ -757,6 +756,42 @@ p {
     object-fit: cover;
     background: var(--surface-2);
 }
+
+.avatarGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 90px);
+    gap: 15px;
+    padding: 10px;
+}
+
+.default-avatar {
+    width: 90px;
+    height: 90px;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .default-avatar img {
+        width: 65px;
+        height: 65px;
+        object-fit: contain;
+    }
+
+    .default-avatar:hover {
+        border-color: #888;
+        transform: translateY(-2px);
+    }
+
+    .default-avatar.selected {
+        border-color: #4a6b4a;
+        background-color: #eef5ee;
+    }
 
 
 .account-fields {
