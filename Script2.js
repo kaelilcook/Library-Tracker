@@ -1228,8 +1228,8 @@ async function showFriendPreviewCard(friend, x, y) {
     const averageRating =
         await getFriendAverageRating(friend.id);
 
-    const favoriteAuthor =
-        await getFriendFavoriteAuthor(friend.id);
+    const topAuthor =
+        await getFriendTopAuthorThisYear(friend.id);
 
     const topGenre =
         await getFriendTopGenre(friend.id);
@@ -1248,7 +1248,7 @@ async function showFriendPreviewCard(friend, x, y) {
             currentlyReading,
             finishedCount,
             averageRating,
-            favoriteAuthor,
+            topAuthor,
             topGenre
         );
 
@@ -1300,7 +1300,7 @@ function buildFriendPreview(
     currentlyReading,
     finishedCount,
     averageRating, 
-    favoriteAuthor,
+    topAuthor,
     topGenre
 ) {
 
@@ -1397,8 +1397,8 @@ function buildFriendPreview(
 
     <strong>
         ${
-        favoriteAuthor
-            ? favoriteAuthor
+        topAuthor
+            ? topAuthor
             : "No finished books yet"
         }
     </strong>
@@ -1683,6 +1683,70 @@ async function getFriendAverageRating(friendId) {
 
 }
 
+async function getFriendTopAuthorThisYear(userId) {
+
+    const currentYear =
+        new Date().getFullYear();
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select(`
+                author,
+                completed_date
+            `)
+            .eq("user_id", userId)
+            .eq("status", "Finished");
+
+
+    if (error) {
+
+        console.error(error);
+
+        return "None yet";
+
+    }
+
+
+    const yearlyBooks =
+        data.filter(book => {
+
+            if (!book.completed_date)
+                return false;
+
+
+            return new Date(
+                book.completed_date
+            ).getFullYear() === currentYear;
+
+        });
+
+
+    const authorCounts = {};
+
+
+    yearlyBooks.forEach(book => {
+
+        if (!book.author)
+            return;
+
+
+        authorCounts[book.author] =
+            (authorCounts[book.author] || 0) + 1;
+
+    });
+
+
+    return (
+        Object.entries(authorCounts)
+            .sort((a, b) => b[1] - a[1])[0]?.[0]
+        ||
+        "None yet"
+    );
+
+}
+
 async function getFriendFavoriteAuthor(friendId) {
 
     const { data, error } =
@@ -1872,16 +1936,20 @@ function closeFriendProfileModal() {
 async function openFriendProfile(userId) {
 
     const profile =
-        await getUserProfile(userId);
+        await getUserProfile(userId);    
 
     if (!profile) return;
 
     const readingBooks =
         await getFriendReadingBooks(userId);    
 
+    const readingSnapshot =
+        await getFriendReadingSnapshot(userId);
+
     renderFriendProfile(
         profile,
-        readingBooks,        
+        readingBooks, 
+        readingSnapshot
     );
 
     document
@@ -1911,9 +1979,149 @@ async function getFriendReadingBooks(userId) {
 
 }
 
+async function getFriendReadingSnapshot(userId) {   
+
+    const currentYear =
+        new Date().getFullYear();
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select(`
+    completed_date,
+    page_count,
+    rating,
+    author,
+    genre
+`)
+            .eq("user_id", userId)
+            .eq("status", "Finished");
+
+    if (error) {
+
+        console.error(error);
+
+        return null;
+
+    }
+
+    const yearlyBooks =
+        data.filter(book => {
+
+            if (!book.completed_date)
+                return false;
+
+            return new Date(
+                book.completed_date
+            ).getFullYear() === currentYear;
+
+        });
+
+    const booksRead =
+        yearlyBooks.length;
+
+    const pagesRead =
+        data
+            .filter(book => {
+
+                if (!book.completed_date)
+                    return false;
+
+                return new Date(
+                    book.completed_date
+                ).getFullYear() === currentYear;
+
+            })
+            .reduce((total, book) => {
+
+                return total + (book.page_count || 0);
+
+            }, 0);
+
+    const ratedBooks =
+        data.filter(book => {
+
+            if (!book.completed_date)
+                return false;
+
+            if (!book.rating)
+                return false;
+
+            return new Date(
+                book.completed_date
+            ).getFullYear() === currentYear;
+
+        });
+
+
+    const averageRating =
+        ratedBooks.length
+            ?
+            (
+                ratedBooks.reduce(
+                    (total, book) => {
+
+                        return total + book.rating;
+
+                    },
+                    0
+                )
+                /
+                ratedBooks.length
+            ).toFixed(1)
+
+            :
+            0;
+
+    const authorCounts = {};
+
+    yearlyBooks.forEach(book => {
+
+        if (!book.author) return;
+
+        authorCounts[book.author] =
+            (authorCounts[book.author] || 0) + 1;
+
+    });
+
+
+    const topAuthor =
+        Object.entries(authorCounts)
+            .sort((a, b) => b[1] - a[1])[0]?.[0]
+        || "None yet";
+
+    const genreCounts = {};
+
+    yearlyBooks.forEach(book => {
+
+        if (!book.genre) return;
+
+        genreCounts[book.genre] =
+            (genreCounts[book.genre] || 0) + 1;
+
+    });
+
+
+    const topGenre =
+        Object.entries(genreCounts)
+            .sort((a, b) => b[1] - a[1])[0]?.[0]
+        || "None yet";
+
+    return {
+
+    booksRead,
+    pagesRead, 
+    averageRating,
+        topAuthor,
+    topGenre
+};    
+
+}
+
 function renderFriendProfile(
     profile,
-    readingBooks
+    readingBooks,
+    readingSnapshot
 ) {
 
     const container =
@@ -1929,7 +2137,7 @@ function renderFriendProfile(
             readingBooks
         ) }
 
-        ${renderReadingStatsSection()}
+        ${renderReadingStatsSection(readingSnapshot)}
 
         ${renderRecentActivitySection()}
 
@@ -1965,53 +2173,7 @@ function renderProfileHeader(profile) {
                 ${profile.bio ||
         "No bio yet."}
 
-            </p>
-
-            <div class="favorite-grid">
-
-                <div>
-
-                    <strong>
-                        Favorite Book
-                    </strong>
-
-                    <p>
-
-                        ${profile.favorite_book || "—"}
-
-                    </p>
-
-                </div>
-
-                <div>
-
-                    <strong>
-                        Most Read Author
-                    </strong>
-
-                    <p>
-
-                        ${profile.favorite_author || "—"}
-
-                    </p>
-
-                </div>
-
-                <div>
-
-                    <strong>
-                        Top Read Genre
-                    </strong>
-
-                    <p>
-
-                        ${profile.favorite_genre || "—"}
-
-                    </p>
-
-                </div>
-
-            </div>
+            </p>            
 
         </section>
 
@@ -2064,7 +2226,7 @@ function renderCurrentReadingSection(books) {
 `;
 
 }
-function renderReadingStatsSection() {
+function renderReadingStatsSection(snapshot) {
 
     return `
 
@@ -2072,15 +2234,64 @@ function renderReadingStatsSection() {
 
             <h3>
 
-                📚 Reading Statistics
+                📈 Reading Snapshot
 
             </h3>
 
-            <p>
+            <div class="reading-snapshot-grid">
 
-                Coming soon...
+                <div class="snapshot-card">
+                    <h2>
+                        ${snapshot.booksRead}
+                    </h2>
+                    <p>
+                        Books Read
+                    </p>
+                </div>
 
-            </p>
+                <div class="snapshot-card">
+                    <h2>
+                        ${snapshot.pagesRead.toLocaleString()}
+                    </h2>
+                    <p>
+                        Pages Read
+                    </p>
+                </div>
+
+                <div class="snapshot-card">
+                     <h2>
+                        ⭐ ${snapshot.averageRating}
+                     </h2>
+                    <p>
+                         Average Rating
+                    </p>
+                </div>
+
+                <div class="snapshot-card">
+                    <h2>
+                        ✍️
+                    </h2>
+                    <p>
+                        ${snapshot.topAuthor}
+                    </p>
+                    <small>
+                        Most Read Author
+                    </small>
+                </div>
+
+                <div class="snapshot-card">
+                    <h2>
+                        📚
+                    </h2>
+                    <p>
+                        ${snapshot.topGenre}
+                    </p>
+                    <small>
+                        Top Genre
+                    </small>
+                </div>
+
+            </div>
 
         </section>
 

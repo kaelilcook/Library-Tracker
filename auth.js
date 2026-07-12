@@ -391,6 +391,11 @@ async function openAccountModal() {
     document.getElementById("accountDisplayName").value =
         profile.display_name || "";
 
+    document.getElementById(
+        "accountBio"
+    ).value =
+        profile.bio || "";
+
     document.getElementById("accountFriendCode").value =
         profile.friend_code || "";
 
@@ -426,6 +431,11 @@ async function saveAccount() {
             .update({
                 username: username,
                 display_name: displayName,
+                bio:
+                    document
+                        .getElementById("accountBio")
+                        .value
+                        .trim(),
                 updated_at: new Date()
             })
             .eq(
@@ -448,6 +458,13 @@ async function saveAccount() {
 
     closeAccountModal();
 }
+
+document
+    .getElementById("avatarUpload")
+    .addEventListener(
+        "change",
+        uploadAvatar
+    );
 
 function closeAccountModal() {
 
@@ -550,4 +567,14 @@ document
     .addEventListener(
         "click",
         saveAccount
-    );
+);
+
+document
+    .getElementById("changeAvatarBtn")
+    .onclick = () => {
+
+        document
+            .getElementById("avatarUpload")
+            .click();
+
+    };

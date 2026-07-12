@@ -868,14 +868,18 @@
                 <div class="account-profile-section">
 
                     <img id="accountAvatar"
-                         src=""
-                         alt="Profile Picture"
                          class="profile-avatar">
-
 
                     <input type="file"
                            id="avatarUpload"
-                           accept="image/*">
+                           accept="image/*"
+                           hidden>
+
+                    <button id="changeAvatarBtn">
+
+                        Change Profile Photo
+
+                    </button>
 
                 </div>
 
@@ -893,6 +897,18 @@
 
                         <input id="accountDisplayName"
                                type="text">
+                    </label>
+
+                    <label>
+
+                        Bio
+
+                        <textarea id="accountBio"
+                                  maxlength="250"
+                                  rows="4"
+                                  placeholder="Tell other readers a little about yourself...">
+                        </textarea>
+
                     </label>
 
                     <label>

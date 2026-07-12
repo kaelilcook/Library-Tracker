@@ -685,6 +685,29 @@ p {
         color: #777;
     }
 
+.reading-snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+    gap: 16px;
+    margin-top: 1rem;
+}
+
+.snapshot-card {
+    text-align: center;
+    padding: 20px;
+    border-radius: 12px;
+    background: var(--card-bg);
+}
+
+    .snapshot-card h2 {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .snapshot-card p {
+        margin-top: 8px;
+    }
+
 /* =========================
    NOTIFICATIONS
 ========================= */
