@@ -708,6 +708,84 @@ p {
         margin-top: 8px;
     }
 
+.reading-history-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.history-year {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.history-book {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: white;
+}
+
+    .history-book img {
+        width: 50px;
+        height: 75px;
+        object-fit: contain;
+    }
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.history-title {
+    font-weight: bold;
+}
+
+.history-date {
+    font-size: .85rem;
+    color: #666;
+}
+
+.history-rating {
+    margin-top: 5px;
+}
+
+.reading-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+
+.history-book-card {
+    display: flex;
+    gap: 15px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+}
+
+
+.history-book-cover {
+    width: 60px;
+    height: 90px;
+    object-fit: contain;
+}
+
+
+.history-book-info h4 {
+    margin: 0 0 5px;
+}
+
+
+.history-book-info p {
+    margin: 3px 0;
+}
+
 /* =========================
    NOTIFICATIONS
 ========================= */

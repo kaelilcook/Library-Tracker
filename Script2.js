@@ -1933,29 +1933,37 @@ function closeFriendProfileModal() {
         .add("modal-hidden");
 
 }
+
 async function openFriendProfile(userId) {
 
     const profile =
-        await getUserProfile(userId);    
+        await getUserProfile(userId);
 
     if (!profile) return;
 
     const readingBooks =
-        await getFriendReadingBooks(userId);    
+        await getFriendReadingBooks(userId);
 
     const readingSnapshot =
         await getFriendReadingSnapshot(userId);
 
+    const readingHistory =
+        await getFriendReadingHistory(userId);
+
+
     renderFriendProfile(
         profile,
-        readingBooks, 
-        readingSnapshot
+        readingBooks,
+        readingSnapshot,
+        readingHistory
     );
+
 
     document
         .getElementById("friendProfileModal")
         .classList.remove("modal-hidden");
 
+}
 }
 
 async function getFriendReadingBooks(userId) {
@@ -2118,10 +2126,61 @@ async function getFriendReadingSnapshot(userId) {
 
 }
 
+async function getFriendReadingHistory(userId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select(`
+                title,
+                author,
+                cover,
+                completed_date,
+                rating,
+                genre
+            `)
+            .eq("user_id", userId)
+            .eq("status", "Finished")
+            .order(
+                "completed_date",
+                {
+                    ascending: false
+                }
+            );
+
+    if (error) {
+
+        console.error(error);
+
+        return [];
+
+    }
+
+    return data;
+
+}
+
+function formatHistoryDate(date) {
+
+    if (!date) return "";
+
+    return new Date(date)
+        .toLocaleDateString(
+            "en-US",
+            {
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
+
+}
+
 function renderFriendProfile(
     profile,
     readingBooks,
-    readingSnapshot
+    readingSnapshot,
+    readingHistory
 ) {
 
     const container =
@@ -2129,17 +2188,22 @@ function renderFriendProfile(
             "friendProfileContent"
         );
 
+
     container.innerHTML = `
 
         ${renderProfileHeader(profile)}
 
         ${renderCurrentReadingSection(
-            readingBooks
-        ) }
+        readingBooks
+    )}
 
-        ${renderReadingStatsSection(readingSnapshot)}
+        ${renderReadingStatsSection(
+        readingSnapshot
+    )}
 
-        ${renderRecentActivitySection()}
+        ${renderReadingHistorySection(
+        readingHistory
+    )}        
 
     `;
 
@@ -2298,27 +2362,98 @@ function renderReadingStatsSection(snapshot) {
     `;
 
 }
-function renderRecentActivitySection() {
+function renderReadingHistorySection(history) {
 
-    return `
+    if (!history.length) {
+
+        return `
 
         <section class="profile-section">
 
             <h3>
-
-                🔥 Recent Activity
-
+                📚 Reading History
             </h3>
 
             <p>
-
-                Coming soon...
-
+                No completed books yet.
             </p>
 
         </section>
 
-    `;
+        `;
+
+    }
+
+
+    return `
+
+<section class="profile-section">
+
+    <h3>
+        📚 Reading History
+    </h3>
+
+
+    <div class="reading-history-list">
+
+
+        ${history.map(book => `
+
+
+            <div class="history-book-card">
+
+
+                <img
+                    src="${book.cover || ""}"
+                    class="history-book-cover">
+
+
+                <div class="history-book-info">
+
+
+                    <h4>
+                        ${book.title}
+                    </h4>
+
+
+                    <p>
+                        ${book.author || ""}
+                    </p>
+
+
+                    <p>
+                        Finished 
+                        ${formatHistoryDate(
+        book.completed_date
+    )}
+                    </p>
+
+
+                    ${book.rating
+            ?
+            `<p>
+                            ⭐ ${book.rating}/5
+                        </p>`
+            :
+            ""
+        }
+
+
+                </div>
+
+
+            </div>
+
+
+        `).join("")}
+
+
+    </div>
+
+
+</section>
+
+`;
 
 }
 
