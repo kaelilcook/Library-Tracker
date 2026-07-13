@@ -223,6 +223,46 @@ async function loadLibrary() {
     await loadReadingLog();
 }
 
+async function updateBook(book) {
+
+    const { error } =
+        await supabaseClient
+            .from("books")
+            .update({
+
+                title: book.title,
+                author: book.author,
+                series: book.series,
+                genre: book.genre,
+                isbn: book.isbn,
+                cover: book.cover,
+                notes: book.notes,
+                shelves: book.shelves,
+                status: book.status,
+                rating: book.rating,
+                page_count: book.page_count,
+                completed_date: book.completed_date,
+                reading_history: book.reading_history,
+                date_added: book.date_added,
+                favorite: book.favorite,
+                tags: book.tags
+
+            })
+            .eq("id", book.id)
+            .eq("user_id", currentUser.id);
+
+    if (error) {
+
+        console.error("Error updating book:", error);
+
+        return false;
+
+    }
+
+    return true;
+
+}
+
 async function loadShelves() {
 
     const { data, error } =
@@ -4436,26 +4476,36 @@ function openFinishBookModal(id) {
         .getElementById("finishBookModal")
         .classList.remove("hidden");
 
-    document
-        .querySelectorAll(".rating-option")
-        .forEach(btn => {
+    const ratingButtons =
+        document.querySelectorAll(
+            "#finishBookModal .rating-option"
+        );
 
-            btn.addEventListener("click", () => {
+    ratingButtons.forEach(btn => {
 
-                document
-                    .querySelectorAll(".rating-option")
-                    .forEach(b => b.classList.remove("selected"));
+        btn.addEventListener("click", () => {
 
-                btn.classList.add("selected");
+            ratingButtons.forEach(b =>
+                b.classList.remove("selected")
+            );
 
-                selectedFinishRating =
-                    btn.dataset.rating === ""
-                        ? null
-                        : Number(btn.dataset.rating);
+            btn.classList.add("selected");
 
-            });
+            selectedFinishRating =
+                btn.dataset.rating === ""
+                    ? null
+                    : Number(btn.dataset.rating);
 
         });
+
+    });
+
+    const unratedButton =
+        document.querySelector(
+            '#finishBookModal .rating-option[data-rating=""]'
+        );
+
+    unratedButton.classList.add("selected");
 
 }
 
@@ -5339,7 +5389,7 @@ async function markDNF(id) {
         }
     }
 
-    await saveBook(book);
+    await updateBook(book);
 
     renderLibrary();
     renderStats();
@@ -6007,7 +6057,7 @@ async function markFinished(id, rating = null) {
 
     }
 
-    await saveLibrary();
+    await updateBook(book);
 
     renderLibrary();
     renderStats();
