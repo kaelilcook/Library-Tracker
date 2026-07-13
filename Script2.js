@@ -1964,7 +1964,7 @@ async function openFriendProfile(userId) {
         .classList.remove("modal-hidden");
 
 }
-}
+
 
 async function getFriendReadingBooks(userId) {
 
