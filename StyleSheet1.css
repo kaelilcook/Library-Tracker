@@ -754,36 +754,33 @@ p {
     margin-top: 5px;
 }
 
-.reading-history-list {
+.recent-activity-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
-
-.history-book-card {
+.activity-card {
     display: flex;
+    align-items: center;
     gap: 15px;
     padding: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border);
     border-radius: 12px;
+    background: var(--surface);
 }
 
-
-.history-book-cover {
-    width: 60px;
-    height: 90px;
-    object-fit: contain;
+.activity-icon {
+    font-size: 1.5rem;
 }
 
-
-.history-book-info h4 {
-    margin: 0 0 5px;
+.activity-info h4 {
+    margin: 0;
 }
 
-
-.history-book-info p {
+.activity-info p {
     margin: 3px 0;
+    color: var(--text-light);
 }
 
 /* =========================

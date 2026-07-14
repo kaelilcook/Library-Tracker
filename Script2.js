@@ -1987,15 +1987,15 @@ async function openFriendProfile(userId) {
     const readingSnapshot =
         await getFriendReadingSnapshot(userId);
 
-    const readingHistory =
-        await getFriendReadingHistory(userId);
+    const recentActivity =
+        await getFriendRecentActivity(userId);
 
 
     renderFriendProfile(
         profile,
         readingBooks,
         readingSnapshot,
-        readingHistory
+        recentActivity
     );
 
 
@@ -2166,6 +2166,210 @@ async function getFriendReadingSnapshot(userId) {
 
 }
 
+async function getFriendRecentActivity(userId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("books")
+            .select("*")
+            .eq("user_id", userId);
+
+    if (error) {
+
+        console.error(error);
+
+        return [];
+
+    }
+
+    const activities = [];
+
+    for (const book of data) {
+
+        activities.push({
+
+            type: "added",
+
+            title: book.title,
+
+            author: book.author,
+
+            cover: book.cover,
+
+            date: book.date_added
+
+        });
+
+        (book.reading_history || []).forEach(session => {
+
+            if (session.startDate) {
+
+                activities.push({
+
+                    type: "started",
+
+                    title: book.title,
+
+                    author: book.author,
+
+                    cover: book.cover,
+
+                    date: session.startDate
+
+                });
+
+            }
+
+            if (
+
+                session.endDate &&
+
+                book.status === "Finished"
+
+            ) {
+
+                activities.push({
+
+                    type: "finished",
+
+                    title: book.title,
+
+                    author: book.author,
+
+                    cover: book.cover,
+
+                    rating: book.rating,
+
+                    date: session.endDate
+
+                });
+
+            }
+
+            if (
+
+                session.endDate &&
+
+                book.status === "DNF"
+
+            ) {
+
+                activities.push({
+
+                    type: "dnf",
+
+                    title: book.title,
+
+                    author: book.author,
+
+                    cover: book.cover,
+
+                    date: session.endDate
+
+                });
+
+            }
+
+        });
+
+        if (book.rating > 0) {
+
+            activities.push({
+
+                type: "rated",
+
+                title: book.title,
+
+                author: book.author,
+
+                cover: book.cover,
+
+                rating: book.rating,
+
+                date: book.completed_date
+
+            });
+
+        }
+
+    }
+
+    activities.sort((a, b) =>
+
+        new Date(b.date) -
+
+        new Date(a.date)
+
+    );
+
+    return activities.slice(0, 15);
+
+}
+
+function getActivityIcon(type) {
+
+    switch (type) {
+
+        case "added":
+            return "📚";
+
+        case "started":
+            return "📖";
+
+        case "finished":
+            return "🏁";
+
+        case "rated":
+            return "⭐";
+
+        case "dnf":
+            return "🚫";
+
+        default:
+            return "📚";
+
+    }
+
+}
+
+function getActivityText(activity) {
+
+    switch (activity.type) {
+
+
+        case "added":
+
+            return "Added to library";
+
+
+        case "started":
+
+            return "Started reading";
+
+
+        case "finished":
+
+            return "Finished reading";
+
+
+        case "rated":
+
+            return `Rated ${activity.rating}/5`;
+
+
+        case "dnf":
+
+            return "Marked as DNF";
+
+
+        default:
+
+            return "";
+
+    }
+
+}
+
 async function getFriendReadingHistory(userId) {
 
     const { data, error } =
@@ -2220,7 +2424,7 @@ function renderFriendProfile(
     profile,
     readingBooks,
     readingSnapshot,
-    readingHistory
+    recentActivity
 ) {
 
     const container =
@@ -2241,9 +2445,9 @@ function renderFriendProfile(
         readingSnapshot
     )}
 
-        ${renderReadingHistorySection(
-        readingHistory
-    )}        
+        ${renderRecentActivitySection(
+            recentActivity
+        )}        
 
     `;
 
@@ -2400,6 +2604,76 @@ function renderReadingStatsSection(snapshot) {
         </section>
 
     `;
+
+}
+
+function renderRecentActivitySection(activities) {
+
+    if (!activities.length) {
+
+        return `
+
+        <section class="profile-section">
+
+            <h3>
+                🕒 Recent Reading Activity
+            </h3>
+
+            <p>
+                No recent activity yet.
+            </p>
+
+        </section>
+
+        `;
+    }
+
+    return `
+
+<section class="profile-section">
+    <h3>
+        🕒 Recent Reading Activity
+    </h3>
+
+    <div class="recent-activity-list">
+
+        ${activities.map(activity => `
+
+            <div class="activity-card">
+
+                <div class="activity-icon">
+                    ${getActivityIcon(activity.type)}
+                </div>
+
+                <div class="activity-info">
+
+                    <h4>
+                        ${activity.title}
+                    </h4>
+
+                    <p>
+                        ${activity.author || ""}
+                    </p>
+
+                    <p>
+                        ${getActivityText(activity)}
+                    </p>
+
+                    <small>
+                        ${formatHistoryDate(activity.date)}
+                    </small>
+
+                </div>
+
+            </div>
+
+        `).join("")}
+
+    </div>
+
+</section>
+
+`;
 
 }
 function renderReadingHistorySection(history) {
