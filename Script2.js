@@ -65,6 +65,10 @@ let friends = [];
 
 let notifications = [];
 
+let currentFriendProfileData = null;
+let currentFriendProfileTab = "profile";
+let currentFriendProfileId = null;
+
 // ========================
 // CONFIG
 // ========================
@@ -1990,14 +1994,19 @@ async function openFriendProfile(userId) {
     const recentActivity =
         await getFriendRecentActivity(userId);
 
+    currentFriendProfileData = {
 
-    renderFriendProfile(
         profile,
-        readingBooks,
-        readingSnapshot,
-        recentActivity
-    );
 
+        readingBooks,
+
+        readingSnapshot,
+
+        recentActivity
+
+    };
+
+    renderFriendProfile(currentFriendProfileData);
 
     document
         .getElementById("friendProfileModal")
@@ -2420,12 +2429,29 @@ function formatHistoryDate(date) {
 
 }
 
+function switchFriendProfileTab(tab) {
+
+    currentFriendProfileTab = tab;
+
+    renderFriendProfile(currentFriendProfileData);
+
+}
+
 function renderFriendProfile(
-    profile,
-    readingBooks,
-    readingSnapshot,
-    recentActivity
+    data
 ) {
+
+    const {
+
+        profile,
+
+        readingBooks,
+
+        readingSnapshot,
+
+        recentActivity
+
+    } = data;
 
     const container =
         document.getElementById(
@@ -2435,19 +2461,74 @@ function renderFriendProfile(
 
     container.innerHTML = `
 
-        ${renderProfileHeader(profile)}
+    ${renderProfileHeader(profile)}
 
-        ${renderCurrentReadingSection(
-        readingBooks
+    ${renderProfileTabs()}
+
+    <div id="friendProfileTabContent">
+
+        ${renderFriendProfileTab(
+        profile,
+        readingBooks,
+        readingSnapshot,
+        recentActivity
     )}
 
-        ${renderReadingStatsSection(
-        readingSnapshot
-    )}
+    </div>
 
-        ${renderRecentActivitySection(
-            recentActivity
-        )}        
+`;
+
+}
+
+function renderFriendProfileTab(
+    profile,
+    readingBooks,
+    readingSnapshot,
+    recentActivity
+) {
+
+    if (currentFriendProfileTab === "profile") {
+
+        return `
+
+            ${renderCurrentReadingSection(readingBooks)}
+
+            ${renderReadingStatsSection(readingSnapshot)}
+
+            ${renderRecentActivitySection(recentActivity)}
+
+        `;
+
+    }
+
+
+    if (currentFriendProfileTab === "goals") {
+
+        return renderReadingGoalsTab();
+
+    }
+
+}
+
+function renderReadingGoalsTab() {
+
+    return `
+
+        <section class="profile-section">
+
+            <h3>
+
+                Reading Goals
+
+            </h3>
+
+            <p>
+
+                Coming soon...
+
+            </p>
+
+        </section>
 
     `;
 
@@ -2484,6 +2565,34 @@ function renderProfileHeader(profile) {
             </p>            
 
         </section>
+
+    `;
+
+}
+
+function renderProfileTabs() {
+
+    return `
+
+        <div class="profile-tabs">
+
+            <button
+                class="profile-tab ${currentFriendProfileTab === "profile" ? "active" : ""}"
+                onclick="switchFriendProfileTab('profile')">
+
+                Profile
+
+            </button>
+
+            <button
+                class="profile-tab ${currentFriendProfileTab === "goals" ? "active" : ""}"
+                onclick="switchFriendProfileTab('goals')">
+
+                Reading Goals
+
+            </button>
+
+        </div>
 
     `;
 
