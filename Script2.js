@@ -1985,8 +1985,8 @@ async function openFriendProfile(userId) {
 
     if (!profile) return;
 
-    const readingBooks =
-        await getFriendReadingBooks(userId);
+    const books =
+        await getFriendBooks(userId);
 
     const readingSnapshot =
         await getFriendReadingSnapshot(userId);
@@ -1998,7 +1998,7 @@ async function openFriendProfile(userId) {
 
         profile,
 
-        readingBooks,
+        books,
 
         readingSnapshot,
 
@@ -2015,14 +2015,13 @@ async function openFriendProfile(userId) {
 }
 
 
-async function getFriendReadingBooks(userId) {
+async function getFriendBooks(userId) {
 
     const { data, error } =
         await supabaseClient
             .from("books")
             .select("*")
-            .eq("user_id", userId)
-            .eq("status", "Reading");
+            .eq("user_id", userId);
 
     if (error) {
 
@@ -2429,6 +2428,34 @@ function formatHistoryDate(date) {
 
 }
 
+async function getFriendReadingGoal(userId) {
+
+    const currentYear =
+        new Date().getFullYear();
+
+    const { data, error } =
+        await supabaseClient
+            .from("reading_goals")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("year", currentYear)
+            .single();
+
+    if (error || !data) {
+
+        return {
+
+            year: currentYear,
+
+            books_goal: 0
+
+        };
+
+    }
+
+    return data;
+}
+
 function switchFriendProfileTab(tab) {
 
     currentFriendProfileTab = tab;
@@ -2437,74 +2464,48 @@ function switchFriendProfileTab(tab) {
 
 }
 
-function renderFriendProfile(
-    data
-) {
-
-    const {
-
-        profile,
-
-        readingBooks,
-
-        readingSnapshot,
-
-        recentActivity
-
-    } = data;
+function renderFriendProfile(data) {
 
     const container =
         document.getElementById(
             "friendProfileContent"
         );
 
-
     container.innerHTML = `
 
-    ${renderProfileHeader(profile)}
+        ${renderProfileHeader(data.profile)}
 
-    ${renderProfileTabs()}
+        ${renderProfileTabs()}
 
-    <div id="friendProfileTabContent">
+        <div id="friendProfileTabContent">
 
-        ${renderFriendProfileTab(
-        profile,
-        readingBooks,
-        readingSnapshot,
-        recentActivity
-    )}
+            ${renderFriendProfileTab(data)}
 
-    </div>
+        </div>
 
-`;
+    `;
 
 }
 
-function renderFriendProfileTab(
-    profile,
-    readingBooks,
-    readingSnapshot,
-    recentActivity
-) {
+function renderFriendProfileTab(data) {
 
     if (currentFriendProfileTab === "profile") {
 
         return `
 
-            ${renderCurrentReadingSection(readingBooks)}
+            ${renderCurrentReadingSection(data.books)}
 
-            ${renderReadingStatsSection(readingSnapshot)}
+            ${renderReadingStatsSection(data.readingSnapshot)}
 
-            ${renderRecentActivitySection(recentActivity)}
+            ${renderRecentActivitySection(data.recentActivity)}
 
         `;
 
     }
 
-
     if (currentFriendProfileTab === "goals") {
 
-        return renderReadingGoalsTab();
+        return renderReadingGoalsTab(data);
 
     }
 
@@ -2600,6 +2601,11 @@ function renderProfileTabs() {
 
 function renderCurrentReadingSection(books) {
 
+    const currentlyReading =
+        books.filter(book =>
+            book.status === "Reading"
+        );
+
     return `
 
 <section class="profile-section">
@@ -2612,7 +2618,7 @@ function renderCurrentReadingSection(books) {
 
     <div class="current-reading-grid">
 
-        ${books.map(book => `
+        ${currentlyReading.map(book => `
 
             <div class="current-book-card">
 
@@ -3457,10 +3463,10 @@ function openAnnualReport() {
     );
 }
 
-function generateAnnualReport(year) {
+function generateAnnualReport(year, books = myLibrary) {
 
     const completedBooks =
-        myLibrary
+        books
             .filter(book => {
                 if (!book.completed_date) return false;
 
