@@ -1994,6 +1994,9 @@ async function openFriendProfile(userId) {
     const recentActivity =
         await getFriendRecentActivity(userId);
 
+    const readingGoal =
+        await getFriendReadingGoal(userId);
+
     currentFriendProfileData = {
 
         profile,
@@ -2002,7 +2005,9 @@ async function openFriendProfile(userId) {
 
         readingSnapshot,
 
-        recentActivity
+        recentActivity,
+
+        readingGoal
 
     };
 
@@ -2439,7 +2444,7 @@ async function getFriendReadingGoal(userId) {
             .select("*")
             .eq("user_id", userId)
             .eq("year", currentYear)
-            .single();
+            .maybeSingle();
 
     if (error || !data) {
 
