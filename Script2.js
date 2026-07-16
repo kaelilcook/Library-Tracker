@@ -2525,8 +2525,24 @@ function renderFriendProfileTab(data) {
 
 function renderReadingGoalsTab(data) {
 
+    const year =
+        new Date().getFullYear();
+
     const currentYear =
         new Date().getFullYear();
+
+    const booksRead =
+        data.books.filter(book => {
+
+            if (!book.completed_date)
+                return false;
+
+            return (
+                new Date(book.completed_date)
+                    .getFullYear() === currentYear
+            );
+
+        });
 
     const report =
         generateAnnualReport(
@@ -2582,7 +2598,63 @@ function renderReadingGoalsTab(data) {
 
 </section>
 
+<section class="profile-section">
+
+    <h3>
+        📚 Books Read in ${year}
+    </h3>
+
+    <div class="friend-reading-book-grid">
+
+        ${booksRead.map(book => `
+
+            ${renderFriendGoalBook(book)}
+
+        `).join("")}
+
+    </div>
+
+</section>
+
 `;
+
+}
+
+function renderFriendGoalBook(book) {
+
+    return `
+
+        <div class="friend-goal-book-card">
+
+            <img
+                src="${book.cover || ""}"
+                class="friend-goal-cover"
+            >
+
+            <div class="friend-goal-book-info">
+
+                <h4>
+                    ${book.title}
+                </h4>
+
+                <p>
+                    ${book.author || ""}
+                </p>
+
+                ${book.rating
+            ?
+            `<p>
+                        ⭐ ${book.rating}/5
+                    </p>`
+            :
+            ""
+        }
+
+            </div>
+
+        </div>
+
+    `;
 
 }
 
