@@ -2544,6 +2544,11 @@ function renderReadingGoalsTab(data) {
 
         });
 
+    booksRead.sort((a, b) =>
+        new Date(a.completed_date) -
+        new Date(b.completed_date)
+    );
+
     const report =
         generateAnnualReport(
             currentYear,
@@ -2624,38 +2629,39 @@ function renderFriendGoalBook(book) {
 
     return `
 
-        <div class="friend-goal-book-card">
+    <div class="friend-goal-book-card">
 
-            <img
-                src="${book.cover || ""}"
-                class="friend-goal-cover"
-            >
+        <img
+            src="${book.cover || ""}"
+            class="friend-goal-cover"
+        >
 
-            <div class="friend-goal-book-info">
+        <h4>
+            ${book.title}
+        </h4>
 
-                <h4>
-                    ${book.title}
-                </h4>
+        <p>
+            ${book.author || ""}
+        </p>
 
-                <p>
-                    ${book.author || ""}
-                </p>
+        <p>
+            Finished
+            <br>
+            ${formatHistoryDate(book.completed_date)}
+        </p>
 
-                ${book.rating
+        ${book.rating
             ?
             `<p>
-                        ⭐ ${book.rating}/5
-                    </p>`
+                ⭐ ${book.rating}/5
+            </p>`
             :
             ""
         }
 
-            </div>
-
-        </div>
+    </div>
 
     `;
-
 }
 
 function renderProfileHeader(profile) {
