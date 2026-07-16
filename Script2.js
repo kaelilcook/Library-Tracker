@@ -2493,15 +2493,22 @@ function renderFriendProfileTab(data) {
 
         return `
 
-            ${renderCurrentReadingSection(data.books)}
+            ${renderCurrentReadingSection(
+            data.books
+        )}
 
-            ${renderReadingStatsSection(data.readingSnapshot)}
+            ${renderReadingStatsSection(
+            data.readingSnapshot
+        )}
 
-            ${renderRecentActivitySection(data.recentActivity)}
+            ${renderRecentActivitySection(
+            data.recentActivity
+        )}
 
         `;
 
     }
+
 
     if (currentFriendProfileTab === "goals") {
 
@@ -2511,27 +2518,66 @@ function renderFriendProfileTab(data) {
 
 }
 
-function renderReadingGoalsTab() {
+function renderReadingGoalsTab(data) {
+
+    const currentYear =
+        new Date().getFullYear();
+
+    const report =
+        generateAnnualReport(
+            currentYear,
+            data.books
+        );
+
+    const goal =
+        data.readingGoal?.books_goal || 0;
+
+    const percent =
+        goal
+            ? Math.min(
+                100,
+                Math.round(
+                    report.booksRead / goal * 100
+                )
+            )
+            : 0;
 
     return `
 
-        <section class="profile-section">
+<section class="profile-section">
 
-            <h3>
+    <h2>
 
-                Reading Goals
+        🎯 ${currentYear} Reading Challenge
 
-            </h3>
+    </h2>
 
-            <p>
+    <div class="goal-card">
 
-                Coming soon...
+        <div class="goal-progress">
 
-            </p>
+            <div
+                class="goal-progress-fill"
+                style="width:${percent}%">
 
-        </section>
+            </div>
 
-    `;
+        </div>
+
+        <p>
+
+            ${report.booksRead}
+            of
+            ${goal}
+            books
+
+        </p>
+
+    </div>
+
+</section>
+
+`;
 
 }
 
@@ -3528,11 +3574,16 @@ async function saveReadingGoal(year) {
     const { error } =
         await supabaseClient
             .from("reading_goals")
-            .update({
-                books_goal: goal
-            })
-            .eq("year", year)
-            .eq("user_id", user.id);
+            .upsert(
+                {
+                    user_id: user.id,
+                    year,
+                    books_goal: goal
+                },
+                {
+                    onConflict: "user_id,year"
+                }
+            );
 
     if (error) {
         console.error(error);
