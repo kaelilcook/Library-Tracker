@@ -5687,6 +5687,15 @@ function toggleLogBook(bookId, date) {
         entry.books = entry.books.filter(id => id !== bookId);
     }
 
+    const search =
+        document.getElementById("logSearch");
+
+    if (search) {
+
+        search.value = "";
+
+    }   
+
     renderLogEditor(date); // instant refresh
 }
 
@@ -5727,7 +5736,26 @@ function renderLogEditor(date) {
         readingLog.find(l => l.date === date) || { books: [] };
 
     const readingBooks =
-        myLibrary.filter(b => b.status === "Reading");
+        myLibrary.filter(book =>
+            book.status === "Reading"
+        );
+
+    const booksToShow = [...readingBooks];
+
+    entry.books.forEach(id => {
+
+        const book = findBook(id);
+
+        if (
+            book &&
+            !booksToShow.some(b => b.id === book.id)
+        ) {
+
+            booksToShow.push(book);
+
+        }
+
+    });
 
     editor.innerHTML = `
         <h3>Log Books for ${date}</h3>
@@ -5736,12 +5764,12 @@ function renderLogEditor(date) {
 
             <!-- CURRENTLY READING -->
             <div>
-                <h4>Currently Reading</h4>
+                <h4Today's Books</h4>
 
       <div class="log-book-grid">
 
-${readingBooks.length
-    ? readingBooks.map(book => `
+${booksToShow.length
+    ? booksToShow.map(book => `
         <label class="log-book-card">
 
             <input
@@ -5760,7 +5788,7 @@ ${readingBooks.length
 
         </label>
     `).join("")
-    : `<p>No currently reading books</p>`
+    : `<p>Search your library to log books.</p>`
 }
             </div>
 
