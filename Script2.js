@@ -69,6 +69,8 @@ let currentFriendProfileData = null;
 let currentFriendProfileTab = "profile";
 let currentFriendProfileId = null;
 
+let currentReadingCircle = null;
+
 // ========================
 // CONFIG
 // ========================
@@ -147,6 +149,8 @@ async function initializeApp() {
     await loadLibrary();
 
     await updateNotificationBadge();
+
+    await loadMyReadingCircles();
 
 
     renderApp();
@@ -716,7 +720,925 @@ document
     .addEventListener(
         "click",
         openNotificationsModal
+);
+
+// ========================
+// READING CIRCLES
+// ========================
+function openCreateCircleModal() {
+
+    document
+        .getElementById("createCircleModal")
+        .classList.remove("hidden");
+
+}
+
+function closeCreateCircleModal() {
+
+    document
+        .getElementById("createCircleModal")
+        .classList.add("hidden");
+
+}
+
+async function createReadingCircle() {
+
+    const name =
+        document
+            .getElementById("circleName")
+            .value
+            .trim();
+
+    const description =
+        document
+            .getElementById("circleDescription")
+            .value
+            .trim();
+
+    console.log(name);
+    console.log(description);
+
+    const {
+        data: { user },
+        error: userError
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
+
+    if (userError || !user) {
+
+        console.error(userError);
+
+        return;
+
+    }
+
+    console.log("Auth user:", user.id);
+
+    const inviteCode =
+        await generateUniqueInviteCode();
+
+    const { data, error } =
+        await supabaseClient
+            .from("reading_circles")
+            .insert({
+
+                name,
+
+                description,
+
+                owner_id: user.id,
+
+                invite_code: inviteCode,
+
+                avatar_color: getRandomCircleColor()
+
+            })
+            .select()
+            .single();
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+    const { error: memberError } =
+        await supabaseClient
+            .from("circle_members")
+            .insert({
+                circle_id: data.id,
+                user_id: user.id
+            });
+
+    if (memberError) {
+
+        console.error(memberError);
+
+        return;
+
+    }
+
+    closeCreateCircleModal();
+
+    document
+        .getElementById("circleName")
+        .value = "";
+
+    document
+        .getElementById("circleDescription")
+        .value = "";
+}
+
+function getRandomCircleColor() {
+
+    const colors = [
+
+        "#8b4c5c",
+        "#6b8e23",
+        "#457b9d",
+        "#e76f51",
+        "#9b5de5",
+        "#f4a261"
+
+    ];
+
+
+    return colors[
+        Math.floor(
+            Math.random() * colors.length
+        )
+    ];
+
+}
+
+const defaultCircleAvatars = [
+
+    "images/circles/sunflowers.jpg",
+
+    "images/circles/cat.jpg",
+
+    "images/circles/duck.jpg",
+
+    "images/circles/flowers.jpg",
+
+    "images/circles/moon.jpg",
+
+    "images/circles/fairy.jpg"
+
+];
+
+function getCircleAvatar(circle) {
+
+    if (circle.avatar_url) {
+
+        return `
+            <div
+                class="circle-avatar"
+                style="
+                    background:${circle.avatar_color};
+                "
+            >
+
+                <img
+                    src="${circle.avatar_url}"
+                >
+
+            </div>
+        `;
+
+    }
+
+
+    return `
+
+        <div
+            class="circle-avatar default-circle-avatar"
+            style="
+                background:${circle.avatar_color || "#8b4c5c"};
+            "
+        >
+            📚
+        </div>
+
+    `;
+
+}
+
+function renderCircleAvatarPicker() {
+
+    return defaultCircleAvatars.map(image => `
+
+        <img
+            src="${image}"
+            class="circle-avatar-option"
+            onclick="selectCircleAvatar('${image}')"
+        >
+
+    `).join("");
+
+}
+
+let selectedCircleAvatar = "";
+
+function selectCircleAvatar(image) {
+
+    selectedCircleAvatar = image;
+
+    document
+        .getElementById(
+            "selectedCircleAvatarPreview"
+        ).src = image;
+
+
+    document
+        .querySelectorAll(".circle-avatar-option")
+        .forEach(option =>
+            option.classList.remove("selected")
+        );
+
+
+    document
+        .querySelector(
+            `[data-avatar="${image}"]`
+        )
+        ?.classList.add("selected");
+
+}
+
+async function generateUniqueInviteCode() {
+
+    while (true) {
+
+        const code = generateInviteCode();
+
+        const { data } =
+            await supabaseClient
+                .from("reading_circles")
+                .select("id")
+                .eq("invite_code", code)
+                .maybeSingle();
+
+        if (!data) {
+
+            return code;
+
+        }
+
+    }
+
+}
+
+async function loadMyReadingCircles() {
+
+    const {
+        data: { user },
+        error
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
+
+
+    if (error || !user) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+    const { data, error: memberError } =
+        await supabaseClient
+            .from("circle_members")
+            .select(`
+                circle_id
+            `)
+            .eq("user_id", user.id);
+
+
+    if (memberError) {
+
+        console.error(memberError);
+
+        return;
+
+    }
+
+
+    console.log(data);
+
+
+    const circleIds =
+        data.map(member => member.circle_id);
+
+
+    const { data: circles, error: circleError } =
+        await supabaseClient
+            .from("reading_circles")
+            .select(`
+            id,
+            name,
+            description,
+            avatar_url,
+            circle_members (
+                user_id
+            )
+        `)
+            .in("id", circleIds);
+
+
+    if (circleError) {
+
+        console.error(circleError);
+
+        return;
+
+    }
+
+
+    console.log(circles);
+
+    renderReadingCircles(circles);
+
+}
+
+function renderReadingCircles(circles) {
+
+    const container =
+        document.getElementById(
+            "readingCirclesContainer"
+        );
+
+    if (!container) return;
+
+
+    container.innerHTML =
+        circles.map(circle => {
+
+            const memberCount =
+                circle.circle_members?.length || 0;
+
+
+            return `
+
+            <div class="circle-card">
+
+                ${getCircleAvatar(circle)}
+
+                <h3>
+                    ${circle.name}
+                </h3>
+
+                <p>
+                    ${circle.description || ""}
+                </p>
+
+                <p>
+                    👥 ${memberCount} members
+                </p>
+
+                <button
+                    onclick="openReadingCircle('${circle.id}')">
+                    Open Circle
+                </button>
+
+            </div>
+
+            `;
+
+        }).join("");
+
+}
+
+async function openReadingCircle(circleId) {
+
+    console.log("Opening circle:", circleId);
+
+    //
+    // Load the circle itself
+    //
+
+    const { data: circle, error: circleError } =
+        await supabaseClient
+            .from("reading_circles")
+            .select("*")
+            .eq("id", circleId)
+            .single();
+
+    if (circleError) {
+
+        console.error(circleError);
+
+        return;
+
+    }
+
+    //
+    // Load the members
+    //
+
+    const { data: members, error: memberError } =
+        await supabaseClient
+            .from("circle_members")
+            .select(`
+                user_id,
+                profiles(
+                    display_name,
+                    avatar_url
+                )
+            `)
+            .eq("circle_id", circleId);
+
+    if (memberError) {
+
+        console.error(memberError);
+
+        return;
+
+    }
+
+    //
+    // Load shared books
+    //
+
+    const { data: sharedBooks, error: booksError } =
+        await supabaseClient
+            .from("circle_books")
+            .select(`
+                *,
+                books(
+                    title,
+                    author,
+                    cover,
+                    status,
+                    rating
+                ),
+                profiles(
+                    display_name,
+                    avatar_url
+                )
+            `)
+            .eq("circle_id", circleId);
+
+    if (booksError) {
+
+        console.error(booksError);
+
+        return;
+
+    }
+
+    currentReadingCircle = {
+
+        circle,
+
+        members,
+
+        sharedBooks
+
+    };
+
+    console.log(currentReadingCircle);
+
+    renderReadingCircle(currentReadingCircle);
+
+    document
+        .getElementById("readingCircleModal")
+        .classList.remove("hidden");
+
+}
+
+function closeReadingCircleModal() {
+
+    document
+        .getElementById("readingCircleModal")
+        .classList.add("hidden");
+
+}
+
+function renderReadingCircle(data) {
+
+    const container =
+        document.getElementById(
+            "readingCircleContent"
+        );
+
+    container.innerHTML = `
+
+        <section class="circle-header">
+        
+
+    <div class="circle-avatar-wrapper">
+
+        ${getCircleAvatar(data.circle)}
+
+    </div>
+
+
+    <h2>
+        ${data.circle.name}
+    </h2>
+
+
+    <p class="circle-description">
+        ${data.circle.description || "A place to share books."}
+    </p>
+
+
+    <div class="circle-meta">
+
+        <span>
+            👥 ${data.members.length} readers
+        </span>
+
+        <span>
+            📚 ${data.sharedBooks.length} books
+        </span>
+
+    </div>
+
+
+    <div class="circle-actions">
+    ${data.circle.owner_id === currentUser.id
+            ? `
+        <button onclick="openEditCircleModal()">
+            ✏️ Edit Circle
+        </button>
+    `
+            : ""
+}
+
+        <button
+            onclick="openShareBookModal()">
+            ➕ Share a Book
+        </button>
+
+
+        <button>
+            🔗 Invite
+        </button>
+
+    </div>
+
+
+</section>
+
+
+        <section>
+
+            <h3>
+                Members
+            </h3>
+
+            ${data.members.map(member => `
+
+                <p>
+                    ${member.profiles?.display_name || "Reader"}
+                </p>
+
+            `).join("")}
+
+        </section>
+
+
+        <section>
+
+    <h3>
+        Shared Books
+    </h3>    
+
+            ${
+        data.sharedBooks.length
+
+            ?
+
+            data.sharedBooks.map(item => `
+
+<div class="circle-book-card">
+
+    <img
+        src="${item.books.cover || ""}"
+        class="circle-book-cover"
+    >
+
+    <div class="circle-book-info">
+
+        <h4>
+            ${item.books.title}
+        </h4>
+
+        <p>
+            ${item.books.author || ""}
+        </p>
+
+        <small>
+            Shared by 
+            ${item.profiles?.display_name || "Reader"}
+        </small>
+
+    </div>
+
+    <button
+    onclick="updateCircleBookStatus('${item.id}')">
+
+    ${item.status || "Set Status"}
+
+</button>
+
+</div>
+
+`).join("")
+
+            :
+
+            "No shared books yet."
+
+}
+
+        </section>
+
+    `;
+
+}
+
+function updateCircleBookStatus(circleBookId) {
+
+    const status =
+        prompt(
+            "Choose status:\n\nCurrently Reading\nFinished\nWant to Read\nDNF"
+        );
+
+
+    if (!status) return;
+
+
+    saveCircleBookStatus(
+        circleBookId,
+        status
     );
+
+}
+
+async function saveCircleBookStatus(
+    circleBookId,
+    status
+) {
+
+
+    const { error } =
+        await supabaseClient
+            .from("circle_books")
+            .update({
+
+                status
+
+            })
+            .eq(
+                "id",
+                circleBookId
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+    openReadingCircle(
+        currentReadingCircle.circle.id
+    );
+
+}
+
+function openShareBookModal() {
+
+    document
+        .getElementById("shareBookModal")
+        .classList.remove("hidden");
+
+    renderShareBookSearch();
+
+}
+
+
+function closeShareBookModal() {
+
+    document
+        .getElementById("shareBookModal")
+        .classList.add("hidden");
+
+}
+
+function renderShareBookSearch() {
+
+    const input =
+        document.getElementById(
+            "circleBookSearch"
+        );
+
+    const results =
+        document.getElementById(
+            "circleBookResults"
+        );
+
+
+    input.addEventListener("input", () => {
+
+        const query =
+            input.value
+                .toLowerCase()
+                .trim();
+
+
+        const matches =
+            myLibrary
+                .filter(book =>
+                    book.title
+                        .toLowerCase()
+                        .includes(query)
+                )
+                .slice(0, 10);
+
+
+        results.innerHTML =
+            matches.map(book => `
+
+                <div
+                    class="circle-book-result"
+                    onclick="shareBookToCircle('${book.id}')">
+
+                    <img src="${book.cover || ""}">
+
+                    <p>
+                        ${book.title}
+                    </p>
+
+                    <small>
+                        ${book.author || ""}
+                    </small>
+
+                </div>
+
+            `).join("");
+
+    });
+
+}
+
+async function shareBookToCircle(bookId) {
+
+    if (!currentReadingCircle) {
+
+        console.error("No circle selected.");
+
+        return;
+
+    }
+
+
+    const {
+        data: { user },
+        error: userError
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
+
+
+    if (userError || !user) {
+
+        console.error(userError);
+
+        return;
+
+    }
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("circle_books")
+            .insert({
+
+                circle_id:
+                    currentReadingCircle.circle.id,
+
+                user_id:
+                    user.id,
+
+                book_id:
+                    bookId,
+
+                status:
+                    "Want to Read"
+
+            })
+            .select()
+            .single();
+
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+    console.log("Book added to circle:", data);
+
+
+    closeShareBookModal();
+
+
+    // reload circle data
+
+    openReadingCircle(
+        currentReadingCircle.circle.id
+    );
+
+}
+
+function openEditCircleModal() {
+
+    const circle =
+        currentReadingCircle.circle;
+
+
+    document.getElementById("editCircleName").value =
+        circle.name;
+
+
+    document.getElementById("editCircleDescription").value =
+        circle.description || "";
+
+
+    selectedCircleAvatar =
+        circle.avatar_url || "";
+
+    document.getElementById(
+        "selectedCircleAvatarPreview"
+    ).src = selectedCircleAvatar;
+
+
+    document.getElementById(
+        "circleAvatarPicker"
+    ).innerHTML =
+        renderCircleAvatarPicker();
+
+
+    document
+        .getElementById("editCircleModal")
+        .classList.remove("hidden");
+
+}
+
+async function saveCircleEdits() {
+
+    const updates = {
+
+        name:
+            document
+                .getElementById("editCircleName")
+                .value
+                .trim(),
+
+        description:
+            document
+                .getElementById("editCircleDescription")
+                .value
+                .trim(),
+
+        avatar_url:
+            selectedCircleAvatar
+
+    };
+
+
+    const { error } =
+        await supabaseClient
+            .from("reading_circles")
+            .update(updates)
+            .eq(
+                "id",
+                currentReadingCircle.circle.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+        return;
+
+    }
+
+
+    closeEditCircleModal();
+
+
+    openReadingCircle(
+        currentReadingCircle.circle.id
+    );
+
+}
+
+function closeEditCircleModal() {
+
+    document
+        .getElementById("editCircleModal")
+        .classList.add("hidden");
+
+}
+
 // ========================
 // FRIENDS
 // ========================

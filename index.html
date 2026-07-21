@@ -239,6 +239,15 @@
                     </button>
 
                 </section>
+                <section class="reading-circles">
+
+                    <button onclick="openCreateCircleModal()">
+                        ➕ Create Reading Circle
+                    </button>
+
+                    <div id="readingCirclesContainer"></div>
+
+                </section>
 
                 <div class="friends-section">
 
@@ -1038,6 +1047,152 @@
                 </div>
 
                 <div class="notification-card">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+      READING CIRLCES MODAL
+    ========================== -->
+        <div id="createCircleModal" class="modal hidden">
+
+            <div class="modal-content">
+
+                <h2>Create Reading Circle</h2>
+
+                <label>
+
+                    Circle Name
+
+                    <input id="circleName"
+                           type="text">
+
+                </label>
+
+                <label>
+
+                    Description
+
+                    <textarea id="circleDescription">
+            </textarea>
+
+                </label>
+
+                <div class="modal-buttons">
+
+                    <button onclick="closeCreateCircleModal()">
+                        Cancel
+                    </button>
+
+                    <button onclick="createReadingCircle()">
+                        Create
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="readingCircleModal" class="modal hidden">
+
+            <div class="modal-content">
+
+                <button onclick="closeReadingCircleModal()">
+                    ✕
+                </button>
+
+                <div id="readingCircleContent"></div>
+
+            </div>
+
+        </div>
+
+        <div id="shareBookModal" class="modal hidden">
+
+            <div class="modal-content">
+
+                <button onclick="closeShareBookModal()">
+                    ✕
+                </button>
+
+                <h2>
+                    Share a Book
+                </h2>
+
+
+                <input id="circleBookSearch"
+                       placeholder="Search your library...">
+
+
+                <div id="circleBookResults"></div>
+
+
+            </div>
+
+        </div>
+
+        <div id="editCircleModal" class="modal hidden">
+
+            <div class="modal-header">
+
+                <h2>Edit Reading Circle</h2>
+
+                <button class="modal-close-btn"
+                        onclick="closeEditCircleModal()">
+                    ✕
+                </button>
+
+            </div>
+
+            <div class="modal-content">
+
+                <h2>Edit Reading Circle</h2>
+
+
+                <label>
+                    Circle Name
+                </label>
+
+                <input id="editCircleName"
+                       type="text">
+
+
+                <label>
+                    Description
+                </label>
+
+                <textarea id="editCircleDescription">
+        </textarea>
+                <div class="circle-avatar-preview">
+
+                    <img id="selectedCircleAvatarPreview"
+                         src=""
+                         class="circle-avatar-preview-image">
+
+                </div>
+
+                <h3>
+                    Choose Avatar
+                </h3>
+
+                <div id="circleAvatarPicker"
+                     class="circle-avatar-picker">
+                </div>
+
+
+                <div class="circle-edit-actions">
+
+                    <button onclick="closeEditCircleModal()">
+                        Cancel
+                    </button>
+
+                    <button onclick="saveCircleEdits()">
+                        Save Changes
+                    </button>
 
                 </div>
 
