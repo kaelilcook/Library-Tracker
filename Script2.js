@@ -532,42 +532,160 @@ function openHallOfFame() {
 // ========================
 async function loadNotifications() {
 
-    const { data, error } =
+    console.log("Loading notifications...");
+
+    notifications = [];
+
+
+    // --------------------------
+    // Friend Requests
+    // --------------------------
+
+    const { data: friendRequests, error: friendError } =
         await supabaseClient
             .from("friendships")
             .select("*")
             .eq("friend_id", currentUser.id)
             .eq("status", "pending");
 
-    if (error) {
-        console.error(error);
+
+    if (friendError) {
+
+        console.error(friendError);
+
         return;
+
     }
 
-    notifications = await Promise.all(
 
-        (data || []).map(async request => {
+    const friendNotifications =
+        await Promise.all(
 
-            const { data: profile } =
-                await supabaseClient
-                    .from("profiles")
-                    .select("*")
-                    .eq("id", request.user_id)
-                    .single();
+            (friendRequests || []).map(async request => {
 
-            return {
 
-                ...request,
+                const { data: profile } =
+                    await supabaseClient
+                        .from("profiles")
+                        .select("*")
+                        .eq("id", request.user_id)
+                        .single();
 
-                sender: profile
 
-            };
+                return {
 
-        })
+                    ...request,
 
+                    type: "friend_request",
+
+                    sender: profile
+
+                };
+
+
+            })
+
+        );
+
+
+    notifications.push(
+        ...friendNotifications
     );
 
-    console.log(notifications);
+
+
+    // --------------------------
+    // Circle Invites
+    // --------------------------
+
+    const { data: circleInvites, error: circleError } =
+        await supabaseClient
+            .from("circle_invites")
+            .select(`
+                id,
+                circle_id,
+                sender_id,
+                status
+            `)
+            .eq(
+                "receiver_id",
+                currentUser.id
+            )
+            .eq(
+                "status",
+                "pending"
+            );
+
+
+    if (circleError) {
+
+        console.error(circleError);
+
+        return;
+
+    }
+
+    console.log(
+        "Circle invites found:",
+        circleInvites
+    );
+
+    console.log(
+        "Circle invite error:",
+        circleError
+    );
+
+    const circleNotifications =
+        await Promise.all(
+
+            (circleInvites || []).map(async invite => {
+
+
+                const { data: sender } =
+                    await supabaseClient
+                        .from("profiles")
+                        .select("*")
+                        .eq("id", invite.sender_id)
+                        .single();
+
+
+
+                const { data: circle } =
+                    await supabaseClient
+                        .from("reading_circles")
+                        .select("*")
+                        .eq("id", invite.circle_id)
+                        .single();
+
+
+
+                return {
+
+                    ...invite,
+
+                    type: "circle_invite",
+
+                    sender,
+
+                    circle
+
+                };
+
+
+            })
+
+        );
+
+
+    notifications.push(
+        ...circleNotifications
+    );
+
+
+    console.log(
+        "All notifications:",
+        notifications
+    );
 
 }
 
@@ -606,26 +724,52 @@ function renderNotifications() {
                     </strong>
 
                     <p>
-                        sent you a friend request.
-                    </p>
+    ${
+            notification.type === "friend_request"
+
+                ?
+                "sent you a friend request."
+
+                :
+
+                `invited you to join ${notification.circle.name}.`
+    }
+</p>
 
                     <div class="notification-actions">
 
-                        <button
-                            onclick="acceptFriendRequest('${notification.id}')">
+${
+            notification.type === "friend_request"
 
-                            Accept
+                ?
 
-                        </button>
+                `
+<button onclick="acceptFriendRequest('${notification.id}')">
+Accept
+</button>
 
-                        <button
-                            onclick="declineFriendRequest('${notification.id}')">
+<button onclick="declineFriendRequest('${notification.id}')">
+Decline
+</button>
+`
 
-                            Decline
+                :
 
-                        </button>
+                `
 
-                    </div>
+<button onclick="acceptCircleInvite('${notification.id}')">
+Accept
+</button>
+
+<button onclick="declineCircleInvite('${notification.id}')">
+Decline
+</button>
+
+`
+
+}
+
+</div>
 
                 </div>
 
@@ -646,7 +790,8 @@ async function updateNotificationBadge() {
     if (!badge) return;
 
 
-    const { count, error } =
+    // Friend requests
+    const { count: friendCount, error: friendError } =
         await supabaseClient
             .from("friendships")
             .select("*", {
@@ -663,21 +808,54 @@ async function updateNotificationBadge() {
             );
 
 
-    if (error) {
+    if (friendError) {
 
-        console.error(
-            "Notification count failed:",
-            error
-        );
+        console.error(friendError);
 
         return;
 
     }
 
 
-    if (count > 0) {
 
-        badge.textContent = count;
+    // Circle invites
+    const { count: circleCount, error: circleError } =
+        await supabaseClient
+            .from("circle_invites")
+            .select("*", {
+                count: "exact",
+                head: true
+            })
+            .eq(
+                "receiver_id",
+                currentUser.id
+            )
+            .eq(
+                "status",
+                "pending"
+            );
+
+
+    if (circleError) {
+
+        console.error(circleError);
+
+        return;
+
+    }
+
+
+
+    const totalNotifications =
+        (friendCount || 0) +
+        (circleCount || 0);
+
+
+
+    if (totalNotifications > 0) {
+
+        badge.textContent =
+            totalNotifications;
 
         badge.classList.remove(
             "hidden"
@@ -1259,9 +1437,12 @@ function renderReadingCircle(data) {
         </button>
 
 
-        <button>
-            🔗 Invite
-        </button>
+        <button
+    onclick="openInviteCircleModal()">
+
+    🔗 Invite
+
+</button>
 
     </div>
 
@@ -1636,6 +1817,296 @@ function closeEditCircleModal() {
     document
         .getElementById("editCircleModal")
         .classList.add("hidden");
+
+} 
+
+function openInviteCircleModal() {
+
+    document.getElementById("inviteCircleAvatar").src =
+        currentReadingCircle.circle.avatar_url ||
+        "images/default-circle.png";
+
+    document.getElementById("inviteCircleName").textContent =
+        currentReadingCircle.circle.name;
+
+    document.getElementById("inviteCircleMembers").textContent =
+        `👥 ${currentReadingCircle.members.length} readers`;
+
+    document.getElementById("inviteCircleCode").textContent =
+        currentReadingCircle.circle.invite_code;
+
+    document
+        .getElementById("inviteCircleModal")
+        .classList.remove("hidden");
+
+    loadCircleFriends();
+
+}
+
+function closeInviteCircleModal() {
+
+    document
+        .getElementById("inviteCircleModal")
+        .classList.add("hidden");
+
+}
+
+async function copyInviteCode() {
+
+    await navigator.clipboard.writeText(
+        currentReadingCircle.circle.invite_code
+    );
+
+    alert("Invite code copied!");
+
+}
+
+async function loadCircleFriends() {
+
+    const {
+        data: { user },
+        error: userError
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
+
+    if (userError || !user) {
+
+        console.error(userError);
+
+        return;
+
+    }
+
+    const { data: friendships, error } =
+        await supabaseClient
+            .from("friendships")
+            .select(`
+            user_id,
+            friend_id
+        `)
+            .eq("status", "accepted")
+            .or(
+                `user_id.eq.${user.id},friend_id.eq.${user.id}`
+            );
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+    const friendIds =
+        friendships.map(friendship =>
+
+            friendship.user_id === user.id
+                ? friendship.friend_id
+                : friendship.user_id
+
+        );
+
+    console.log(friendIds);
+
+    const {
+        data: profiles,
+        error: profileError
+    } =
+        await supabaseClient
+            .from("profiles")
+            .select(`
+            id,
+            display_name,
+            avatar_url
+        `)
+            .in("id", friendIds);
+
+    const container =
+        document.getElementById(
+            "circleFriendList"
+        );
+
+    console.log(profiles);
+
+    container.innerHTML =
+        profiles.map(profile => `
+
+        <div class="circle-friend-row">
+
+            <img
+                src="${profile.avatar_url || "images/default-avatar.svg"}"
+                class="friend-avatar">
+
+            <div class="circle-friend-info">
+
+                <strong>
+                    ${profile.display_name}
+                </strong>
+
+            </div>
+
+            <button
+                onclick="inviteFriend('${profile.id}')">
+
+                Invite
+
+            </button>
+
+        </div>
+
+    `).join("");
+
+    console.log(friends);
+
+}
+
+async function inviteFriend(friendId) {
+
+    const {
+        data: { user },
+        error: userError
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
+
+    if (userError || !user) {
+
+        console.error(userError);
+
+        return;
+
+    }
+
+    const { data: session } =
+        await supabaseClient.auth.getSession();
+
+    console.log(session.session.user);
+    console.log(session.session.user.aud);
+
+    const { error } =
+        await supabaseClient
+            .from("circle_invites")
+            .insert({
+                circle_id: currentReadingCircle.circle.id,
+                sender_id: user.id,
+                receiver_id: friendId,
+                status: "pending"
+            });
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+    console.log("Invite sent successfully!");
+
+    alert("Invitation sent!");
+
+}
+
+async function acceptCircleInvite(inviteId) {
+
+    const {
+        data: { user },
+        error: userError
+    } =
+        await supabaseClient
+            .auth
+            .getUser();
+
+
+    if (userError || !user) {
+
+        console.error(userError);
+        return;
+
+    }
+
+
+    // Get the invitation
+
+    const { data: invite, error: inviteError } =
+        await supabaseClient
+            .from("circle_invites")
+            .select("*")
+            .eq("id", inviteId)
+            .single();
+
+
+    if (inviteError) {
+
+        console.error(inviteError);
+        return;
+
+    }
+
+
+
+    // Add user to circle members
+
+    const { error: memberError } =
+        await supabaseClient
+            .from("circle_members")
+            .insert({
+
+                circle_id:
+                    invite.circle_id,
+
+                user_id:
+                    user.id
+
+            });
+
+
+    if (memberError) {
+
+        console.error(memberError);
+        return;
+
+    }
+
+
+
+    // Update invite status
+
+    const { error: updateError } =
+        await supabaseClient
+            .from("circle_invites")
+            .update({
+
+                status: "accepted"
+
+            })
+            .eq(
+                "id",
+                inviteId
+            );
+
+
+    if (updateError) {
+
+        console.error(updateError);
+        return;
+
+    }
+
+
+    console.log(
+        "Joined reading circle!"
+    );
+
+
+    await loadNotifications();
+
+    renderNotifications();
+
+    updateNotificationBadge();
 
 }
 

@@ -1200,6 +1200,51 @@
 
         </div>
 
+        <div id="inviteCircleModal" class="modal hidden">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h2>Invite Readers</h2>
+
+                    <button class="modal-close-btn"
+                            onclick="closeInviteCircleModal()">
+                        ✕
+                    </button>
+
+                </div>
+
+                <div class="invite-circle-preview">
+
+                    <img id="inviteCircleAvatar"
+                         class="circle-avatar"
+                         src="">
+
+                    <h3 id="inviteCircleName"></h3>
+
+                    <p id="inviteCircleMembers"></p>
+
+                </div>
+
+                <h3>Invite Friends</h3>
+
+                <div id="circleFriendList"></div>
+
+                <p>Share this code with your friends:</p>
+
+                <div id="inviteCircleCode"
+                     class="invite-code">
+                </div>
+
+                <button onclick="copyInviteCode()">
+                    📋 Copy Invite Code
+                </button>
+
+            </div>
+
+        </div>
+
         <!-- =========================
       FRIEND CARD MODAL
     ========================== -->
