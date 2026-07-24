@@ -9,7 +9,8 @@ async function signUp() {
         document
             .getElementById("signupEmail")
             .value
-            .trim();
+            .trim()
+            .toLowerCase();
 
 
     const username =
@@ -18,6 +19,11 @@ async function signUp() {
             .value
             .trim();
 
+    const displayName =
+        document
+            .getElementById("signupDisplayName")
+            .value
+            .trim() || username;
 
     const password =
         document
@@ -40,6 +46,21 @@ async function signUp() {
         return;
     }
 
+    const { data: existing } =
+        await supabaseClient
+            .from("profiles")
+            .select("id")
+            .eq("username", username)
+            .maybeSingle();
+
+    if (existing) {
+
+        alert("That username is already taken.");
+
+        return;
+
+    }
+
 
     const { data, error } =
         await supabaseClient.auth.signUp({
@@ -53,13 +74,16 @@ async function signUp() {
                     "https://kaelilcook.github.io/Library-Tracker/",
 
                 data: {
-                    username
+
+                    username,
+
+                    display_name: displayName
+
                 }
 
             }
 
         });
-
 
     if (error) {
 
@@ -295,6 +319,9 @@ async function ensureProfileExists() {
 
     if (!profile) {
 
+        const metadata =
+            currentUser.user_metadata || {};
+
         await supabaseClient
             .from("profiles")
             .insert({
@@ -302,14 +329,17 @@ async function ensureProfileExists() {
                 id: currentUser.id,
 
                 username:
-                    currentUser.email
-                        .split("@")[0],
+                    metadata.username
+                    || currentUser.email.split("@")[0],
 
                 display_name:
-                    "",
+                    metadata.display_name
+                    || metadata.username
+                    || currentUser.email.split("@")[0],
 
                 friend_code:
                     generateFriendCode()
+
             });
     }
 

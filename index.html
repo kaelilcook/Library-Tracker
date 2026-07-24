@@ -128,15 +128,6 @@
     <div id="signupModal" class="modal modal-hidden">
         
         <div class="modal-content">
-            <div class="modal-header">               
-
-                <p>
-
-                    Create your free Library Tracker account.
-
-                </p>
-
-            </div>
 
             <span class="close"
                   onclick="closeSignupModal()">
@@ -145,7 +136,11 @@
 
 
             <div class="modal-header">
-                <h2>Create Account</h2>
+                <h2>Create Your Account</h2>
+
+                <p class="modal-subtitle">
+                    Save your library, track your reading, and connect with friends.
+                </p>
             </div>
 
 
@@ -153,7 +148,8 @@
                 Email
 
                 <input id="signupEmail"
-                       type="email">
+                       type="email"
+                       placeholder="you@example.com">
             </label>
 
 
@@ -161,12 +157,28 @@
                 Username
 
                 <input id="signupUsername"
-                       type="text">
+                       type="text"
+                       placeholder="booklover42">
             </label>
 
             <small class="input-help">
 
-                Friends will use this username to find you.
+                Choose a unique username. Friends will use it to find you, but you can always change your display name later.
+
+            </small>
+
+            <label>
+                Display Name
+
+                <input id="signupDisplayName"
+                       type="text"
+                       maxlength="40"
+                       placeholder="display name">
+            </label>
+
+            <small class="input-help">
+
+                This is the name other readers will see.
 
             </small>
 
@@ -175,7 +187,8 @@
                 Password
 
                 <input id="signupPassword"
-                       type="password">
+                       type="password"
+                       placeholder="••••••••">
             </label>
 
             <small class="input-help">
@@ -1135,20 +1148,14 @@
 
         </div>
 
-        <div id="editCircleModal" class="modal hidden">
+        <div id="editCircleModal" class="modal hidden">            
 
-            <div class="modal-header">
-
-                <h2>Edit Reading Circle</h2>
+            <div class="modal-content">
 
                 <button class="modal-close-btn"
                         onclick="closeEditCircleModal()">
                     ✕
                 </button>
-
-            </div>
-
-            <div class="modal-content">
 
                 <h2>Edit Reading Circle</h2>
 

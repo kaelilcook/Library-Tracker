@@ -1450,21 +1450,51 @@ function renderReadingCircle(data) {
 </section>
 
 
-        <section>
+        <section class="circle-members-section">
 
-            <h3>
-                Members
-            </h3>
+    <h3>
+        👥 Members (${data.members.length})
+    </h3>
 
-            ${data.members.map(member => `
+    <div class="circle-members-grid">
 
-                <p>
+        ${data.members.map(member => `
+
+            <div class="circle-member-card">
+
+                <img
+                    src="${member.profiles?.avatar_url || "images/default-avatar.svg"}"
+                    class="circle-member-avatar"
+                >
+
+                <div class="circle-member-name">
+
                     ${member.profiles?.display_name || "Reader"}
-                </p>
 
-            `).join("")}
+                </div>
 
-        </section>
+                ${member.user_id === data.circle.owner_id
+
+                ?
+
+                `<div class="circle-owner-badge">
+                        👑 Owner
+                    </div>`
+
+                :
+
+                `<div class="circle-member-role">
+                        Member
+                    </div>`
+            }
+
+            </div>
+
+        `).join("")}
+
+    </div>
+
+</section>
 
 
         <section>

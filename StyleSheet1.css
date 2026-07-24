@@ -1022,6 +1022,59 @@ p {
     border: 4px solid var(--accent);
 }
 
+.circle-members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.circle-member-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    transition: .2s;
+}
+
+    .circle-member-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-sm);
+    }
+
+.circle-member-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: .75rem;
+}
+
+.circle-member-name {
+    font-weight: 600;
+    margin-bottom: .35rem;
+}
+
+.circle-owner-badge {
+    background: gold;
+    color: #5a4300;
+    font-size: .75rem;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+}
+
+.circle-member-role {
+    background: var(--surface-2);
+    color: var(--text-light);
+    font-size: .75rem;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+}
+
 /* =========================
    NOTIFICATIONS
 ========================= */
@@ -1183,8 +1236,20 @@ p {
     }
 
     /* =========================
-       FRIENDS
+       READING CIRCLES
     ========================= */
+    .circle-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .circle-actions button {
+            width: 100%;
+            min-height: 44px;
+            padding: .75rem 1rem;
+            font-size: .95rem;
+        }
+
 
     
     /* =========================
